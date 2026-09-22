@@ -108,9 +108,13 @@ separately.
 - Windows programs reach the files via
   `\\wsl.localhost\Ubuntu-24.04\home\chirag\projects\RiboMamba`, and VS Code
   opens the folder "in WSL". Slightly less convenient than a Desktop folder.
-- The repository is intended to be public (created private on 2026-09-22
-  pending Chirag's confirmation, because CLAUDE.md §0 is personal), so
-  nothing secret (tokens, passwords, private data) may ever be committed.
+- The repository is **private during the build and goes public at the end of
+  the project**, after a final pass over the contents (Chirag's decision,
+  2026-09-22). The reason for not publishing immediately: CLAUDE.md §0 is
+  personal (it names the target lab and describes past AI-written projects),
+  and publishing cannot be undone, while private → public is one command.
+  Even so, nothing secret (tokens, passwords, private data) may ever be
+  committed, since every commit stays in history after the flip.
 
 ---
 
