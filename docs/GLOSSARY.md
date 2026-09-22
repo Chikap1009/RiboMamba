@@ -295,6 +295,72 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Where it appears:** A headline metric in Phase 3. Defined precisely there.
 - **First explained:** session 01 (preview only).
 
+### Genome, contig, accession
+- **Definition:** A **genome** is an organism's complete DNA. Sequencing produces it in pieces called **contigs**, and each stored piece gets an **accession**, a unique catalogue number such as `AAAA02036851.1`.
+- **Analogy:** A genome is a whole library; contigs are loose chapters; the accession is the shelf mark.
+- **Where it appears:** Rfam ids like `AAAA02036851.1/1-118` = accession, then positions 1–118 on it. Reversed coordinates (`12691-12604`) mean the RNA sits on the opposite DNA strand.
+- **First explained:** session 03.
+
+### Homologous (homology)
+- **Definition:** Two sequences are homologous if they descend from a common ancestor sequence, however much they have changed since.
+- **Analogy:** Two chip designs derived from the same original layout, even after years of independent revisions.
+- **Where it appears:** The reason family members leak across a random split (D-008).
+- **First explained:** session 03.
+
+### RNA family
+- **Definition:** A set of homologous RNAs: different letters, the same structure, the same job, because mutations that broke the shape were weeded out by evolution.
+- **Analogy:** One circuit (say, a 4-bit adder) taped out by many fabs over decades: every layout differs, the schematic is the same.
+- **Where it appears:** The `family` column of Rfam; the split unit (D-008); `splits/rfam_split.tsv`.
+- **First explained:** session 03.
+
+### Covariation (compensatory mutation)
+- **Definition:** Both partners of a base pair mutate together so the pair survives (G–C → A–U). The sequence changes at two positions while the structure is untouched.
+- **Analogy:** Changing a plug and its socket together to a different matching pair: the connection still works, but both parts look different.
+- **Where it appears:** Why family members can be only ~50–60 % identical yet share a structure, and so why identity filters alone don't stop leakage (D-008).
+- **First explained:** session 03.
+
+### Clan (Rfam)
+- **Definition:** A group of Rfam families that are themselves related, e.g. versions of one RNA from different kingdoms of life that Rfam curates as separate families.
+- **Analogy:** Product lines descended from the same original design.
+- **Where it appears:** The `clan` column; our split unit when present (D-008). 145 clans cover 459 of 4,023 families.
+- **First explained:** session 03.
+
+### Rfam
+- **Definition:** A curated database of about 4,000 RNA families. Experts align a small **seed** set of members per family; a **covariance model** built from the seed then scans genomes, and every hit above a threshold becomes a **full** member.
+- **Analogy:** A field guide with a hand-checked reference photo per species, plus an automatic camera-trap classifier that labels millions of new photos.
+- **Where it appears:** Our training corpus (D-005); `data/raw/rfam/`.
+- **First explained:** session 03.
+
+### Seed alignment, covariance model, full region
+- **Definition:** The **seed** is a hand-curated alignment of a few family members with their shared structure. A **covariance model** is a statistical model of the family's letters *and* its base pairs, built from the seed. **Full regions** are the genome hits the model finds.
+- **Analogy:** Seed = the golden test vectors; covariance model = a pattern matcher trained on them; full regions = everything the matcher flags in the field (mostly right, occasionally wrong or partial).
+- **Where it appears:** The HF Rfam copy contains full regions, which is why some members are fragments (D-007).
+- **First explained:** session 03.
+
+### Fragment (truncated hit)
+- **Definition:** A partial copy of an RNA, e.g. because the sequenced contig ended mid-molecule. It isn't a whole, working molecule.
+- **Analogy:** Half a netlist: it looks like the circuit but can't function.
+- **Where it appears:** `prepare_data.py` steps 4–5: families with median > 256 are dropped whole; members under half their family's median are dropped (D-007).
+- **First explained:** session 03.
+
+### bpRNA-1m (and TS0, bpRNA-new)
+- **Definition:** 102,318 RNAs **with** secondary structures, gathered from 7 databases (CRW, Rfam, tmRNA, SRP, SPR, RNase P, PDB), with **no** family labels. TS0 is a test split filtered at 80 % identity; bpRNA-new is 5,401 sequences from families added to Rfam later, so it's family-disjoint.
+- **Analogy:** An answer key with solutions (structures) but no chapter headings (families).
+- **Where it appears:** Downloaded and characterised (`explore_data.py`, audit check 4); its role is decided in Phase 3. Models scoring well on TS0 but dropping on bpRNA-new is the literature's own evidence of family leakage.
+- **First explained:** session 03.
+
+### Named RNA types that appear in our data
+- **Definition:** **tRNA** (transfer RNA): the cloverleaf-shaped adaptor that brings amino acids to the protein-building machine. **rRNA** (ribosomal RNA): the long RNAs that form the protein-building machine itself (the **ribosome**); 5S rRNA is its small ~120-nt piece. **snoRNA** (small nucleolar RNA): guides that mark positions on other RNAs for chemical modification; SNORA/SNORD are its two main classes. **microRNA (miRNA)**: short RNAs that switch genes down; Rfam stores their ~60–100-nt hairpin precursors. **SRP RNA**: part of the machine that delivers new proteins to membranes. **U6**: part of the machine that cuts and rejoins gene messages (the spliceosome).
+- **Analogy:** Different standard cells in a library: each has its own fixed shape and job.
+- **Where it appears:** The largest families (tRNA 5.3 M members), the dropped long families (rRNAs), and the residual-similarity cases (SNORA52, snoR16, mir-1285).
+- **First explained:** session 03.
+
+### IUPAC ambiguity codes (N, R, Y, …)
+- **Definition:** Letters meaning "not sure which base": N = any, R = A or G, Y = C or U, and so on. They come from sequencing uncertainty.
+- **Analogy:** An 'X' (don't-care or unknown) value in a logic simulation.
+- **Where it appears:** 0.45 % of Rfam sequences contain them (mostly N); those sequences are dropped, so the vocabulary needs no `<unk>` (D-006, D-007).
+- **First explained:** session 03.
+
 ---
 
 ## Machine learning
@@ -310,6 +376,96 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Analogy:** The golden reference model in verification: the testbench compares the design under test against it.
 - **Where it appears:** The evaluation harness (Phase 3).
 - **First explained:** session 01.
+
+### Train / validation / test split
+- **Definition:** Dividing the data into three disjoint parts: **train** (the model learns from it), **validation** (checked during development to choose settings and when to stop), **test** (touched once at the end to report the final number).
+- **Analogy:** Homework, mock exams, and the final exam. Studying the final's questions in advance makes the grade meaningless.
+- **Where it appears:** `data/processed/{train,val,test}.parquet`; 452,867 / 57,054 / 56,883 sequences (D-008).
+- **First explained:** session 03.
+
+### Data leakage
+- **Definition:** Information about the test data reaching the model during training, so test scores come out better than the model's real ability.
+- **Analogy:** Exam questions that are reworded homework problems: 95 % without being able to solve anything new.
+- **Where it appears:** The leakage audit (`audit_leakage.py`, RESULTS.md): a random split gives 89.6 % of test sequences a ≥ 80 %-identical training relative.
+- **First explained:** session 03.
+
+### Family-aware (clan-aware) split
+- **Definition:** A split in which every family (or whole clan) goes entirely into one of train / val / test, so held-out RNAs have no relatives in training.
+- **Analogy:** Holding out whole chapters of a textbook for the exam, instead of random questions from every chapter.
+- **Where it appears:** `prepare_data.py` step 9 (D-008).
+- **First explained:** session 03.
+
+### Token, tokenisation, vocabulary, token id
+- **Definition:** **Tokenisation** chops a string into units (**tokens**); the **vocabulary** is the list of all possible tokens; each token's position in that list is its **id**, the integer the model actually sees.
+- **Analogy:** An instruction set's opcode table: each mnemonic maps to a fixed binary code.
+- **Where it appears:** `ribomamba/data/tokenizer.py`: `<pad>=0 <mask>=1 <bos>=2 <eos>=3 A=4 C=5 G=6 U=7` (D-006).
+- **First explained:** session 03.
+
+### Special tokens (`<pad>`, `<mask>`, `<bos>`, `<eos>`)
+- **Definition:** Vocabulary entries that aren't nucleotides. `<pad>` fills unused positions; `<mask>` marks a hidden letter (the "absorbing state" of masked diffusion, Phase 2); `<bos>`/`<eos>` mark the beginning and end of a sequence, so a left-to-right model knows where to start and can decide when to stop.
+- **Analogy:** Control characters in a serial protocol (start bit, stop bit, idle fill), as opposed to data bits.
+- **Where it appears:** `tokenizer.py`; `RNADataset(add_bos=…, add_eos=…)`.
+- **First explained:** session 03.
+
+### k-mer, BPE (rejected tokenisations)
+- **Definition:** A **k-mer** is a run of k letters used as one token (3-mers → 64 tokens). **BPE** (byte-pair encoding) learns frequent letter groups as tokens; it's how LLMs tokenise text.
+- **Analogy:** Reading a bus 3 bits at a time, versus a compression dictionary of common patterns.
+- **Where it appears:** Rejected in D-006: pairing and masking act on single nucleotides.
+- **First explained:** session 03.
+
+### Embedding (preview)
+- **Definition:** A learned table with one vector (list of numbers) per token id; the model's first step replaces each id by its vector.
+- **Analogy:** A lookup ROM whose contents are learned during training.
+- **Where it appears:** Phase 2. Its size is vocabulary × width, which is why all three models must share one vocabulary (D-006).
+- **First explained:** session 03 (preview).
+
+### Tensor, batch
+- **Definition:** A **tensor** is a multi-dimensional block of numbers (a 2-D tensor is a matrix). A **batch** is B examples processed together as one tensor, shape `(B, L)` for B sequences of length L.
+- **Analogy:** A SIMD vector unit or a wide bus: every lane is processed at once, and every lane has the same width.
+- **Where it appears:** `collate()` returns `input_ids` of shape `(B, L_max)`.
+- **First explained:** session 03.
+
+### Padding, attention (padding) mask
+- **Definition:** **Padding** appends `<pad>` so all sequences in a batch reach the same length. The **attention mask** is a `(B, L)` true/false tensor saying which positions are real, so the model ignores filler and the loss isn't computed on it.
+- **Analogy:** Stuffing bytes plus a byte-enable signal: the enable says which bytes on the bus are valid.
+- **Where it appears:** `collate()` in `ribomamba/data/dataset.py`.
+- **First explained:** session 03.
+
+### "Mask": three different meanings
+- **Definition:** (1) the **padding/attention mask**, which positions are real; (2) the **`<mask>` token**, diffusion's "hidden letter" symbol (id 1); (3) **masking** as an operation, e.g. `masked_fill`, overwriting chosen entries.
+- **Analogy:** "Clock" meaning the oscillator, the net, or the timing constraint, depending on who's talking.
+- **Where it appears:** (1) Phase 1 `collate()`; (2) and (3) Phase 2.
+- **First explained:** session 03.
+
+### Dynamic padding, length bucketing
+- **Definition:** **Dynamic padding** pads only to the longest sequence *in this batch*. **Length bucketing** puts similar-length sequences into the same batch, so there's almost nothing to pad.
+- **Analogy:** Sorting parcels by size before packing trucks, instead of loading them randomly and shipping mostly air.
+- **Where it appears:** `BucketBatchSampler`. Measured on train with batch 64: padding 54.4 % of positions (random) → 1.1 % (bucketed).
+- **First explained:** session 03.
+
+### Epoch
+- **Definition:** One full pass of training over every example in the training set.
+- **Analogy:** One complete regression run through the whole test suite.
+- **Where it appears:** `BucketBatchSampler.set_epoch()` reshuffles differently (but reproducibly) each epoch. One epoch = 7,077 batches of 64.
+- **First explained:** session 03.
+
+### Activations, gradients, optimiser state, backpropagation
+- **Definition:** **Activations** are the intermediate results of the forward pass, which training must keep. **Backpropagation** walks back through them to compute **gradients** (how much each weight should change). The **optimiser state** is Adam's two running averages per weight.
+- **Analogy:** Activations are the waveform dump you keep so you can trace a failure backward; gradients are the blame assigned to each gate.
+- **Where it appears:** The VRAM estimate: weights + gradients + Adam ≈ 16 bytes/parameter (small), while activations grow with batch × length and dominate.
+- **First explained:** session 03 (memory view only; the mechanics come in Phase 2).
+
+### VRAM
+- **Definition:** The GPU's own memory. Everything a training step touches must fit in it: 8 GB on the RTX 4060 (8.59 × 10⁹ bytes).
+- **Analogy:** On-chip SRAM: fast, but a hard size limit.
+- **Where it appears:** The length cap (D-007).
+- **First explained:** session 03.
+
+### Autoregressive generation (preview)
+- **Definition:** Producing a sequence one token at a time, left to right, each choice conditioned on everything written so far (how GPT works).
+- **Analogy:** A shift register being filled one bit per clock, each bit decided from the ones already in.
+- **Where it appears:** The Phase 4 baseline; the reason `<bos>`/`<eos>` exist.
+- **First explained:** session 03 (preview).
 
 ---
 
@@ -344,6 +500,30 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Analogy:** Annealing metal (or annealing in wafer processing): heat it so atoms can escape bad arrangements, then cool slowly so they settle into a good one.
 - **Where it appears:** Mentioned only as a patch that classical design tools use.
 - **First explained:** session 01.
+
+### Percentile (p50, p90, p99), median
+- **Definition:** The p-th percentile is the value below which p % of the data falls. The **median** is p50, the middle value.
+- **Analogy:** "90 % of paths meet timing below this delay."
+- **Where it appears:** Rfam lengths: p50 = 73, p90 = 148, p99 = 1,520 (`explore_data.py`).
+- **First explained:** session 03.
+
+### Sequence identity, query coverage
+- **Definition:** **Identity** is the fraction of aligned positions where two sequences have the same letter. **Coverage** is the fraction of the query's length that the alignment spans. Both matter: 100 % identity over 15 letters of a 150-letter RNA isn't "the same sequence".
+- **Analogy:** Bit-error rate over the matched part of a packet, and how much of the packet was matched at all.
+- **Where it appears:** Step 10 and the audit: a hit counts if identity ≥ 80 % over ≥ 80 % coverage.
+- **First explained:** session 03.
+
+### E-value
+- **Definition:** The number of hits this good you'd expect to find by pure chance in a database this size. Smaller = more surely real. MMseqs2 reports hits with E ≤ 10⁻³.
+- **Analogy:** A false-alarm rate: how often random noise alone would trip the detector.
+- **Where it appears:** "Any detectable relative" in the audit = any hit with E ≤ 10⁻³.
+- **First explained:** session 03.
+
+### 95 % confidence interval (for a proportion)
+- **Definition:** A range that, over repeated sampling, contains the true value 95 % of the time. For a proportion p from n samples it's roughly p ± 1.96·√(p(1−p)/n).
+- **Analogy:** Error bars on a measured yield from a sample of dies rather than the whole wafer.
+- **Where it appears:** The audit samples 2,000 sequences, so e.g. 89.6 % ± 1.3 %.
+- **First explained:** session 03.
 
 ---
 
@@ -558,3 +738,105 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Analogy:** A stack of plates, or a hardware return-address stack.
 - **Where it appears:** Decoding dot-bracket into base pairs.
 - **First explained:** session 01.
+
+### PyTorch, CUDA
+- **Definition:** **PyTorch** is the Python library we build and train neural networks with; it runs tensor maths on the GPU. **CUDA** is NVIDIA's platform for running general computations on its GPUs; PyTorch ships its own CUDA libraries.
+- **Analogy:** PyTorch is the HDL plus simulator; CUDA is the vendor toolchain that maps it onto the actual silicon.
+- **Where it appears:** `torch==2.10.0+cu128` in `environment.yml` (D-004).
+- **First explained:** session 03.
+
+### Wheel, prebuilt wheel, ABI
+- **Definition:** A **wheel** is a ready-to-install Python package file. A **prebuilt** wheel contains already-compiled code, so installing it needs no compiler. The **ABI** (application binary interface) is the exact binary-level contract between compiled pieces; a compiled extension only works with the library build it was compiled against.
+- **Analogy:** A hard IP block characterised for one specific process node: drop it into a different node and it won't work, even if the RTL is the same.
+- **Where it appears:** Why we pin torch 2.10: `mamba-ssm` wheels exist only up to it (D-004).
+- **First explained:** session 03.
+
+### Package index (`--extra-index-url`)
+- **Definition:** A server pip downloads packages from. PyPI is the default; PyTorch runs its own index with CUDA-specific builds, added with `--extra-index-url`.
+- **Analogy:** A second distributor you order a specific part variant from.
+- **Where it appears:** The `pip:` section of `environment.yml`.
+- **First explained:** session 03.
+
+### HuggingFace Hub, dataset revision
+- **Definition:** A public site hosting models and datasets as Git repositories. A **revision** is one commit of such a repository; downloading "at a revision" fetches exactly that version.
+- **Analogy:** GitHub for datasets; the revision is the tape-out tag.
+- **Where it appears:** `scripts/download_data.py` pins `multimolecule/rfam@25e8aa8…` and `multimolecule/bprna@423465b…` (D-005).
+- **First explained:** session 03.
+
+### Parquet
+- **Definition:** A compressed file format for tables that stores each column separately, so a program can read only the columns it needs.
+- **Analogy:** A memory organised by field rather than by record, so fetching one field doesn't drag in the others.
+- **Where it appears:** Every data file in `data/raw/` and `data/processed/`.
+- **First explained:** session 03.
+
+### polars, DataFrame, lazy evaluation, streaming
+- **Definition:** A **DataFrame** is a table in memory (named columns, many rows). **polars** is a fast DataFrame library. **Lazy** mode (`scan_parquet`) builds a query plan first and runs it only on `.collect()`, so it can skip unneeded columns and rows. **Streaming** processes the file in chunks to cap memory.
+- **Analogy:** Synthesis before execution: describe the whole computation, let the tool optimise it, then run it.
+- **Where it appears:** `explore_data.py`, `prepare_data.py` (4.6 s, 4.4 GB peak for 10 M rows).
+- **First explained:** session 03.
+
+### FASTA
+- **Definition:** The standard text format for sequences: a line `>name`, then the letters.
+- **Analogy:** The netlist exchange format everyone's tools read.
+- **Where it appears:** Written temporarily by `ribomamba/data/similarity.py` for MMseqs2 (with U written as T).
+- **First explained:** session 03.
+
+### MMseqs2
+- **Definition:** A fast sequence-search tool (a modern relative of BLAST): for each query it finds similar target sequences and reports identity, coverage and E-value.
+- **Analogy:** A fast approximate pattern-matcher over a huge database, like a content-addressable memory with fuzzy matching.
+- **Where it appears:** Step 10 of the split and the leakage audit (`ribomamba/data/similarity.py`); version 18.8cc5c.
+- **First explained:** session 03.
+
+### Seed, random number generator (RNG), stable hash
+- **Definition:** An **RNG** produces numbers that look random but are computed; the **seed** is its starting value, so the same seed gives the same "random" choices. A **stable hash** (SHA-256) gives the same output everywhere. Python's built-in `hash()` of a string is deliberately randomised per process, so it's unusable for reproducible splits.
+- **Analogy:** An LFSR: fully deterministic from its initial state, random-looking in output.
+- **Where it appears:** `SEED = 0` in the scripts; `stable_hash()` orders the split units.
+- **First explained:** session 03.
+
+### Lookup table (LUT)
+- **Definition:** A precomputed array where the answer for input x is stored at position x, so converting is one indexing step.
+- **Analogy:** A ROM, or an FPGA LUT.
+- **Where it appears:** `_BYTE_TO_ID` in `tokenizer.py`: ASCII byte → token id for a whole sequence at once.
+- **First explained:** session 03.
+
+### dtype (int8, int64, bool)
+- **Definition:** The number type of a tensor's elements: int8 = 1-byte integers (−128…127), int64 = 8-byte integers, bool = true/false.
+- **Analogy:** Bus width.
+- **Where it appears:** Token ids stored as int8 (1 byte per nucleotide), converted to int64 ("long") when handed to PyTorch, since embedding lookups expect that; the attention mask is bool.
+- **First explained:** session 03.
+
+### Flat array + offsets
+- **Definition:** Storing many variable-length items end-to-end in one array, plus an `offsets` array where item i occupies `flat[offsets[i]:offsets[i+1]]`.
+- **Analogy:** A memory plus a table of base addresses.
+- **Where it appears:** `RNADataset`: 452,867 training sequences in one 47.7 MB array.
+- **First explained:** session 03.
+
+### Broadcasting
+- **Definition:** A rule by which tensor operations on different shapes stretch size-1 dimensions to match. `(1, L) < (B, 1)` compares every position with every row's length, giving `(B, L)`.
+- **Analogy:** Fanning one signal out to every lane of a bus instead of copying it by hand.
+- **Where it appears:** Building the attention mask in `collate()`.
+- **First explained:** session 03.
+
+### `Dataset`, `DataLoader`, collate function, sampler
+- **Definition:** PyTorch's data pipeline. A **Dataset** answers "give me item i". A **sampler** decides which indices form each batch. The **collate function** merges a list of items into one batch tensor. The **DataLoader** runs all of this, optionally in background **worker processes**, with **pinned memory** (page-locked RAM) for faster copies to the GPU.
+- **Analogy:** A memory (Dataset), an address generator (sampler), a packer that builds bus words (collate), and a DMA engine that runs them (DataLoader).
+- **Where it appears:** `ribomamba/data/dataset.py`, `make_dataloader()`.
+- **First explained:** session 03.
+
+### `pyproject.toml`, editable install
+- **Definition:** `pyproject.toml` describes a Python project so it can be installed as a package. An **editable** install (`pip install -e .`) makes `import ribomamba` point at the live source folder, so edits take effect without reinstalling.
+- **Analogy:** A symbolic link into your working directory rather than a copied snapshot.
+- **Where it appears:** `pyproject.toml`; `-e .` in `environment.yml`.
+- **First explained:** session 03.
+
+### Unit test, pytest, assertion
+- **Definition:** A **unit test** is a small program that checks one piece of code gives a known answer; **pytest** finds and runs them (`python -m pytest`). An **assertion** is a check inside code that stops the program if a condition is false.
+- **Analogy:** A self-checking testbench with golden vectors; an assertion is an SVA assertion firing in simulation.
+- **Where it appears:** `tests/` (15 tests); `check_no_leakage_by_construction()` in `prepare_data.py`.
+- **First explained:** session 03.
+
+### `.gitignore` (and anchored patterns)
+- **Definition:** A list of path patterns Git should not track. A pattern with a leading `/` matches only at the repository root; without it, `data/` matches a `data` folder at any depth.
+- **Analogy:** A mask on which nets get dumped to the waveform file; without anchoring, the wildcard catches more than intended.
+- **Where it appears:** `/data/`, `/checkpoints/`. Unanchored `data/` briefly hid the code folder `ribomamba/data/` (session 03).
+- **First explained:** session 03.

@@ -100,3 +100,85 @@ divided by the total. I checked the 51% by hand from the eight lowest
 structures and got 50.8%.
 **Source:** logbook/2026-09-22-session-02.md (22:30); RESULTS.md, Phase 0
 sanity checks.
+
+---
+
+## Phase 1 — Data
+
+*(Draft answers written by Claude from session 03; to be rewritten in
+Chirag's words after the Phase 1 quiz.)*
+
+### Q: How did you split your data, and why not randomly?
+**Draft answer:** RNAs come in families: relatives descended from one
+ancestor, with different letters but the same structure. If you split
+randomly, almost every test sequence has a sibling in training, so the test
+measures whether the model can recall a relative, not whether it
+generalises. I measured it: with a random split, about 90 % of test
+sequences have a training relative that's at least 80 % identical, and the
+median test sequence has a 96 %-identical one. So I split by Rfam **clan**,
+or by **family** when there's no clan: whole groups go to train, val or
+test. Then I removed any held-out sequence that still had an 80 %-identical
+training relative, because Rfam doesn't link every related family. After
+that, 99 % of test sequences have no detectable relative in training at all.
+**Likely follow-up:** "Why not just filter by sequence identity, like
+CD-HIT at 80 %?" → Because of covariation: family members can drift below
+80 % identity while keeping the same structure, since both sides of a pair
+mutate together. bpRNA's TS0 split was built that way, and published models
+that look good on it drop on the family-disjoint bpRNA-new. Identity alone
+lets families leak. I use both criteria.
+**Source:** logbook/2026-09-23-session-03.md; DECISIONS D-008; RESULTS.md
+leakage audit.
+
+### Q: What's the most important thing you found in the data?
+**Draft answer:** The HuggingFace copy of Rfam I downloaded contains every
+row twice. The second copy's family label is a placeholder, "No such family".
+I checked it properly: all 10 million placeholder rows have an identical twin
+with a real label. If I'd treated the placeholder as a family, it would have
+been one giant family containing a copy of every other family. Whichever
+split it landed in would then share sequences with every other split, so the
+family split would have been completely leaky while looking perfectly clean
+by its labels. That's why I measure data before trusting it.
+**Likely follow-up:** "How would you have noticed if you hadn't looked?" →
+The leakage audit would have caught it (near-100 % identical hits across
+splits), which is the point of having an audit that checks sequences, not
+just labels.
+**Source:** logbook/2026-09-23-session-03.md (~03:45); DECISIONS D-007.
+
+### Q: Why a maximum length of 256?
+**Draft answer:** Three reasons. Memory: the Transformer baseline's
+activation memory grows with length, and naive attention grows with length
+squared. My rough estimate was ~2.7 GB at 256 versus ~7.4 GB at 512 on an
+8 GB card. The oracle folds in O(N³), so 512-nt sequences cost ~8× more to
+evaluate. And MFE prediction gets less reliable for long RNAs. The cost is
+honest: 256 keeps 95 % of Rfam families, and the 185 dropped ones are the
+long RNAs, the ribosomal RNAs, RNase P and tmRNA, which we don't claim to
+design. I applied the cut per family (by median length) first, because
+otherwise short fragments of ribosomal RNA would slip in as if they were
+whole molecules.
+**Likely follow-up:** "Doesn't that favour the Transformer, since Mamba's
+advantage is at long lengths?" → Yes, it probably does, and I'd state it as
+a limitation. It makes our comparison conservative for Mamba. If Mamba still
+wins at ≤ 256, that's a stronger claim; if it loses, the length regime is
+part of the explanation.
+**Source:** DECISIONS D-007.
+
+### Q: Why tokenise one nucleotide per token?
+**Draft answer:** Base pairs link single nucleotides, and masked diffusion
+hides and predicts whole tokens. With 3-letter tokens, one token could sit
+half in a stem and half in a loop, so the model couldn't mask or predict
+one base independently. The alphabet is only 4 letters and our sequences
+are at most 256 long, so there's nothing to gain from compressing. The
+vocabulary is 8 tokens: A, C, G, U plus pad, mask, begin and end. The
+begin/end tokens are reserved now so the autoregressive baseline shares the
+same embedding table, which keeps the parameter matching exact.
+**Source:** DECISIONS D-006.
+
+### Q: What is padding, and how did you handle its cost?
+**Draft answer:** A GPU processes a batch as one rectangle, so shorter
+sequences are padded to the longest one in the batch, and an attention mask
+marks which positions are real so padding never influences the model or the
+loss. Padding is wasted compute. With random batches, 54 % of all positions
+in our training set were padding. I group similar lengths into the same
+batch (shuffling within big pools, so batches stay random between epochs),
+which brought it to 1.1 %, roughly halving the cost of an epoch.
+**Source:** logbook/2026-09-23-session-03.md (04:27).

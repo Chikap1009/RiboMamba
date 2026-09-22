@@ -6,8 +6,9 @@
 > numbers mean and where they fall short".
 
 **Status:** Parts 1–2 written in full (end of Phase 0 content, 2026-09-22).
-Parts 3–10 are written at the end of their phases (CLAUDE.md §2.4), so this
-guide grows with the work instead of being rushed at the end.
+Part 3 written at the end of the Phase 1 build (2026-09-23). Parts 4–10 are
+written at the end of their phases (CLAUDE.md §2.4), so this guide grows
+with the work instead of being rushed at the end.
 
 ---
 
@@ -59,6 +60,26 @@ honest about the limits: success means *the oracle predicts the target*, not a
 wet-lab result; we work only with nested secondary structures, not 3D shapes
 and not **pseudoknots**; and "the MFE matches" is a weak test on its own, so
 the target's **share of the ensemble** matters too.
+
+*(Phase 1 addition.)* The training data is **Rfam**, a catalogue of about
+4,000 RNA **families**. A family is a set of evolutionary relatives: different
+letters, same structure, same job. Relatives are the whole problem with
+testing. Split the data randomly and **89.6 %** of test sequences have a
+≥ 80 %-identical relative in training (we measured it), so a test score
+would measure memory. So we split by **clan** (a group of related families),
+or by family when there's no clan: whole groups go to train, validation or
+test. Then we removed the 775 held-out sequences that still had a close
+training relative, because Rfam doesn't link every related pair. Result:
+**99 % of test sequences have no detectable relative in training.** Along the
+way we found that the HuggingFace copy of Rfam contains **every row twice**,
+the second copy labelled "No such family". Left in, that one label would have
+silently leaked every family into every split. After cleaning (T → U, only
+A/C/G/U, families of typical length ≤ 256, fragments removed, duplicates
+removed, at most 1,000 members per family) we have **452,867 / 57,054 /
+56,883** sequences for train / val / test. Each nucleotide is one **token**
+(vocabulary of 8: A, C, G, U plus pad, mask, begin, end), and batches group
+similar lengths so only **1.1 %** of the GPU's work is padding instead of
+54 %.
 
 ---
 
@@ -563,6 +584,322 @@ test is "does the predicted structure **match the target**".
 ---
 
 ## Part 3 — The data, and how we kept the test set honest  *(Phase 1)*
+
+### 3.1 What this phase is for
+
+A generative model knows only what its examples show it. Phase 1 settles
+three questions, and the third is the one that decides whether any later
+number means anything:
+
+1. **Which examples** the model learns from.
+2. **In what form** it sees them: numbers, not letters.
+3. **How we hold some back** so the final exam is honest.
+
+Get the third one wrong and every result in Phases 2–5 is inflated, and
+nobody can tell by looking at the numbers.
+
+### 3.2 RNA families: why relatives are the whole problem
+
+Take one useful RNA, say the **tRNA** that every cell uses while building
+proteins. Over billions of years that RNA was copied into every branch of
+life, and each copy accumulated mutations. Today the human and bacterial
+versions differ at many positions, yet both still fold into the same
+cloverleaf and do the same job. Any copy that stopped folding correctly
+stopped working, and the organism carrying it lost out. **Evolution let the
+letters drift and held the shape fixed.**
+
+A set of such relatives is an **RNA family**: different letters, same
+structure, same function, common ancestor. In chip terms, it's the same
+schematic taped out by many fabs over decades, every layout different.
+
+How can letters change while a stem survives? **Covariation.** Suppose a stem
+contains a G–C pair. A mutation turns the G into an A, and the pair breaks.
+If a second mutation later turns the partner C into a U, the pair is back,
+now as A–U. Two letters changed, the structure didn't:
+
+```
+ancestor      ...G...........C...     G–C pair
+species X     ...A...........U...     A–U pair   ← both sides changed, pair kept
+```
+
+This matters twice over. Family members can end up sharing only 50–60 % of
+their letters while having the same shape. So "these two sequences look
+different" doesn't mean "these two RNAs are unrelated", and that's exactly
+the trap in §3.7.
+
+Families that are themselves related, such as the bacterial and eukaryotic
+versions of one RNA that Rfam curates separately, are grouped into a **clan**.
+
+### 3.3 The two databases, and what's actually in them
+
+**Rfam** is the standard catalogue of RNA families. For each family, experts
+hand-align a small **seed** set of members and annotate their shared
+structure. From the seed, Rfam builds a **covariance model**, a statistical
+model of the family's letters *and* its base pairs, and scans whole genomes
+with it. Every hit above a threshold becomes a **full** member. The copy on
+HuggingFace (`multimolecule/rfam`) is those full members: sequence, family
+name, clan, and a description of the genome it came from. Three things to
+know about it:
+- it has **no per-sequence structure**;
+- it uses **DNA letters** (T instead of U), because the hits were cut out of
+  genome DNA;
+- its members are found by a model, so a few are mislabelled or are
+  **fragments**, partial copies cut off where a sequenced piece of genome
+  ended.
+
+**bpRNA-1m** is 102,318 RNAs *with* structures, pooled from seven
+databases, but *without* family labels. About a fifth of its structures
+(21.4 %) contain pseudoknots. It has a famous history. Its TS0 test split
+was built by removing test sequences more than 80 % identical to training
+ones. Later, bpRNA-new was assembled from Rfam families that didn't exist
+when the training data was collected, so it's guaranteed family-disjoint.
+Published deep-learning structure predictors that scored well on TS0
+dropped sharply on bpRNA-new (reported in the MXfold2 paper, Sato et al.
+2021, and by Szikszai et al. 2022, *"Deep learning models for RNA secondary
+structure prediction (probably) do not generalize across families"*; verify
+both before citing formally). The 80 % identity filter hadn't stopped
+family leakage, and a family-disjoint test exposed it.
+
+**Our choice (D-005):** train on Rfam, because its family and clan labels
+are what make an honest split possible. bpRNA can't be split by family at
+all. We download bpRNA too and characterise it; whether it supplies target
+structures for evaluation is a Phase 3 decision. Both downloads are pinned to
+an exact repository commit and checked against a SHA-256 checksum, so the
+same bytes arrive on every machine, forever.
+
+### 3.4 The surprise: Rfam, twice
+
+The first thing the exploration script printed was odd. The largest "family"
+wasn't tRNA; it was one called **"No such family"**, with **10,025,911**
+members, exactly half of the 20,051,822 rows. Investigation showed that the
+second half of the file is the first half again, with identical ids and
+identical sequences, but with the family label replaced by that placeholder.
+We checked every one of the ten million placeholder rows: each has a twin in
+the labelled half, and not one differs in sequence.
+
+Why this matters so much is the best single story from this phase. Dropping
+the placeholder rows loses nothing. **Keeping** them would have been
+catastrophic in a way that's invisible if you only look at labels. "No such
+family" would have been treated as one enormous family, containing a copy of
+*every* real family. A family-aware split would put that pseudo-family
+wholly into one split, say test, and then **test would contain an exact
+copy of every training sequence.** The split would look perfectly
+family-disjoint on paper and be 100 % leaky in reality.
+
+Two lessons worth saying out loud: measure data before trusting it, and
+audit leakage with the *sequences* themselves, not just the labels, because
+labels can lie.
+
+### 3.5 Cleaning, with the numbers behind every threshold
+
+Every threshold was set from a measured number (`scripts/explore_data.py`),
+not picked in advance:
+
+| Step | Rows after | Why |
+|---|---|---|
+| raw download | 20,051,822 | |
+| drop the "No such family" copy | 10,025,911 | §3.4 |
+| T → U; only A/C/G/U | 9,981,218 | 0.45 % contained `N` or other "unsure" letters; a generator must never learn to emit "unknown" |
+| drop families whose median length > 256 | 9,590,462 | long RNAs; see §3.6 |
+| drop single sequences > 256 | 9,547,361 | |
+| drop members < half their family's median | 9,534,330 | likely fragments |
+| remove exact duplicates within a family | 5,730,590 | 3.8 M copies, mostly of multi-copy genes |
+| drop sequences filed under >1 family | 5,730,554 | ambiguous label, could straddle splits |
+| keep ≤ 1,000 per family (seeded random draw) | **567,579** | tRNA alone had 5.3 M members |
+
+Two of these deserve a sentence each, because they're where a careless
+pipeline goes wrong.
+
+**The length rule acts on families first.** Of the sequences under 256 nt,
+83,525 belonged to families whose typical member is far longer: pieces of
+ribosomal RNA, which is 1,500–3,000 nt in full. A plain "drop anything over
+256" filter would keep those pieces as if they were whole molecules. So a
+family is dropped whole if its *median* length exceeds 256, and only then are
+individual long sequences removed.
+
+**The per-family cap fixes imbalance.** The median family has 31 members;
+tRNA has 5.3 million. Without a cap the model would mostly learn tRNA and 5S
+rRNA. With a cap of 1,000, no family is more than 0.18 % of the data. Cap
+100 was rejected because it throws away most of the variation inside large
+families. The price: family frequencies in our data are not their natural
+frequencies. The model learns what RNA families look like, not how common
+each one is in genomes.
+
+### 3.6 Why 256, and what it costs
+
+Memory on the GPU during training holds four things. Weights, gradients and
+the optimiser's running averages cost about 16 bytes per parameter, only
+~0.2 GB for a model of 14 million parameters. The fourth thing,
+**activations** (every intermediate result kept for the backward pass), grows
+with batch size × length × width × layers. Naive attention, used by the
+Transformer baseline, adds a term that grows with **length squared**. A rough
+estimate for an 8-layer, width-384 Transformer at batch 64 is ~2.7 GB at
+length 256, ~7.4 GB at 512, and ~23 GB at 1,024, on a card with 8 GB.
+Doubling the length doubles one part of the bill and quadruples the other.
+
+Two more reasons point the same way. The oracle folds in O(N³), so a
+512-nt sequence costs about 8× more to check than a 256-nt one. And MFE
+prediction is less reliable for long RNAs.
+
+The honest cost: a cap of 256 keeps **95.4 %** of families. The 185 dropped
+are the long RNAs: all ribosomal RNAs, 7SK, tmRNA, RNase P, group I
+introns, plant SRP. We make no claims about designing those. And one
+subtlety an interviewer may raise: Mamba's advantage is supposed to appear at
+*long* lengths, so a 256 cap probably favours the Transformer. That makes our
+comparison **conservative** for Mamba, which is the right direction to err in.
+
+### 3.7 Leakage, and how the split prevents it
+
+**Data leakage** means information about the test set reaches the model
+during training, so test scores overstate its real ability. It's the exam
+built from reworded homework problems.
+
+For RNA the mechanism is families. Split randomly, sequence by sequence, and
+almost every test sequence has siblings in training. The model can "design"
+a test RNA's structure by recalling its relatives. We measured exactly how
+bad this would be. For 2,000 randomly chosen test sequences under a random
+split, we searched all training sequences with **MMseqs2**, a fast
+sequence-search tool, and recorded the closest relative of each:
+
+- **96 %** had a detectable relative in training;
+- **89.6 %** had one at least 80 % identical;
+- **56 %** had one at least 95 % identical;
+- the median test sequence's closest training relative was **96 %** identical.
+
+That test set would be a memory test.
+
+**Our split** works on groups instead of sequences. The group is the clan,
+or the family if it belongs to no clan. Groups are put in a pseudo-random
+order (sorted by a SHA-256 hash of their name, which is identical on every
+machine; Python's own `hash()` is deliberately randomised per run, so it
+can't be used). Then whole groups fill test up to 10 % of the sequences,
+then validation to 10 %, and the rest is training.
+
+That alone wasn't airtight, and finding that was part of the job. Searching
+every held-out sequence against training found **775 (0.68 %)** with a
+≥ 80 %-identical relative, concentrated in 17 families. Rfam simply doesn't
+link these families through a clan: SNORA52 and snopsi28S-1192 look like the
+same snoRNA under two names, and mir-1285 derives from an SRP-like repeat.
+So step 10 removes every held-out sequence with a ≥ 80 % identity / ≥ 80 %
+coverage relative in training. Family labels catch low-identity relatives,
+which is what identity filters miss (covariation, §3.2). The identity check
+catches relatives the labels miss. **Each criterion covers the other's blind
+spot.**
+
+The final split: **452,867 / 57,054 / 56,883** sequences, **3,032 / 406 /
+399** families. Rerunning the whole pipeline produces byte-identical files.
+
+### 3.8 The audit, and what its numbers mean
+
+`scripts/audit_leakage.py` runs four checks; the full table is in
+`RESULTS.md`.
+
+1. **No clan and no family appears in two splits.** Also enforced by an
+   assertion: the preparation script refuses to write a split that violates it.
+2. **No identical sequence appears in two splits.**
+3. **Nearest training relative of held-out sequences**, with the random
+   split as a **control**:
+
+| | any detectable relative | ≥ 50 % identical | ≥ 80 % identical |
+|---|---|---|---|
+| our split, test | 1.0 % | 0.15 % | 0 (by construction) |
+| random split, test | 96.0 % | 93.0 % | 89.6 % |
+
+   Read it carefully. The ≥ 80 % column is zero *because step 10 removed
+   those sequences with the same search*, so it isn't independent evidence.
+   The informative columns are the lower ones: 99 % of our test sequences
+   have **no detectable sequence relative in training at all**. The control
+   row turns "a random split would leak" from a claim into a measured number.
+4. **bpRNA overlap:** 17,086 bpRNA sequences appear letter for letter in our
+   training set. If bpRNA structures ever become design targets, they must
+   be screened against training first.
+
+Each proportion comes from 2,000 samples, so it carries a 95 % confidence
+interval of roughly ±1–2 percentage points for the large values. That's why
+the table in `RESULTS.md` prints "89.6 % ± 1.3".
+
+### 3.9 Turning letters into batches
+
+**Tokenisation.** A network does arithmetic, so each nucleotide becomes an
+integer. We use one token per nucleotide, with a fixed vocabulary:
+
+```
+id:     0      1       2      3      4  5  6  7
+token:  <pad>  <mask>  <bos>  <eos>  A  C  G  U
+
+"GGGAAACCC"  →  [6, 6, 6, 4, 4, 4, 5, 5, 5]
+```
+
+`<mask>` is the "hidden letter" symbol that masked diffusion is built on
+(Part 4). `<bos>`/`<eos>` ("begin"/"end") are for the autoregressive
+baseline in Phase 4, which writes left to right and has to know where to
+start and when it's done. They're reserved now so all three compared models
+share one vocabulary, and therefore one embedding table of exactly the same
+size. The ids are frozen by a test, because renumbering them would silently
+scramble every saved model. Bigger tokens (3-letter "k-mers", or the learned
+word pieces LLMs use) were rejected: base pairs and diffusion masking both act
+on single nucleotides, and a 3-letter token can sit half in a stem and half
+in a loop.
+
+**Batches and padding.** The GPU processes a **batch** of B sequences as one
+rectangle of shape `(B, L)`, like a vector unit whose lanes all have the same
+width. Real sequences differ in length, so shorter ones are **padded** with
+`<pad>`, and an **attention mask** of the same shape records which positions
+are real (1) and which are filler (0):
+
+```
+input_ids       = [[6,6,6,4,4,4,5,5,5],
+                   [4,5,6,7,0,0,0,0,0]]        (B=2, L=9)
+attention_mask  = [[1,1,1,1,1,1,1,1,1],
+                   [1,1,1,1,0,0,0,0,0]]
+```
+
+Without the mask, the model would treat filler as RNA and the loss would
+reward predicting filler. Beware the word "mask": it means three different
+things in this project. There's the **padding mask** above, the **`<mask>`
+token** of diffusion, and **masking** as an operation (overwriting chosen
+entries of a tensor). Interviewers notice when you keep them apart.
+
+**Padding is wasted compute**, and we measured how much. With batches of 64
+drawn at random from our training set, **54.4 %** of all positions were
+padding. The GPU spent more than half its effort multiplying filler. The fix
+is **length bucketing**: shuffle, cut the data into pools of 100 batches,
+sort each pool by length, cut it into batches, then shuffle the order of the
+batches. Similar lengths travel together, while batches stay random from
+epoch to epoch. Padding fell to **1.1 %**, making each epoch roughly 2.2×
+cheaper.
+
+Two implementation details worth being able to explain:
+- The training set is stored as **one flat array of 47.7 million bytes**
+  plus an array of start positions, not as 452,867 separate objects. It
+  loads in 0.3 s and is cheap to share with background loader processes.
+- Encoding uses a 256-entry **lookup table** (a ROM, in hardware terms) from
+  byte value to token id, so a whole sequence converts in one step, and any
+  letter outside A/C/G/U raises an error instead of becoming a wrong number.
+
+### 3.10 What Phase 1 settled, and what it left open
+
+**Settled:**
+- Training corpus: Rfam, pinned and checksummed; 566,804 sequences after
+  cleaning and the leakage filter.
+- A clan/family split with a measured leakage audit. The audit's control
+  shows a random split would give 89.6 % of test sequences a near-twin in
+  training.
+- A frozen 8-token vocabulary, and a loader with 1.1 % padding waste.
+
+**Left open, honestly:**
+- The audit checks **sequence** similarity only. Two families with the same
+  *structure* but no detectable sequence similarity would pass. A model
+  could have "seen the shape" without seeing the sequence. A structure-aware
+  check would need a tool such as Infernal; not done.
+- The test set is one random draw (seed 0). Which families land in test
+  changes with the seed. The most famous RNA, tRNA, happens to sit in
+  validation, not training. Repeating key results over several seeds is a
+  Phase 3 decision.
+- 185 long families (all ribosomal RNAs among them) are out of scope.
+- The 256 cap probably favours the Transformer over Mamba; the comparison is
+  conservative for Mamba.
+- The VRAM figures are estimates; the real ones get measured in Phase 2.
 
 ## Part 4 — Generating instead of searching: masked discrete diffusion  *(Phase 2)*
 
