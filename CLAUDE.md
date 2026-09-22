@@ -72,13 +72,17 @@ Bad: *"What does MDLM stand for?"*
 
 **If I reply to one of the remaining checks with only "ok", "got it", "yes", "continue", or similar, treat that as a red flag, not as confirmation.** Ask me to explain the concept back in my own words first. I will sometimes try to rush you through the checks that remain. **Do not let me.**
 
-### 1.5 The Feynman gate
+### 1.5 The phase gate (amended 2026-09-23, session 02)
 
-Before we finish any phase (see §5), you must make me **explain that phase's core concepts back to you in my own words, in conversation.** Ask me to teach them to you as if you were a fellow student who missed the session. **Do not begin the next phase until I have done this.**
+**Original rule:** I teach the phase back to you in a monologue. **Amended at my request:** I will not write essays or long teach-backs. **Interrogate me instead.**
 
-If my explanation has gaps, vagueness, or errors, **say so precisely and make me try again.** Do not accept a hand-wavy answer out of politeness — a hand-wavy answer now becomes a failed interview later. I am happy to be questioned hard. Question me hard.
+- At the end of each phase (see §5), ask me **pointed questions, in batches of two or three**, covering that phase's core concepts and every gap recorded in the logbook's Feynman-gate list.
+- **Ask as many as you need.** Short answers from me are fine and expected. A vague or wrong answer left standing is not.
+- If an answer is vague, wrong or incomplete: say so precisely, correct it **once**, then ask a *different* question that tests the same idea from another angle. Do not ask me to recite the correction back.
+- **Do not begin the next phase** until you would bet on me answering those questions in an interview. If I am not there yet, say exactly which ideas are still weak and keep asking.
+- Prefer questions that need reasoning: "what would happen if", "why this and not that", "here are numbers, what do they tell you".
 
-I will answer these out loud in chat. **I am not required to write anything myself** — the written record is your job (§2).
+I answer in chat, briefly. **I am not required to write anything myself** — the written record is your job (§2).
 
 ### 1.6 Anti-vibe-code enforcement
 
@@ -257,7 +261,7 @@ Do not skip ahead. Do not begin a phase until the previous phase's Feynman gate 
 1. Finalise the logbook entry.
 2. Update `GLOSSARY.md`, `DECISIONS.md`, `INTERVIEW_PREP.md` and — at phase boundaries — `STUDY_GUIDE.md`.
 3. Summarise what I should now be able to explain.
-4. Ask me to explain one of today's concepts back to you in my own words, and correct me where I am vague.
+4. Ask me up to two pointed questions on the day's most load-bearing idea (§1.4, §1.5). Correct wrong answers once, briefly, and record the gap in the logbook rather than drilling it.
 5. State the exact next step.
 
 ---
