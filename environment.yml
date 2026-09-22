@@ -1,12 +1,26 @@
 # Conda environment for RiboMamba.
 #   Create it:  conda env create -f environment.yml
+#   Update it:  conda env update -f environment.yml
 #   Use it:     conda activate ribomamba
-# Why each line is here: docs/DECISIONS.md, D-003.
+# Why each line is here: docs/DECISIONS.md, D-003 (conda) and D-004 (PyTorch).
 name: ribomamba
 channels:
   - conda-forge   # main community channel; listed first = highest priority
-  - bioconda      # bioinformatics packages (ViennaRNA); built on top of conda-forge
+  - bioconda      # bioinformatics packages (ViennaRNA, MMseqs2); built on top of conda-forge
 dependencies:
   - python=3.12   # mature release, supported by PyTorch, mamba-ssm and ViennaRNA builds
   - viennarna=2.7.2  # RNA folding (RNAfold, "import RNA"). Exact pin: it is our
                      # evaluation oracle, and another version may give other energies.
+  - mmseqs2=18.8cc5c   # fast sequence search; used for the train/test leakage audit
+  - polars=1.44        # fast table processing (20 M Rfam rows in seconds, low memory)
+  - huggingface_hub=1.9  # downloads dataset files from the HuggingFace Hub at a pinned revision
+  - numpy=2.5
+  - pytest=9.1         # runs the tests in tests/
+  - pip
+  - pip:
+      # PyTorch from PyTorch's own package index, built against CUDA 12.8.
+      # Pinned to 2.10 because it is the newest version that mamba-ssm and
+      # causal-conv1d (Phase 4) ship prebuilt wheels for (D-004).
+      - --extra-index-url https://download.pytorch.org/whl/cu128
+      - torch==2.10.0+cu128
+      - -e .             # this repository's own code (ribomamba/), "editable" (see pyproject.toml)

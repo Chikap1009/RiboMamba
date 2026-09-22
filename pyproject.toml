@@ -1,0 +1,20 @@
+# Makes the ribomamba/ folder an installable Python package, so that
+# `import ribomamba` works from scripts/, tests/ and notebooks alike.
+# Dependencies are NOT listed here: environment.yml is the single source of
+# truth for them (D-003), because several (ViennaRNA, MMseqs2) are not pip packages.
+
+[build-system]
+requires = ["setuptools>=64"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ribomamba"
+version = "0.1.0"
+description = "Masked discrete diffusion with a bidirectional Mamba backbone for RNA sequence design"
+requires-python = ">=3.12"
+
+[tool.setuptools.packages.find]
+include = ["ribomamba*"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

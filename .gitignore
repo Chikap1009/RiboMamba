@@ -1,0 +1,10 @@
+# Data and model files are re-creatable and too large for Git (D-002).
+# The leading "/" anchors each pattern to the repository root. Without it,
+# "data/" would also match the code folder ribomamba/data/ (it did, once).
+/data/
+/checkpoints/
+
+# Python build/run by-products
+__pycache__/
+*.egg-info/
+.pytest_cache/
