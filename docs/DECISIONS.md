@@ -108,5 +108,50 @@ separately.
 - Windows programs reach the files via
   `\\wsl.localhost\Ubuntu-24.04\home\chirag\projects\RiboMamba`, and VS Code
   opens the folder "in WSL". Slightly less convenient than a Desktop folder.
-- The repository is public from day one, so nothing secret (tokens,
-  passwords, private data) may ever be committed.
+- The repository is intended to be public (created private on 2026-09-22
+  pending Chirag's confirmation, because CLAUDE.md §0 is personal), so
+  nothing secret (tokens, passwords, private data) may ever be committed.
+
+---
+
+## D-003 — Software environment: Miniforge (conda) with a committed `environment.yml`
+**Date:** 2026-09-22   **Phase:** 0   **Logbook:** logbook/2026-09-22-session-02.md
+**Status:** accepted
+
+**Context.** The project needs Python plus compiled scientific software that
+isn't pure Python: ViennaRNA (C code with Python bindings) now, and PyTorch
+with CUDA and `mamba-ssm` later. Versions must be pinned so that the
+evaluation oracle gives the same answers every time (CLAUDE.md §3.5), and
+the whole setup must be rebuildable from one file after a wipe (which
+happened this session). Zero budget: no commercial licences.
+
+**Decision.** Install **Miniforge** (version 26.7.2-0, checksum-verified),
+which provides `conda` and uses the free, community-run **conda-forge**
+channel by default. Keep the project's dependencies in an isolated
+environment named `ribomamba`, defined by `environment.yml` in the repo
+(channels: conda-forge, then bioconda; Python 3.12; ViennaRNA). Rebuild with
+`conda env create -f environment.yml`.
+
+**Alternatives rejected.**
+- *Anaconda / Miniconda with the `defaults` channel.* The `defaults` channel
+  has commercial terms-of-service restrictions for some organisations.
+  Miniforge is the same tool, pointed at the free community channel, and
+  bioconda is built against conda-forge anyway.
+- *pip + venv only.* Fine for pure-Python packages, but ViennaRNA's official
+  binary builds come through bioconda. pip can't manage non-Python pieces
+  (C libraries, CUDA runtimes) as cleanly.
+- *Ubuntu's `apt` packages.* System-wide (one version for the whole machine),
+  often older, and not reproducible on Kaggle/Colab.
+- *Installing into conda's `base` environment.* `base` runs conda itself.
+  Filling it with project packages risks breaking the tool that manages
+  everything else, and can't be deleted and recreated cleanly.
+
+**Consequences / trade-offs accepted.**
+- About 0.7 GB for Miniforge plus the environment's size on disk.
+- Environment creation depends on download servers. In session 02 the
+  ViennaRNA package downloaded at about 30 KB/s from bioconda's servers.
+- `environment.yml` pins Python's minor version. ViennaRNA is pinned to the
+  exact version that got installed, because it is the folding oracle and
+  a different version could give different energies.
+- Naming clash to remember: **mamba** the package installer (it ships with
+  Miniforge) has nothing to do with **Mamba** the neural network.
