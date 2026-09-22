@@ -403,6 +403,66 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Where it appears:** Session 02: RTX 4060 Laptop, 8188 MiB (8 GB) VRAM, driver 595.79, CUDA ≤ 13.2, visible from inside WSL.
 - **First explained:** session 02.
 
+### Git, repository, commit
+- **Definition:** Git is a version-control system: it records snapshots of your project over time. The repository is the project folder plus Git's hidden database (`.git/`). A commit is one saved snapshot, with an author, a time and a message explaining why it was made.
+- **Analogy:** Tape-out revisions with a change log. Every revision is kept, and you can always return to any earlier one.
+- **Where it appears:** `~/projects/RiboMamba` is a Git repository. First commit `f495772`, session 02.
+- **First explained:** session 02.
+
+### Staging area (`git add`)
+- **Definition:** The waiting room between editing files and committing them. `git add` puts chosen changes in it; `git commit` turns exactly those into a snapshot.
+- **Analogy:** Choosing which modified cells go into this revision before signing it off.
+- **Where it appears:** Every commit.
+- **First explained:** session 02.
+
+### Commit hash
+- **Definition:** A 40-hex-digit fingerprint that identifies a commit, calculated from its contents and its parent commit. Change anything in history and every later hash changes, so tampering is visible. Usually shortened to the first 7 digits (e.g. `f495772`).
+- **Analogy:** A CRC/checksum over the whole history chain.
+- **Where it appears:** RESULTS.md records the commit hash next to every number, for reproducibility.
+- **First explained:** session 02.
+
+### Branch (`main`)
+- **Definition:** A named line of commits. A new repository starts with one; we call it `main`.
+- **Analogy:** A named design revision track.
+- **Where it appears:** Our only branch so far.
+- **First explained:** session 02 (briefly; more when we need a second branch).
+
+### Remote, push, GitHub
+- **Definition:** A remote is another copy of the repository, somewhere else. GitHub is a website that hosts remotes. `git push` sends your new commits to the remote.
+- **Analogy:** An off-site backup of the design database, updated whenever you choose.
+- **Where it appears:** `Chikap1009/RiboMamba` on GitHub (public). Pushed at the end of every session (D-002).
+- **First explained:** session 02.
+
+### `gh` (GitHub CLI)
+- **Definition:** GitHub's command-line tool. It logs you in to GitHub and can create repositories, among other things, without opening the website.
+- **Analogy:** A command-line interface to a web service, instead of clicking through its GUI.
+- **Where it appears:** Installed in Ubuntu (version 2.45.0), session 02.
+- **First explained:** session 02.
+
+### Noreply email
+- **Definition:** A private address GitHub gives each user (`ID+username@users.noreply.github.com`). Commits made with it are linked to your profile without exposing your real email in a public repository.
+- **Analogy:** A PO box instead of your home address.
+- **Where it appears:** Our Git author email.
+- **First explained:** session 02.
+
+### apt (package manager)
+- **Definition:** Ubuntu's tool for installing system software from Ubuntu's official collection. `apt-get update` refreshes the catalogue; `apt-get install X` installs X. It needs root.
+- **Analogy:** An app store for the command line.
+- **Where it appears:** Installed `gh` in session 02. (Python packages will come from conda instead, explained at step 4.)
+- **First explained:** session 02.
+
+### Shell script
+- **Definition:** A text file containing shell commands, run in order with `bash file.sh`. We use them to avoid typing long Linux commands through PowerShell, which rewrites quotes and `$` signs.
+- **Analogy:** A test vector file you replay, instead of typing every stimulus by hand.
+- **Where it appears:** One-off setup scripts in session 02 (kept outside the repo).
+- **First explained:** session 02.
+
+### Time zone vs. clock
+- **Definition:** A computer's clock counts one universal time (UTC). The time zone only controls how that time is *displayed* (IST = UTC + 5:30).
+- **Analogy:** The same voltage shown on two meters with different offsets.
+- **Where it appears:** Ubuntu was showing UTC; set to Asia/Kolkata in session 02. Git records the offset with every commit.
+- **First explained:** session 02.
+
 ### Bioconda (preview)
 - **Definition:** A community collection of ready-to-install bioinformatics software packages (ViennaRNA is one), distributed through conda. It builds packages for Linux and macOS only, not Windows.
 - **Analogy:** A vendor's IP catalogue that only ships for certain process nodes.
