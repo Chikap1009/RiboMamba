@@ -81,3 +81,22 @@ its predicted structure matches the target.
 we don't. The folding software is itself a model, so our success means "the
 software predicts the target", not a wet-lab result.
 **Source:** logbook/2026-09-22-session-01.md (concept 5, explain-back).
+
+### Q: Is "the predicted MFE structure equals the target" a good enough success test?
+**Draft answer** *(written by Claude from the session 02 results; to be
+rewritten in Chirag's own words after his explain-back)*: Not on its own.
+Our very first sanity check showed why. The textbook hairpin `GGGAAACCC`
+does fold to the target as its MFE, at −1.20 kcal/mol, but ViennaRNA finds a
+rival shape only 0.2 kcal/mol higher, so the molecule spends only about 51%
+of its time in the target. It passes an MFE-match test while being close to
+a coin flip in reality. Meanwhile a one-letter mutant, `GGGAAACCA`, refolds
+into a *different* hairpin and holds it 94% of the time. So besides MFE
+match I'd look at how dominant the target is: its probability in the
+Boltzmann ensemble, or its energy gap to the nearest rival.
+**Likely follow-up:** "How do you compute that probability?" → The partition
+function: add up e^(−ΔG/RT) over all structures (ViennaRNA does this with
+dynamic programming, `RNAfold -p`), then the target's share is its own term
+divided by the total. I checked the 51% by hand from the eight lowest
+structures and got 50.8%.
+**Source:** logbook/2026-09-22-session-02.md (22:30); RESULTS.md, Phase 0
+sanity checks.

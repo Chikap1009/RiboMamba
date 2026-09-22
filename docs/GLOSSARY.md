@@ -241,6 +241,42 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Where it appears:** Energy-gap reasoning; ensemble-based metrics (Phase 3).
 - **First explained:** session 01.
 
+### Dangling end
+- **Definition:** An unpaired base right next to the end of a helix. It stacks onto the last pair and gives a small energy bonus (about −0.1 to −1.7 kcal/mol).
+- **Analogy:** A loose coin resting on top of a stack. It doesn't belong to the stack, but it still helps hold it steady.
+- **Where it appears:** Session 02: why ViennaRNA scored `.((...)).` at +1.10 instead of our toy +2.1, and part of why `GGGAAACCA` folds. Our toy model left it out.
+- **First explained:** session 02.
+
+### Terminal mismatch (and why a 4-nt loop can be cheaper than a 3-nt loop)
+- **Definition:** In a loop of 4 or more bases, the first unpaired bases next to the closing pair stack onto it and earn a bonus (a G·A first mismatch is especially good). Loops of exactly 3 are too tight to get this bonus.
+- **Analogy:** A slightly wider cable bend that lets the connector seat properly, so it ends up more stable than the tightest bend.
+- **Where it appears:** Session 02: in `GGGAAACCA`, the 4-nt hairpin loop cost +3.10, versus +5.40 for the 3-nt loop.
+- **First explained:** session 02.
+
+### Suboptimal structures (`RNAsubopt`)
+- **Definition:** The structures just above the MFE in energy, i.e. the rivals. `RNAsubopt -e X` lists every structure within X kcal/mol of the best.
+- **Analogy:** The second- and third-best timing paths, just behind the critical path.
+- **Where it appears:** Session 02: `GGGAAACCC`'s nearest rival is only 0.20 kcal/mol above its MFE.
+- **First explained:** session 02.
+
+### `RNAeval`
+- **Definition:** ViennaRNA's tool for computing the free energy of a structure *you choose* for a sequence (rather than the best one). With `-v` it lists the energy of every stack and loop, which is the nearest-neighbour sum written out.
+- **Analogy:** Evaluating one specific path's delay, rather than searching for the worst path.
+- **Where it appears:** Session 02, to check our hand calculations piece by piece.
+- **First explained:** session 02.
+
+### Ensemble and partition function
+- **Definition:** The ensemble is every structure a sequence can take, each weighted by e^(−ΔG/RT). The partition function Z is the sum of all those weights. A structure's probability (its share of the time) is its weight divided by Z. ViennaRNA computes Z exactly with dynamic programming (`RNAfold -p`).
+- **Analogy:** Occupancy statistics across all states of a noisy state machine, rather than just the most likely state.
+- **Where it appears:** Session 02: `GGGAAACCC` spends 50.7 % of its time in its MFE shape; `GGGAAACCA` 93.9 %. It's a likely extra success metric in Phase 3.
+- **First explained:** session 02.
+
+### Energy units in ViennaRNA output
+- **Definition:** `RNAfold` prints kcal/mol (e.g. −1.20). `RNAeval -v` prints per-loop values in units of 0.01 kcal/mol (e.g. −330 = −3.30).
+- **Analogy:** The same quantity read in mV versus V.
+- **Where it appears:** Session 02 outputs.
+- **First explained:** session 02.
+
 ### Mutation
 - **Definition:** A change of one letter (base) in a sequence, e.g. `GGGAAACCC` → `GGGAAACCA`.
 - **Analogy:** A single bit flip.
@@ -463,11 +499,59 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Where it appears:** Ubuntu was showing UTC; set to Asia/Kolkata in session 02. Git records the offset with every commit.
 - **First explained:** session 02.
 
-### Bioconda (preview)
+### Package and package manager
+- **Definition:** A package is a ready-built piece of software plus a note of what it depends on. A package manager downloads packages, works out which versions of everything fit together (this is called "solving"), and installs them.
+- **Analogy:** A parts distributor with a compatibility checker: order one IC, and it also ships the matching regulator and passives in versions that work together.
+- **Where it appears:** apt (system software), conda (our project software), pip (pure-Python packages).
+- **First explained:** session 02.
+
+### conda, Miniforge, and `mamba` (the installer)
+- **Definition:** conda is a package manager that can install *any* software (Python, C libraries, CUDA runtimes), not only Python, into isolated environments. Miniforge is a small installer that gives you conda, set up to use the free conda-forge channel. It also includes `mamba`, a faster conda-compatible installer. **That mamba has nothing to do with the Mamba neural network.**
+- **Analogy:** A toolchain manager that can install several compiler versions side by side, each in its own sandbox.
+- **Where it appears:** Installed at `~/miniforge3` (conda 26.7.2), session 02. D-003.
+- **First explained:** session 02.
+
+### Environment (conda environment)
+- **Definition:** A self-contained folder holding one specific Python version and one specific set of packages, separate from every other environment. "Activating" it (`conda activate ribomamba`) makes the terminal use its tools.
+- **Analogy:** A separate EDA install per project: project A can stay on tool version 2021 while project B uses 2024, without breaking each other.
+- **Where it appears:** `ribomamba`, defined in `environment.yml`.
+- **First explained:** session 02.
+
+### Channel (conda-forge, bioconda)
+- **Definition:** A channel is an online collection of conda packages. conda-forge is the large free community channel; bioconda is a channel for bioinformatics software, built on top of conda-forge. Channel order sets priority when both offer a package.
+- **Analogy:** Different component distributors. You list your preferred one first.
+- **Where it appears:** `environment.yml` lists conda-forge, then bioconda.
+- **First explained:** session 02.
+
+### Bioconda
 - **Definition:** A community collection of ready-to-install bioinformatics software packages (ViennaRNA is one), distributed through conda. It builds packages for Linux and macOS only, not Windows.
 - **Analogy:** A vendor's IP catalogue that only ships for certain process nodes.
-- **Where it appears:** How we will install ViennaRNA (step 5). Conda itself is explained at step 4.
-- **First explained:** session 02 (preview).
+- **Where it appears:** Source of our ViennaRNA package (`environment.yml`).
+- **First explained:** session 02.
+
+### `environment.yml` (and YAML)
+- **Definition:** A text file listing an environment's name, channels and packages, from which conda can rebuild it anywhere. YAML is the simple "key: value" and "- list item" text format it's written in.
+- **Analogy:** A bill of materials: anyone can rebuild the same board from it.
+- **Where it appears:** Repo root. Rebuild with `conda env create -f environment.yml`.
+- **First explained:** session 02.
+
+### Version pinning
+- **Definition:** Writing an exact version (e.g. `viennarna=2.7.2`) instead of "whatever is newest", so every rebuild installs the same software.
+- **Analogy:** Specifying an exact part number on a BOM, not "any 10k resistor".
+- **Where it appears:** `environment.yml`. It matters most for the folding oracle, because a different ViennaRNA version could give different energies.
+- **First explained:** session 02.
+
+### Checksum (SHA-256)
+- **Definition:** A fixed-length fingerprint computed from a file's bytes. If even one byte changes, the fingerprint changes completely. Comparing it with the publisher's value proves the download is intact and unaltered.
+- **Analogy:** A CRC check on a received packet, but cryptographically strong.
+- **Where it appears:** Verifying the Miniforge installer, session 02.
+- **First explained:** session 02.
+
+### Python bindings
+- **Definition:** A bridge that lets Python code call a library written in another language (here, ViennaRNA's C code). `import RNA` gives Python access to the same folding engine as the `RNAfold` command.
+- **Analogy:** A driver API that lets high-level software call into firmware.
+- **Where it appears:** Our evaluation code (Phase 3) will call ViennaRNA via `import RNA`.
+- **First explained:** session 02.
 
 ### Stack (data structure)
 - **Definition:** A list where you can only add to the top (push) or remove from the top (pop): last in, first out.
