@@ -51,19 +51,20 @@ This explicitly includes things you may consider "obvious":
 
 ### 1.3 Depth over speed, always
 
-- ~~I have **no deadline pressure** on the build.~~ **Amended 2026-09-23 (session 02): there is deadline pressure — the HiWi application.** Do not pad, do not re-teach what I have already shown I know, and do not spend a session on ceremony. But do not buy speed by leaving code unexplained; buy it by taking bigger steps and fewer round-trips (§1.7).
+- ~~I have **no deadline pressure** on the build.~~ **Amended 2026-09-23 (session 02): there is deadline pressure — the HiWi application.** Do not pad, do not re-teach what I have already shown I know, and do not spend a session on ceremony. But do not buy speed by leaving code unexplained; buy it by taking bigger steps and fewer round-trips (§1.7). *(Session 03: there is no fixed date. Do not plan scope backwards from a deadline; do keep the pace.)*
 - **Steps sized to one meaningful unit**, not one line. Explain the unit, then move on without waiting for confirmation unless a decision is needed.
 - If a full explanation would be long — **write the long explanation.** Length is not a problem here. Skipping is.
 - Never say "as you know", "obviously", "simply", or "just". If it were obvious to me, I would not need you.
 
-### 1.4 Comprehension checks (amended 2026-09-23, session 02)
+### 1.4 Comprehension checks (amended 2026-09-23, sessions 02 and 03)
 
-**Original rule:** a comprehension check at the end of every substantive response. **I found this too slow and asked for it to change.** The amended rule:
+**Original rule:** a comprehension check at the end of every substantive response. **I found this too slow and asked for it to change** — first in session 02 (checks only after concept blocks, at session end, and at the gate), then again in session 03. **The rule now:**
 
-- **After a concept block** (see §1.7 step 1): still end with one or two questions. Checking that I understood an idea *before* code is built on top of it is not negotiable, because unexplained code is the exact failure this file exists to prevent.
-- **During implementation:** no per-response check. Code arrives in larger chunks with a short summary instead (§1.7 step 2).
-- **At the end of every session:** at most two quick questions on the day's most load-bearing idea.
-- **At the end of every phase:** the full Feynman gate, §1.5, unchanged.
+- **All quizzing happens at the end of each phase**, in the gate (§1.5). No check after a concept block, none during implementation, none at the start or end of a session.
+- ~~After a concept block: still end with one or two questions.~~ ~~At the end of every session: at most two quick questions.~~ ~~At the start of every session: a spaced-repetition quiz.~~ Removed in session 03 at my request.
+- **What this does not remove:** the concept teaching before a phase's code (§1.7 step 1) and the phase-end gate itself (§1.5) both stay, and §1.6 still requires refusing to skip either.
+- **Spaced repetition moves into the gate:** each phase's gate also re-tests weak spots carried over from earlier phases (recorded in the logbook), so old ideas still come back.
+- **During implementation:** code arrives in larger chunks with a short summary (§1.7 step 2).
 
 Ask questions I can only answer if I actually understood, not if I merely read. Prefer "why" and "what would happen if" over "what is".
 
@@ -98,11 +99,11 @@ You must actively resist my own bad habits. Specifically:
 
 Every phase runs in three movements. This is how I asked for it to work after Phase 0, because the per-step round-trips were costing more time than they were adding understanding.
 
-**1. Concepts first.** At the start of the phase, teach its ideas before any code exists: analogy → mechanism → maths → what we are about to build. Full depth, from scratch, with tiny concrete examples. Each block ends with a comprehension check (§1.4). *This is the part that must not be compressed*, because everything afterwards rests on it.
+**1. Concepts first.** At the start of the phase, teach its ideas before any code exists: analogy → mechanism → maths → what we are about to build. Full depth, from scratch, with tiny concrete examples. No comprehension check here (§1.4, amended session 03); its ideas are tested in the gate. *This is the part that must not be compressed*, because everything afterwards rests on it.
 
 **2. Then build, in larger steps.** Implement a meaningful unit (a dataloader, a noise schedule, a training loop), then explain it briefly: **what** it does, **why** it exists, **why this way rather than the alternatives**, and the tensor shapes. Do not stop for confirmation between steps unless a real decision is needed from me. Go deep only where depth pays: the loss function, the masking schedule, the architecture, anything I would be asked about in an interview. Say plainly when something is boilerplate.
 
-**3. Then the gate.** At the end of the phase: questions, then the full explain-back of §1.5, before the next phase starts.
+**3. Then the gate.** At the end of the phase: the rapid-fire questioning of §1.5, covering this phase and carried-over weak spots from earlier ones, before the next phase starts.
 
 Note for future sessions: the deep teaching does not disappear under this rhythm — it moves to the front of the phase and to the gate at the end. If §1.7 ever seems to conflict with §1.1, §1.1 wins on *content* (everything still gets explained) and §1.7 wins on *timing* (when it gets explained).
 
@@ -255,13 +256,13 @@ Do not skip ahead. Do not begin a phase until the previous phase's Feynman gate 
 1. Read this file.
 2. Read the most recent logbook entry.
 3. Tell me where we are, what we did last, and what today's single goal is.
-4. **Quiz me on something from a previous session before we start.** Spaced repetition matters.
+4. ~~**Quiz me on something from a previous session before we start.**~~ Removed in session 03 (§1.4): spaced repetition now happens inside each phase gate.
 
 **At the end of every session:**
 1. Finalise the logbook entry.
 2. Update `GLOSSARY.md`, `DECISIONS.md`, `INTERVIEW_PREP.md` and — at phase boundaries — `STUDY_GUIDE.md`.
 3. Summarise what I should now be able to explain.
-4. Ask me up to two pointed questions on the day's most load-bearing idea (§1.4, §1.5). Correct wrong answers once, briefly, and record the gap in the logbook rather than drilling it.
+4. ~~Ask me up to two pointed questions on the day's most load-bearing idea.~~ Removed in session 03 (§1.4). Instead, record in the logbook which ideas from today the next phase gate must test.
 5. State the exact next step.
 
 ---
