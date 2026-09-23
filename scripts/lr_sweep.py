@@ -26,14 +26,37 @@ SWEEP_STEPS, SWEEP_WARMUP = 8000, 1000
 FULL_STEPS, FULL_WARMUP, FULL_EVAL_EVERY = 200_000, 2000, 5000
 
 
+def eval_rows(run_name: str) -> list[dict]:
+    log = REPO_ROOT / "checkpoints" / run_name / "log.csv"
+    if not log.exists():
+        return []
+    with open(log) as f:
+        return [r for r in csv.DictReader(f) if r["val_bits_ema"]]
+
+
 def final_val_ema(run_name: str) -> float:
-    with open(REPO_ROOT / "checkpoints" / run_name / "log.csv") as f:
-        rows = [r for r in csv.DictReader(f) if r["val_bits_ema"]]
-    return float(rows[-1]["val_bits_ema"])
+    return float(eval_rows(run_name)[-1]["val_bits_ema"])
 
 
 def train(*args: str) -> None:
     subprocess.run([sys.executable, str(REPO_ROOT / "scripts" / "train.py"), *args], check=True)
+
+
+def run_to_completion(name: str, steps: int, *new_run_args: str) -> None:
+    """Skip a finished run; resume an interrupted one; otherwise start it.
+
+    "Finished" means its log has an evaluation at the final step. A last.pt
+    alone is not enough: an interrupted run has one too, and choosing a
+    learning rate from a half-trained run would break the protocol.
+    """
+    rows = eval_rows(name)
+    if rows and int(rows[-1]["step"]) >= steps:
+        return
+    last = REPO_ROOT / "checkpoints" / name / "last.pt"
+    if last.exists():
+        train("--resume", str(last))
+    else:
+        train("--run-name", name, "--max-steps", str(steps), *new_run_args)
 
 
 def main() -> None:
@@ -46,9 +69,8 @@ def main() -> None:
     results = {}
     for lr in CANDIDATE_LRS:
         name = f"{args.prefix}_sweep_lr{lr:g}"
-        if not (REPO_ROOT / "checkpoints" / name / "last.pt").exists():
-            train("--run-name", name, "--lr", str(lr), "--max-steps", str(SWEEP_STEPS),
-                  "--warmup-steps", str(SWEEP_WARMUP), "--eval-every", "2000", *args.extra)
+        run_to_completion(name, SWEEP_STEPS, "--lr", str(lr), "--warmup-steps", str(SWEEP_WARMUP),
+                          "--eval-every", "2000", *args.extra)
         results[lr] = final_val_ema(name)
         print(f"lr {lr:g}: final validation {results[lr]:.4f} bits/nt (EMA)", flush=True)
 
@@ -60,8 +82,8 @@ def main() -> None:
     print(json.dumps(summary, indent=2), flush=True)
 
     if args.then_full:
-        train("--run-name", f"{args.prefix}_full", "--lr", str(best), "--max-steps", str(FULL_STEPS),
-              "--warmup-steps", str(FULL_WARMUP), "--eval-every", str(FULL_EVAL_EVERY), *args.extra)
+        run_to_completion(f"{args.prefix}_full", FULL_STEPS, "--lr", str(best), "--warmup-steps",
+                          str(FULL_WARMUP), "--eval-every", str(FULL_EVAL_EVERY), *args.extra)
 
 
 if __name__ == "__main__":
