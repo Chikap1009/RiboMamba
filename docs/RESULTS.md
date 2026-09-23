@@ -148,6 +148,52 @@ resemblance remains by design.
 
 ---
 
+## Phase 2 — reference points for bits per nucleotide
+
+### Markov (counting) baselines
+
+Recorded 2026-09-24, session 03. `python scripts/baselines_markov.py`
+(deterministic; random-split control uses seed 0). A k-th order Markov
+model predicts each nucleotide from the previous k, from training-split
+counts with add-0.5 smoothing (fixed in advance). Exact likelihoods, bits per
+nucleotide. "Ours" = the clan/family split (validation = unseen families);
+"random" = the same sequences shuffled 80/10/10 ignoring families.
+
+| order k | 0 | 1 | 2 | 3 | 4 | 5 | 6 | 7 | 8 |
+|---|---|---|---|---|---|---|---|---|---|
+| ours: train | 1.9966 | 1.9805 | 1.9751 | 1.9708 | 1.9656 | 1.9571 | 1.9375 | 1.8899 | 1.7897 |
+| **ours: validation** | 1.9962 | 1.9801 | 1.9737 | 1.9693 | **1.9663** | 1.9684 | 1.9803 | 2.0164 | 2.0790 |
+| random: validation | 1.9964 | 1.9801 | 1.9748 | 1.9707 | 1.9657 | 1.9583 | 1.9422 | 1.9025 | **1.8170** |
+
+**Reading it.**
+- RNA letters are close to random locally: letter frequencies alone give
+  1.996 bits, and the best counting model on unseen families reaches only
+  **1.966 (k = 4)**.
+- On our split, contexts longer than 4 **overfit**: training improves,
+  validation worsens. Memorised training k-mers don't transfer to new
+  families.
+- On a random split the same memorisation is **rewarded**: k = 8 reaches
+  1.817 bits, which would appear better than our Transformer's 1.914 after
+  8,000 steps (sweep below). A random split would make a counting
+  memoriser look like it beats the neural network. That's the leakage of
+  Phase 1, measured on a model metric.
+
+### Transformer learning-rate sweep (D-011)
+
+`python scripts/lr_sweep.py --prefix tf_M --then-full` at commit
+`6917362` (sweep) / `8b1c932` (extension); seed 0; size M (14,174,976
+params); 8,000 steps × 16,384-token batches, warmup 1,000, cosine to 10 %.
+Validation = full val split, fixed noise (seed 1234), EMA weights.
+
+| peak LR | val bits/nt @2k | @4k | @6k | **@8k (rule)** |
+|---|---|---|---|---|
+| 3×10⁻⁴ | 1.9339 | 1.9165 | 1.9125 | **1.9138** |
+| 10⁻³ | 1.9499 | 1.9393 | 1.9303 | 1.9252 |
+| 3×10⁻³ | 1.9576 | 1.9587 | 1.9481 | 1.9441 |
+| 10⁻⁴ | *(boundary extension, running)* | | | |
+
+---
+
 ## Phase 0 — oracle sanity checks (not experiments)
 
 Hand-calculated predictions from session 01, checked against ViennaRNA.

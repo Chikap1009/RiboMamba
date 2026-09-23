@@ -176,6 +176,23 @@ a control isn't a box to tick. When it looks slightly off, that's the
 detector telling you it's broken.
 **Source:** logbook/2026-09-23-session-03.md (19:37); DECISIONS D-009.
 
+### Q: Your model gets ~1.9 bits per nucleotide. Is that good?
+**Draft answer:** On its own the number means little, so I calibrated it.
+Knowing nothing is exactly 2 bits for four letters. Letter frequencies alone
+give 1.996, so RNA is almost uniform in composition. The best counting model
+(predict each letter from the previous 4) gets 1.966 on unseen families, and
+longer contexts get *worse* there because they memorise training k-mers. The
+Transformer was at 1.914 after a short run, so it has learned something beyond
+local statistics; most plausibly the long-range pairing correlations, which
+no left-context count can see. And the random-split control is striking: an
+8-letter counting model would score 1.817 on a random split, apparently
+beating the neural network, purely by recognising relatives of the test
+sequences.
+**Likely follow-up:** "Why so close to 2?" → Different RNA families share
+almost no sequence, and the information is mostly in which positions pair,
+not in which letters appear. A model has to learn "grammar", not vocabulary.
+**Source:** RESULTS.md, Phase 2 reference points.
+
 ### Q: Why a maximum length of 256?
 **Draft answer:** Three reasons. Memory: the Transformer baseline's
 activation memory grows with length, and naive attention grows with length

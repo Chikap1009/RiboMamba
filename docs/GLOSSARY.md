@@ -509,6 +509,24 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Where it appears:** The Phase 2 validation metric (on families never seen in training).
 - **First explained:** session 03.
 
+### k-th order Markov model (counting baseline)
+- **Definition:** A model that predicts each letter from the k letters before it, using counts from the training data (plus smoothing: add 0.5 to every count so nothing gets probability zero). Exact likelihood; a reference point for "how much is purely local".
+- **Analogy:** A predictive text that only looks at the last few characters.
+- **Where it appears:** `scripts/baselines_markov.py`; best on unseen families is k = 4 at 1.966 bits/nt.
+- **First explained:** session 03.
+
+### Overfitting
+- **Definition:** Getting better on the training data while getting worse on new data, because the model memorises specifics instead of learning what transfers.
+- **Analogy:** Memorising last year's exam answers: perfect on those papers, useless on a new one.
+- **Where it appears:** Markov models with k ≥ 5 (train keeps improving, unseen-family validation worsens); watched in every training run via validation bits/nt.
+- **First explained:** session 03.
+
+### Hyperparameter sweep; boundary effect
+- **Definition:** Training the same model with several values of a setting (e.g. learning rate) and picking the best by a fixed rule. If the winner is the smallest or largest value tried, the true optimum may lie outside the range, so the range is extended.
+- **Analogy:** Sweeping a bias voltage to find the best operating point; if the best reading is at the end of your sweep, sweep further.
+- **Where it appears:** `scripts/lr_sweep.py` (rule 2b, D-011 amendment).
+- **First explained:** session 03.
+
 ### Pre-registration (frozen evaluation protocol)
 - **Definition:** Writing down the metrics, thresholds and headline success criterion **before** running the test set, so the metric can't be chosen after seeing which model it favours.
 - **Analogy:** Fixing the sign-off criteria before tape-out, not after looking at which chip passes.
