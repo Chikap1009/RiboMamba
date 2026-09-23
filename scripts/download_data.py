@@ -1,19 +1,23 @@
-"""Download the raw Phase 1 datasets from the HuggingFace Hub.
+"""Download the raw Phase 1 data: two HuggingFace datasets and Rfam's family models.
 
-Each dataset is pinned to one exact commit of its HuggingFace repository, and
-the downloaded file's SHA-256 checksum is compared with the value recorded
-below. Together these guarantee that anyone who runs this script gets the same
-bytes we trained on, even if the dataset's owners update it later (D-005).
+Each file is pinned to one exact version (a HuggingFace repository commit, or
+a numbered Rfam release) and its SHA-256 checksum is compared with the value
+recorded below. Together these guarantee that anyone who runs this script
+gets the same bytes we used, even if the owners update their copies later
+(D-005, D-009).
 
 Usage (from the repository root, inside `conda activate ribomamba`):
     python scripts/download_data.py
 
 Output:
-    data/raw/rfam/data.parquet    20,051,822 Rfam family members (726 MB)
-    data/raw/bprna/data.parquet   102,318 bpRNA-1m sequences with structures (5 MB)
+    data/raw/rfam/data.parquet      20,051,822 Rfam family members (726 MB)
+    data/raw/bprna/data.parquet     102,318 bpRNA-1m sequences with structures (5 MB)
+    data/raw/rfam_cm/Rfam.cm.gz     4,178 Rfam 15.0 covariance models (45 MB)
 """
 
 import hashlib
+import shutil
+import urllib.request
 from pathlib import Path
 
 from huggingface_hub import hf_hub_download
@@ -21,7 +25,7 @@ from huggingface_hub import hf_hub_download
 from ribomamba.paths import RAW_DIR
 
 # name -> (HuggingFace repo, commit hash, file in the repo, expected SHA-256)
-DATASETS = {
+HF_DATASETS = {
     "rfam": (
         "multimolecule/rfam",
         "25e8aa866f647aefdd0777928ba3de6b98fd1d57",
@@ -36,6 +40,20 @@ DATASETS = {
     ),
 }
 
+# name -> (URL of a numbered, never-changing release, file name, expected SHA-256)
+# Rfam 15.0 is the release the HF Rfam copy was built from: all 459 of its
+# family->clan pairs match 15.0's Rfam.clanin exactly (checked in session 03).
+# Rfam publishes no checksums, so this SHA-256 was recorded at our first
+# download on 2026-09-23 ("trust on first use"): it guarantees later
+# downloads are identical to ours, not that ours was untampered.
+URL_FILES = {
+    "rfam_cm": (
+        "https://ftp.ebi.ac.uk/pub/databases/Rfam/15.0/Rfam.cm.gz",
+        "Rfam.cm.gz",
+        "f8885ee1bdf7a085c9a68af94be68d23e63da647d8f9f09835d22a218d2bfe9f",
+    ),
+}
+
 
 def sha256_of(path: Path) -> str:
     """Checksum a file in 1 MB chunks, so a large file never sits in memory whole."""
@@ -46,28 +64,36 @@ def sha256_of(path: Path) -> str:
     return digest.hexdigest()
 
 
-def main() -> None:
-    for name, (repo, revision, filename, expected) in DATASETS.items():
-        local_dir = RAW_DIR / name
-        target = local_dir / filename
-        if target.exists() and sha256_of(target) == expected:
-            print(f"{name}: already downloaded, checksum OK")
-            continue
+def verify(name: str, path: Path, expected: str) -> None:
+    actual = sha256_of(path)
+    if actual != expected:
+        raise RuntimeError(
+            f"{name}: checksum mismatch.\n  expected {expected}\n  got      {actual}\n"
+            "The file is corrupted or not the version we pinned. Delete it and retry."
+        )
+    print(f"{name}: {path.stat().st_size:,} bytes, checksum OK -> {path}")
 
-        path = Path(hf_hub_download(
-            repo_id=repo,
-            repo_type="dataset",
-            filename=filename,
-            revision=revision,      # the pin: this exact version, never "latest"
-            local_dir=local_dir,    # straight into data/raw/, no second copy
-        ))
-        actual = sha256_of(path)
-        if actual != expected:
-            raise RuntimeError(
-                f"{name}: checksum mismatch.\n  expected {expected}\n  got      {actual}\n"
-                "The file is corrupted or not the version we pinned. Delete it and retry."
+
+def main() -> None:
+    for name, (repo, revision, filename, expected) in HF_DATASETS.items():
+        target = RAW_DIR / name / filename
+        if not (target.exists() and sha256_of(target) == expected):
+            hf_hub_download(
+                repo_id=repo,
+                repo_type="dataset",
+                filename=filename,
+                revision=revision,        # the pin: this exact version, never "latest"
+                local_dir=RAW_DIR / name, # straight into data/raw/, no second copy
             )
-        print(f"{name}: downloaded {path.stat().st_size:,} bytes, checksum OK -> {path}")
+        verify(name, target, expected)
+
+    for name, (url, filename, expected) in URL_FILES.items():
+        target = RAW_DIR / name / filename
+        if not (target.exists() and sha256_of(target) == expected):
+            target.parent.mkdir(parents=True, exist_ok=True)
+            with urllib.request.urlopen(url) as response, open(target, "wb") as out:
+                shutil.copyfileobj(response, out)   # streams in chunks, never all in memory
+        verify(name, target, expected)
 
 
 if __name__ == "__main__":
