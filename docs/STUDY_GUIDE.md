@@ -982,6 +982,211 @@ Two implementation details worth being able to explain:
 
 ## Part 4 — Generating instead of searching: masked discrete diffusion  *(Phase 2)*
 
+*(Drafted during the Phase 2 build, 2026-09-24; §4.10 is completed when the
+full training run finishes, and the section is revised after the Phase 2
+gate.)*
+
+### 4.1 What this phase is for
+
+The scientific question compares backbones: does a Mamba denoiser beat a
+Transformer one, when everything else is equal? That question only means
+something if the Transformer is a **strong, standard, working** baseline,
+built and debugged first. So Phase 2 builds the whole generative machinery
+(the diffusion process, the loss, the sampler, the training loop) around a
+conventional Transformer. Phase 4 then swaps out that one box.
+
+### 4.2 What a generative model is, and why not left-to-right
+
+A generative model is a probability distribution over sequences that you
+can **sample** from. For RNA a lookup table is impossible (4¹⁰⁰ ≈ 10⁶⁰
+entries for length 100), so the distribution must be computed by a network
+from learnable pieces.
+
+The GPT way is the **chain rule**: p(x) = p(x₁)·p(x₂|x₁)·…, written left to
+right. It's exact in principle, but awkward for RNA:
+- when the model writes position 1, its pairing partner (say position 9)
+  doesn't exist yet, so pairing, which is two-directional and long-range,
+  must be planned silently;
+- filling in the middle of an existing design, or imposing a whole target
+  structure, doesn't fit a left-to-right process;
+- generation takes L sequential steps, and early mistakes can't be revised.
+
+Say "awkward", never "impossible": that's why the autoregressive Mamba stays
+in the Phase 4 comparison as an empirical test.
+
+### 4.3 Masked diffusion
+
+BERT-style models predict hidden letters from **both** sides, but only ever
+see ~15 % hidden, so they can't generate from scratch. **Masked diffusion**
+trains at every hiding level from 0 % to 100 %, then generates by starting
+fully hidden and revealing letters step by step.
+
+- **Forward process** (fixed): at time t ∈ (0, 1], each nucleotide is
+  replaced by `<mask>` with probability t (linear schedule α_t = 1 − t).
+- **Absorbing state**: once masked, a position stays masked in the forward
+  process; once revealed during generation, a letter is never changed.
+- **Why masking rather than other noise:** random letter swaps would plant
+  wrong letters (and fake base pairs) that look like real ones; continuous
+  noise on vectors fits letters badly. Masking says honestly "unknown here".
+- **Reverse process (sampling):** start from `<bos> <mask>…<mask> <eos>`.
+  Stepping from time t to s, each masked position is revealed with
+  probability (t − s)/t, its letter drawn from the model's prediction. With
+  4 steps the reveal probabilities are 1/4, 1/3, 1/2, 1, so about a quarter
+  of the positions are revealed per step. **Few steps** means many letters
+  are chosen at once, unable to see each other: two pairing partners
+  revealed together can't coordinate. **Many steps** means each letter sees
+  more already-written context: better, but slower.
+- A subtle implementation detail worth knowing: letters are sampled from
+  **float64** probabilities, because low-precision sampling has been shown
+  to quietly sharpen the distribution and reduce diversity (Zheng et al. 2024).
+
+### 4.4 The loss, and two exact checks on it
+
+For each training sequence: pick t, mask, predict, and score
+**cross-entropy only at the masked positions, weighted by 1/t**:
+
+> Loss = average over t and masks of (1/t) · Σ_{masked i} −log p_θ(x_i | z_t)
+
+- Cross-entropy −log p is 0 for a certain, correct prediction and large for
+  a confident mistake.
+- Only masked positions count: the rest are given in the input, and
+  predicting them would reward copying. That's the same lesson as padding.
+- The **1/t** weight: about t·L positions are masked, so the sum is about
+  t·L × (average loss per blank); multiplying by 1/t leaves L × (average),
+  whatever t was, so every noise level counts equally. Formally, exactly
+  this weighting makes the loss an **upper bound on −log p(x)** (a negative
+  ELBO), so it can be reported as a likelihood: **bits per nucleotide**. 2.0
+  bits means knowing nothing about four letters.
+
+Two tests pin this down exactly, and they're worth quoting:
+1. A hand-worked example (`GGGAAACCC`, t = 1/3, masks at positions 2, 5, 9,
+   predicted probabilities 0.6, 0.5, 0.9) must give 3·(0.511 + 0.693 +
+   0.105) = **3.928 nats = 0.630 bits/nt**. It does.
+2. A model that knows nothing (equal odds on A, C, G, U) must score
+   **exactly 2 bits** on average. That only happens if the 1/t weighting is
+   right: each masked position costs ln 4, about t·L are masked, and 1/t
+   cancels the t. It does (2.00 within 0.03 over 40 batches).
+
+### 4.5 The Transformer denoiser
+
+The denoiser takes the partly masked sequence and returns, for every
+position, scores over the 8 tokens. The 4 special tokens are forced to −∞,
+so only A/C/G/U can ever be predicted. Shapes: (B, L) ids → embedding
+(B, L, d) → N blocks → (B, L, 8).
+
+**Attention** lets each position gather information from every other. Each
+position makes a query, a key and a value. The scores q·k/√d_h go through
+softmax into weights summing to 1, and the output is the weighted sum of
+values. Worked numbers: scores 1, 0, 2 → ÷√2 → softmax → weights 0.284,
+0.140, 0.576 → output [2.012, 0.564]. The √d_h keeps scores from
+saturating the softmax. The L × L grid of scores has the shape of a
+base-pairing matrix: attention can connect position i straight to its
+partner j in one step. Mamba has no such grid; that's the scientific
+question of Phase 4. PyTorch's fused attention computes it in tiles without
+storing the grid, so memory grows roughly linearly with L (compute is still
+quadratic).
+
+**Rotary position encoding (RoPE)**: pairs of numbers in q and k are
+treated as phasors and rotated by an angle proportional to position; the
+score then depends only on the offset m − n, because e^{jmθ}·conj(e^{jnθ})
+= e^{j(m−n)θ}. It has no parameters (clean parameter matching with Mamba) and
+treats a motif the same wherever it sits.
+
+**Block** (pre-norm): x + Attention(LayerNorm(x)), then x + MLP(LayerNorm(x)).
+LayerNorm is per-position standardisation (like automatic gain control);
+the MLP (d → 4d → GELU → d) is per-position "thinking"; the residual "+" is a
+bypass that lets gradients through deep stacks. About 12d² parameters per
+block: d = 384 and 8 blocks gives **14,174,976** parameters (tested against
+the formula).
+
+### 4.6 A real design flaw, found by a test: position blindness
+
+The standard sanity check, "can a tiny model memorise four sequences?",
+**failed**. Reasoning from the maths found the cause. If every position
+holds `<mask>`, every position has the same vector, so every value vector
+is the same, and any attention-weighted average of identical vectors is that
+same vector: **every position gets an identical output**, whatever the
+weights. RoPE only knows relative offsets, and padding is invisible to
+attention, so the model had no way to know where the molecule starts or
+ends. Measured per noise level: at t = 1 the model scored **2.11 bits**
+(knowing nothing) without markers, and **1.58** (near the 1.6-bit optimum)
+with them.
+
+This matters exactly where generation begins (100 % masked), and RNA has
+strongly end-dependent features: the two ends of a molecule often pair,
+tRNAs end in CCA. The fix uses two tokens reserved back in Phase 1: every
+sequence is framed **`<bos> … <eos>`**. The markers are never masked or
+scored, and together with RoPE they give every position its distance from
+both ends, at zero parameter cost. A permanent test now shows identical
+outputs without markers and varied outputs with them (D-010).
+
+The interview lesson: a failing sanity test was the *model* telling us
+something true about the architecture, not a test to be loosened.
+
+### 4.7 Training machinery, and what the GPU actually allows
+
+**Measured, not assumed** (`scripts/measure_memory.py`). At a 16,384-token
+batch the 14.2 M-parameter model needs 2.4 GB and processes about 105,000
+nucleotides per second. Speed per nucleotide barely depends on sequence
+length, so batches are sized by **nucleotides, not sequences** (median 140
+sequences per batch, 0.9 % padding): every step costs the same.
+
+A trap worth telling: a 38 M-parameter model at a 32k-token batch needed
+9.05 GB of a card with 7.44 GB free. Under WSL there was **no out-of-memory
+error**. The driver spilled into system RAM and each step took 6.2 s
+instead of ~0.36 s. Silent slowdowns are worse than crashes, so we keep
+headroom and log step time.
+
+The recipe (D-011): AdamW (per-weight adaptive step sizes, weight decay on
+matrices only); learning rate warmup, then cosine decay to 10 %; bf16 mixed
+precision; gradient clipping at norm 1.0 (a limiter); an exponential moving
+average of the weights (a low-pass filter; used for evaluation and
+sampling); validation on all 57,052 held-out-family sequences with
+**fixed** noise, so changes reflect the model, not the dice; atomic,
+resumable checkpoints recording the git commit.
+
+### 4.8 Choosing the learning rate honestly
+
+The learning rate was chosen by a **sweep with a rule written in advance**:
+three values, 8,000 steps each, lowest final validation bits/nt wins. The
+same protocol will be applied to every backbone, so no architecture gets
+more tuning than another.
+
+Result: 3×10⁻⁴ → 1.914, 10⁻³ → 1.925, 3×10⁻³ → 1.944. The winner sat on
+the **edge** of the grid, so the optimum might lie below it, and the
+rule had no clause for that. So the protocol was **amended, openly and
+before any other backbone was swept**: extend the grid while the winner is
+on its edge. 10⁻⁴ scored 1.917, making 3×10⁻⁴ an interior winner. The two
+differ by only 0.003 bits, so the choice isn't sensitive in that range.
+Being able to say "our protocol had a gap, here's the dated amendment, and
+here's why it can't favour either model" is a strong answer in its own right.
+
+### 4.9 Is ~1.9 bits good? Reference points
+
+A number needs a scale. Counting models (predict each letter from the
+previous k letters, from training counts) give, on unseen families:
+1.996 bits (k = 0, letter frequencies alone), falling to a best of
+**1.966 (k = 4)**. Longer contexts get *worse* on validation while
+improving on training: they memorise training k-mers that don't transfer to
+new families. The Transformer beat the best of them after only 8,000 steps
+(1.914), so it learns something beyond local statistics, most plausibly the
+long-range pairing correlations that no left-context count can see.
+
+And the control makes Phase 1's point on a model metric. On a **random**
+split, the 8-letter counting model scores **1.817**, which would look
+*better* than the Transformer, purely by recognising k-mers from the test
+sequences' relatives in training. Under a leaky split, a trivial memoriser
+appears to beat a neural network.
+
+### 4.10 The full baseline run
+
+*(To be completed when `tf_M_full` finishes: 200,000 steps, ≈ 66 epochs;
+the validation curve, the best checkpoint, and what samples look like.)*
+
+### 4.11 What Phase 2 settles, and what it leaves open
+
+*(Completed at the end of the phase.)*
+
 ## Part 5 — How we evaluated honestly  *(Phase 3)*
 
 ## Part 6 — What Mamba is, and why we chose it  *(Phase 4)*
