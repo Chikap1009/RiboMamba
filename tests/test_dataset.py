@@ -58,6 +58,16 @@ def test_bucket_sampler_reduces_padding():
     assert padding_fraction(bucketed) < 0.05 < padding_fraction(random)
 
 
+def test_token_budget_batches_respect_the_budget_and_cover_everything():
+    lengths = np.random.default_rng(0).integers(20, 258, size=5000)
+    sampler = BucketBatchSampler(lengths, max_tokens=4096, seed=2)
+    batches = [np.array(b) for b in sampler]
+    assert all(len(b) * lengths[b].max() <= 4096 for b in batches)       # padded slots within budget
+    assert sorted(np.concatenate(batches).tolist()) == list(range(5000))  # every sequence exactly once
+    sizes = [len(b) for b in batches]
+    assert max(sizes) > 3 * min(sizes)                                     # short sequences -> bigger batches
+
+
 def test_bucket_sampler_is_reproducible_and_changes_per_epoch():
     lengths = np.arange(500)
     a, b = BucketBatchSampler(lengths, 16, seed=3), BucketBatchSampler(lengths, 16, seed=3)

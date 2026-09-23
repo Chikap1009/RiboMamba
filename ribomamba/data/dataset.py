@@ -87,29 +87,52 @@ class BucketBatchSampler(Sampler[list[int]]):
          sequences first and long ones last).
     Sorting inside a pool rather than over the whole dataset keeps batches
     random enough to train on while still cutting most of the padding.
+
+    Batch size is given in one of two ways:
+      batch_size=n   every batch has n sequences (Phase 1 default);
+      max_tokens=m   every batch holds as many sequences as fit in m padded
+                     slots (count x longest length <= m), so every training
+                     step costs about the same memory and time whether the
+                     sequences are short or long (D-011).
     """
 
-    def __init__(self, lengths: np.ndarray, batch_size: int, pool_batches: int = 100,
-                 shuffle: bool = True, drop_last: bool = False, seed: int = 0):
+    def __init__(self, lengths: np.ndarray, batch_size: int | None = None, max_tokens: int | None = None,
+                 pool_batches: int = 100, shuffle: bool = True, drop_last: bool = False, seed: int = 0):
+        assert (batch_size is None) != (max_tokens is None), "give exactly one of batch_size, max_tokens"
         self.lengths = np.asarray(lengths)
-        self.batch_size, self.pool_batches = batch_size, pool_batches
+        self.batch_size, self.max_tokens, self.pool_batches = batch_size, max_tokens, pool_batches
         self.shuffle, self.drop_last, self.seed = shuffle, drop_last, seed
         self.epoch = 0
+        # pool size in sequences: 100 batches' worth (for max_tokens, estimated at the median length)
+        per_batch = batch_size or max(1, max_tokens // int(np.median(self.lengths)))
+        self.pool_size = per_batch * pool_batches
 
     def set_epoch(self, epoch: int) -> None:
         """Call once per epoch so each epoch shuffles differently but reproducibly."""
         self.epoch = epoch
 
+    def _cut(self, pool: np.ndarray) -> list[np.ndarray]:
+        """Cut a length-sorted pool into batches."""
+        if self.batch_size is not None:
+            return [pool[i:i + self.batch_size] for i in range(0, len(pool), self.batch_size)]
+        batches, start = [], 0
+        for end in range(1, len(pool) + 1):
+            # the pool is sorted, so the newest sequence is the longest: cost = count x its length
+            if (end - start) * self.lengths[pool[end - 1]] > self.max_tokens and end - 1 > start:
+                batches.append(pool[start:end - 1])
+                start = end - 1
+        batches.append(pool[start:])
+        return batches
+
     def _batches(self) -> list[np.ndarray]:
         rng = np.random.default_rng((self.seed, self.epoch))
         order = rng.permutation(len(self.lengths)) if self.shuffle else np.arange(len(self.lengths))
-        pool_size = self.batch_size * self.pool_batches
         batches = []
-        for start in range(0, len(order), pool_size):
-            pool = order[start:start + pool_size]
+        for start in range(0, len(order), self.pool_size):
+            pool = order[start:start + self.pool_size]
             pool = pool[np.argsort(self.lengths[pool], kind="stable")]
-            batches += [pool[i:i + self.batch_size] for i in range(0, len(pool), self.batch_size)]
-        if self.drop_last:
+            batches += self._cut(pool)
+        if self.drop_last and self.batch_size is not None:
             batches = [b for b in batches if len(b) == self.batch_size]
         if self.shuffle:
             batches = [batches[i] for i in rng.permutation(len(batches))]
@@ -123,14 +146,16 @@ class BucketBatchSampler(Sampler[list[int]]):
         return len(self._batches())
 
 
-def make_dataloader(split: str, batch_size: int, shuffle: bool = True, bucketing: bool = True,
-                    add_bos: bool = False, add_eos: bool = False, num_workers: int = 2,
-                    seed: int = 0, data_dir=PROCESSED_DIR) -> DataLoader:
+def make_dataloader(split: str, batch_size: int | None = None, max_tokens: int | None = None,
+                    shuffle: bool = True, bucketing: bool = True, add_bos: bool = False,
+                    add_eos: bool = False, num_workers: int = 2, seed: int = 0,
+                    data_dir=PROCESSED_DIR) -> DataLoader:
     """The one call training code makes to get batches of a split."""
     dataset = RNADataset(split, add_bos=add_bos, add_eos=add_eos, data_dir=data_dir)
     common = dict(collate_fn=collate, num_workers=num_workers, pin_memory=torch.cuda.is_available())
-    if bucketing:
-        sampler = BucketBatchSampler(dataset.token_lengths(), batch_size, shuffle=shuffle, seed=seed)
+    if bucketing or max_tokens is not None:
+        sampler = BucketBatchSampler(dataset.token_lengths(), batch_size=batch_size, max_tokens=max_tokens,
+                                     shuffle=shuffle, seed=seed)
         return DataLoader(dataset, batch_sampler=sampler, **common)
     generator = torch.Generator().manual_seed(seed)
     return DataLoader(dataset, batch_size=batch_size, shuffle=shuffle, generator=generator, **common)
