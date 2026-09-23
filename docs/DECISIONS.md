@@ -520,3 +520,65 @@ cost no parameters: the tokens were reserved in Phase 1 (D-006).
 - The BiMamba and autoregressive Mamba must use the same framing, so the
   comparison stays like-for-like (the AR model needs `<bos>`/`<eos>`
   anyway).
+
+---
+
+## D-011 — Model size, token-budget batches, training recipe, and a pre-registered LR sweep
+**Date:** 2026-09-24   **Phase:** 2   **Logbook:** logbook/2026-09-23-session-03.md (00:40)
+**Status:** accepted (size revisit condition below)
+
+**Context.** Measured with `scripts/measure_memory.py` (bf16, AdamW,
+worst-case length 256 + 2): 7.44 of 8.59 GB free (the Windows display uses
+the rest). Peak memory at a 16,384-token batch: S 4.7 M params 1.2 GB,
+**M 14.2 M 2.4 GB**, L 25.2 M 3.3 GB, XL 37.8 M 4.9 GB. Throughput ≈ 270 /
+**105–125** / 68 / 46 thousand nucleotides/s. Throughput barely depends on
+sequence length (64 vs 256). **XL at 32k tokens needed 9.05 GB: WSL spilled
+into system RAM and a step took 6.2 s instead of 0.36 s**, with no error
+raised.
+
+**Decision.**
+1. **Size M** (d 384, 8 layers, 6 heads, 14.17 M parameters) for the
+   Phase 2 baseline, and as the parameter target for the Phase 4 models.
+2. **Batches by token budget:** 16,384 padded slots per batch (median 140
+   sequences, 3,015 batches per epoch, 0.9 % padding), not a fixed number
+   of sequences, so every step costs about the same memory and time.
+3. **Recipe:** AdamW (β = 0.9/0.98, weight decay 0.1 on matrices and
+   embeddings only), linear warmup then cosine decay to 10 % of the peak,
+   bf16 autocast, gradient-norm clipping at 1.0, EMA of the weights (0.9999,
+   with a warm-up), validation bits/nt on the full validation set with fixed
+   noise, atomic checkpoints with config and git commit, resumable.
+4. **Learning rate from a pre-registered sweep** (`scripts/lr_sweep.py`):
+   3×10⁻⁴, 10⁻³, 3×10⁻³, 8,000 steps each with a full schedule; the lowest
+   final EMA validation bits/nt wins. The rule was written before any sweep
+   result existed. The same protocol is applied to every backbone in
+   Phase 4.
+5. **Full run: 200,000 steps** (≈ 3.3 B nucleotide-tokens, ≈ 66 epochs,
+   ≈ 9 h at 105k nt/s), evaluated every 5,000 steps; `best.pt` keeps the
+   best EMA validation state.
+
+**Alternatives rejected.**
+- *S*: likely capacity-limited for ~3,000 families. *L/XL*: 1.6–2.4× the
+  cost per run, multiplied by the ~9–12 runs Phase 4 needs, and XL's
+  headroom is gone at larger batches.
+- *Fixed sequences per batch*: a batch of short sequences uses the GPU
+  poorly, and a batch of long ones sets the memory ceiling.
+- *32k-token batches*: fits for M (4.5 GB), but halves the number of
+  updates per epoch; 16k is a conventional small-model batch, revisitable.
+- *Hand-picking the learning rate*, or tuning it longer for one backbone
+  than another: either would weaken or bias the comparison.
+- *`torch.compile`*: could speed training, but it adds compile-time
+  failure modes and would have to be verified for the Mamba kernels too;
+  not needed at this throughput.
+
+**Consequences / trade-offs accepted.**
+- The best learning rate for 8,000 steps may be slightly higher than the
+  best for 200,000; standard practice, stated as a limitation.
+- 66 epochs is many passes over 452k sequences. Masked diffusion models are
+  reported to keep benefiting from repeated data longer than
+  autoregressive ones do, but validation is on unseen families, so
+  overfitting will show directly; `best.pt` guards against it.
+- **Revisit condition for size:** if validation is still falling steadily
+  at the end of the full run, the model is capacity- or compute-limited and
+  a larger size is warranted, for all backbones alike.
+- Operational: keep peak memory well below the free VRAM and watch step
+  time, because exceeding it under WSL slows everything silently.
