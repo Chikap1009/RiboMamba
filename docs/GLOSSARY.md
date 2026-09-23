@@ -461,11 +461,59 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Where it appears:** The length cap (D-007).
 - **First explained:** session 03.
 
-### Autoregressive generation (preview)
-- **Definition:** Producing a sequence one token at a time, left to right, each choice conditioned on everything written so far (how GPT works).
+### Autoregressive generation
+- **Definition:** Producing a sequence one token at a time, left to right, each choice conditioned on everything written so far (how GPT works). Based on the chain rule, so it can represent any distribution in principle; awkward for RNA because a letter is chosen before its pairing partner exists.
 - **Analogy:** A shift register being filled one bit per clock, each bit decided from the ones already in.
 - **Where it appears:** The Phase 4 baseline; the reason `<bos>`/`<eos>` exist.
-- **First explained:** session 03 (preview).
+- **First explained:** session 03 (preview, then Phase 2 Part A).
+
+### Masked language model (BERT)
+- **Definition:** A model trained to predict hidden letters from the letters on both sides, at one fixed hiding rate (~15 %). Good at filling a few gaps; not a generator, because it never learned to start from nothing.
+- **Analogy:** A crossword solver who needs most of the grid filled in first.
+- **Where it appears:** The stepping stone to masked diffusion (Phase 2 Part A).
+- **First explained:** session 03.
+
+### Diffusion model; forward and reverse process
+- **Definition:** A generative model built from two processes: a fixed **forward** process that gradually destroys data (for us: masking letters), and a learned **reverse** process that gradually rebuilds it. Generation runs the reverse process from fully destroyed.
+- **Analogy:** Learning to restore a photo by practising on copies you damaged yourself at every level of damage.
+- **Where it appears:** Phase 2, `ribomamba/diffusion` (to be built).
+- **First explained:** session 03.
+
+### Masked (absorbing-state) discrete diffusion
+- **Definition:** Diffusion over letters where the noise is replacing letters with `<mask>`. `<mask>` is **absorbing**: once a position is masked it stays masked in the forward process, and once revealed in the reverse process it stays fixed.
+- **Analogy:** A set-only sticky bit, or a blown fuse: you can enter the state, never leave it.
+- **Where it appears:** The core of RiboMamba (Phase 2 onward).
+- **First explained:** session 03.
+
+### Noise schedule (α_t)
+- **Definition:** α_t is the probability a position is still visible at time t, going from α₀ = 1 (clean) to α₁ = 0 (all masked). We use the linear schedule α_t = 1 − t, so at time t each position is masked with probability t.
+- **Analogy:** A ramp generator setting how much damage is applied at each moment.
+- **Where it appears:** Phase 2 forward process and sampler.
+- **First explained:** session 03.
+
+### Denoiser (backbone)
+- **Definition:** The network inside the diffusion model: it takes a partly masked sequence and returns, for every position, probabilities over A, C, G, U. It sees both sides and gets no time input. Phase 2 uses a Transformer, Phase 4 a BiMamba, with everything else identical.
+- **Analogy:** The plug-in module in a fixed test fixture: swap only the module, and any change in the measurement is the module's doing.
+- **Where it appears:** Phases 2 and 4.
+- **First explained:** session 03.
+
+### Sampling steps (N)
+- **Definition:** How many reverse steps generation takes. From time t to s, each masked position is revealed with probability (t − s)/t. More steps: each letter sees more already-written letters (better, slower). Fewer steps: letters chosen in the same step can't coordinate (two pairing partners might both become G).
+- **Analogy:** Resolving a design in many small, informed decisions versus a few big simultaneous ones.
+- **Where it appears:** Phase 2 sampler; a hyperparameter to evaluate in Phase 3.
+- **First explained:** session 03.
+
+### Bits per nucleotide
+- **Definition:** The model's average "surprise" per letter on held-out data, measured in bits. 2.0 = knows nothing (uniform over 4 letters, log₂ 4 = 2); lower = more knowledge of RNA. For our diffusion models it's an upper bound (from the ELBO); for the autoregressive model it's exact.
+- **Analogy:** Compression ratio: a model that understands the data can encode it in fewer bits.
+- **Where it appears:** The Phase 2 validation metric (on families never seen in training).
+- **First explained:** session 03.
+
+### Pre-registration (frozen evaluation protocol)
+- **Definition:** Writing down the metrics, thresholds and headline success criterion **before** running the test set, so the metric can't be chosen after seeing which model it favours.
+- **Analogy:** Fixing the sign-off criteria before tape-out, not after looking at which chip passes.
+- **Where it appears:** RESULTS.md "Frozen evaluation protocol" (Phase 3). Motivated by: an MFE-only metric and an ensemble-probability metric can crown different architectures.
+- **First explained:** session 03 (Phase 1 gate, re-taught).
 
 ---
 
@@ -517,6 +565,48 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Definition:** The number of hits this good you'd expect to find by pure chance in a database this size. Smaller = more surely real. MMseqs2 reports hits with E ≤ 10⁻³.
 - **Analogy:** A false-alarm rate: how often random noise alone would trip the detector.
 - **Where it appears:** "Any detectable relative" in the audit = any hit with E ≤ 10⁻³.
+- **First explained:** session 03.
+
+### Rule of three
+- **Definition:** If an event happened 0 times in n independent trials, its true rate is below about 3/n with 95 % confidence. "0 out of 2,000" means "below ~0.15 %", not "exactly zero".
+- **Analogy:** Zero failures in a short burn-in doesn't prove a zero failure rate, only an upper bound.
+- **Where it appears:** Check D of the structural audit (0 membership-level hits in a 2,000 sample).
+- **First explained:** session 03.
+
+### Probability distribution, sampling
+- **Definition:** A **distribution** assigns every possible outcome a probability between 0 and 1, all summing to 1. **Sampling** draws an outcome at random so that likely outcomes come up often.
+- **Analogy:** A loaded die, and rolling it.
+- **Where it appears:** A generative model *is* a distribution over sequences; generation is sampling.
+- **First explained:** session 03.
+
+### Chain rule of probability
+- **Definition:** p(x₁ … x_L) = p(x₁) · p(x₂ | x₁) · … · p(x_L | x₁ … x_{L−1}). Exact for any distribution; the basis of autoregressive models.
+- **Analogy:** Computing the probability of a whole bit string one bit at a time, each bit given the ones before it.
+- **Where it appears:** Phase 2 Part A; the Phase 4 autoregressive baseline.
+- **First explained:** session 03.
+
+### Cross-entropy; nats and bits
+- **Definition:** The loss −log p for the probability p the model gave to the true answer: 0 when certain and right, large when confident and wrong. With the natural log the unit is **nats**; divide by ln 2 ≈ 0.693 to get **bits**.
+- **Analogy:** A penalty that grows steeply the more confidently you bet on the wrong outcome.
+- **Where it appears:** The diffusion loss (masked positions only); bits per nucleotide.
+- **First explained:** session 03.
+
+### ELBO / NELBO (evidence lower bound)
+- **Definition:** A quantity guaranteed to be ≤ log p(x) (its negative, the NELBO, is ≥ −log p(x)). For masked diffusion, the weighted loss E_t[(1/t) Σ_masked −log p_θ] is exactly a NELBO, which is why it can be reported as a likelihood.
+- **Analogy:** A guaranteed worst-case timing bound: you may be faster in reality, never slower.
+- **Where it appears:** Why the 1/t weight; bits per nucleotide for diffusion models.
+- **First explained:** session 03.
+
+### Positive control, negative control
+- **Definition:** A **positive control** runs a detector on a case where the answer is known to be *yes*, measuring sensitivity (can it see?). A **negative control** runs it where the answer is known to be *no*, measuring the false-alarm rate (noise floor).
+- **Analogy:** Fault injection to measure fault coverage (positive); measuring with the input grounded to see the noise floor (negative).
+- **Where it appears:** `audit_structural.py`: own family found (positive); dinucleotide-shuffled sequences (negative).
+- **First explained:** session 03 (re-taught at the Phase 1 gate).
+
+### Dinucleotide shuffle
+- **Definition:** A random rearrangement of a sequence that keeps exactly how often each letter is followed by each other letter (Altschul & Erickson 1985). The standard "looks like RNA but isn't real" null model, because stacking energies depend on neighbours.
+- **Analogy:** A random walk that uses every road of a map exactly once, starting from the same town.
+- **Where it appears:** `dinucleotide_shuffle()` in `ribomamba/data/structure_search.py` (tested).
 - **First explained:** session 03.
 
 ### 95 % confidence interval (for a proportion)
@@ -785,6 +875,36 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Definition:** A fast sequence-search tool (a modern relative of BLAST): for each query it finds similar target sequences and reports identity, coverage and E-value.
 - **Analogy:** A fast approximate pattern-matcher over a huge database, like a content-addressable memory with fuzzy matching.
 - **Where it appears:** Step 10 of the split and the leakage audit (`ribomamba/data/similarity.py`); version 18.8cc5c.
+- **First explained:** session 03.
+
+### Covariance model (CM), Infernal, cmscan
+- **Definition:** A **covariance model** is a statistical model of an RNA family that scores single positions *and* pairs of positions that must base-pair (any complementary pair is accepted), so it recognises relatives whose letters changed by covariation. **Infernal** is the software for CMs; **cmscan** scores each sequence against every model in a database (Rfam 15.0: 4,178 models).
+- **Analogy:** A pattern matcher with paired constraints, "positions 3 and 20 must be complementary, whatever the letters".
+- **Where it appears:** `ribomamba/data/structure_search.py`; step 11 of `prepare_data.py`; `audit_structural.py` (D-009).
+- **First explained:** session 03.
+
+### Bit score, GA (gathering) threshold
+- **Definition:** A CM's **bit score** says how much more likely a sequence is under "member of this family" than under "random RNA" (+1 bit = twice the odds). The **GA threshold** is a curator-set cutoff per family; Rfam's full member lists are exactly the hits scoring ≥ GA. So ≥ GA means "Rfam would call this a member".
+- **Analogy:** A pass mark set per exam by the examiner.
+- **Where it appears:** `gathering_thresholds()`; the leakage criterion of step 11.
+- **First explained:** session 03.
+
+### HMM-only mode and `--nohmmonly`
+- **Definition:** For a model with **zero base pairs**, cmscan by default uses a cheaper letters-only model (a profile HMM), whose bit scores aren't on the scale the GA thresholds were set on. `--nohmmonly` forces full CM scoring for every model, as Rfam's own annotation does. 347 of 4,178 Rfam 15.0 models have zero pairs.
+- **Analogy:** Comparing a reading in dB with a pass mark written in volts.
+- **Where it appears:** A bug in the first scan (session 03): own-family recovery for zero-pair families went 87.93 % → 99.99 % once the flag was added.
+- **First explained:** session 03.
+
+### Trust on first use (TOFU)
+- **Definition:** When a source publishes no checksum, recording the checksum of your first download. It guarantees that later downloads are identical to yours, not that yours was authentic.
+- **Analogy:** Recording a device's fingerprint the first time you pair it.
+- **Where it appears:** The Rfam 15.0 `Rfam.cm.gz` pin in `download_data.py`.
+- **First explained:** session 03.
+
+### Per-sequence (content-addressed) cache
+- **Definition:** Storing results under a fingerprint (hash) of each input item, so any later request containing the same item reuses the stored result. Valid only if an item's result doesn't depend on the other items it was computed with (checked for cmscan).
+- **Analogy:** A cache indexed by address: a hit doesn't care which program asked.
+- **Where it appears:** `cmscan()` cache under `data/processed/cmscan_cache/<flags-hash>/`: prepare reruns take 24 s instead of 2 h.
 - **First explained:** session 03.
 
 ### Seed, random number generator (RNG), stable hash

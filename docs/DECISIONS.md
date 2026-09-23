@@ -397,3 +397,71 @@ Result: train 452,867 / val 57,054 / test 56,883 sequences; 3,032 / 406 /
 - The tRNA family (clan CL00001) landed in **val**, so the most famous RNA
   shape is never trained on. That's honest, but worth knowing when reading
   validation curves.
+- *Superseded in part by D-009:* the "structure-aware search not done"
+  limitation above was an effort shortcut and has been removed (step 11).
+
+---
+
+## D-009 — Structure-aware leakage check with Rfam's own covariance models (step 11)
+**Date:** 2026-09-23   **Phase:** 1   **Logbook:** logbook/2026-09-23-session-03.md
+**Status:** accepted
+
+**Context.** MMseqs2 compares letters. Covariation lets family relatives
+drift far apart in letters while keeping every base pair, so a letters-only
+check can miss real relatives across splits. D-008 listed "structure-aware
+search not done" as a limitation. That was an effort shortcut, which
+CLAUDE.md §1.3 (amended session 03) now rules out.
+
+**Decision.**
+1. Use **Infernal 1.1.5** `cmscan` with the **Rfam 15.0** covariance models:
+   the release the HF dump was built from (all 459 of its family→clan pairs
+   match 15.0's `Rfam.clanin`; 14.10 misses 14). Pinned URL + SHA-256
+   recorded on first download (Rfam publishes no checksums).
+2. **Leakage = membership.** A held-out sequence scoring ≥ the **GA
+   (gathering) threshold** of a **training** family's model is one Rfam
+   would call a member of that family. **Step 11** of `prepare_data.py`
+   removes such sequences from val/test.
+3. Flags follow Rfam's own recipe: `--nohmmonly` (score every model as a
+   full CM), `--toponly` (each RNA in its own orientation), `--rfam` (Rfam's
+   fast pre-filters), reporting E ≤ 0.01; GA applied by us from the model
+   file.
+4. The audit (`scripts/audit_structural.py`) adds a **positive control**
+   (is each held-out sequence's own family found?), a **negative control**
+   (dinucleotide-shuffled sequences: the false-alarm rate), and a
+   **filter-sensitivity check** (Infernal's slower default filters on a
+   2,000 sample).
+5. Results are **cached per sequence** (valid because a sequence's hits and
+   E-values were shown to be independent of the rest of the batch), in
+   chunks committed as they finish.
+
+Result: step 11 removed **12** held-out sequences (val 2, test 10):
+snoR16→SNORD36 8, SNORD2→SNORD36 2, ceN109→SNORD36 1, SNORA36→SNORA51 1.
+Final split **452,867 / 57,052 / 56,873**.
+
+**Alternatives rejected.**
+- *Keep the letters-only audit and state the limitation.* Rejected under
+  §1.3; the check is feasible (≈ 2 h CPU).
+- *Weak resemblance (E ≤ 10⁻³ below GA) as leakage.* Such hits mostly mean
+  "same kind of RNA" (e.g. microRNA precursors are all ~70-nt hairpins).
+  That's class-level knowledge a model should be able to use on new
+  families; no split can remove it. It's reported, next to the negative
+  control, but not filtered.
+- *Default (more sensitive) filters for the full scan.* ≈ 20 h of CPU
+  (11× slower, measured). Replaced by check D, which measures on a sample
+  whether the fast filters miss membership-level hits.
+- *Scanning without `--nohmmonly`* (the first attempt): **wrong.** 347 of
+  the 4,178 models have zero base pairs, and without the flag cmscan scores
+  them with a letters-only HMM whose bit scores aren't on the scale their
+  GA thresholds were set on. Measured on the same 106,191 sequences: own
+  family found for zero-pair families **87.93 % → 99.99 %** with the flag;
+  unchanged (99.54 %) for families with pairs.
+- *Cache keyed by the whole input file.* Any change to the held-out set
+  (e.g. removing 12 sequences) would force a new 2-hour scan.
+
+**Consequences / trade-offs accepted.**
+- `prepare_data.py`'s first run takes ≈ 2 h; later runs take ≈ 24 s
+  (cache). The output is byte-identical either way.
+- The GA criterion inherits Rfam's curation: families whose GA is set
+  loosely or tightly make the check correspondingly looser or stricter.
+- With the fast filters, check B (member of a train family) is zero by
+  construction; check D is the independent evidence.

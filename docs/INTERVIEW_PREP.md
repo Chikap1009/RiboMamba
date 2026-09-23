@@ -144,6 +144,38 @@ splits), which is the point of having an audit that checks sequences, not
 just labels.
 **Source:** logbook/2026-09-23-session-03.md (~03:45); DECISIONS D-007.
 
+### Q: Sequence identity misses covariation. How do you know no structural relatives leaked?
+**Draft answer:** I checked with the tool Rfam itself uses to decide family
+membership: covariance models, which score base pairs as well as letters,
+so a relative that swapped G–C for A–U still fits. I scanned every
+held-out sequence (about 114 thousand) against all 4,178 Rfam 15.0 models.
+If one scored above a *training* family's gathering threshold, meaning
+Rfam would call it a member of that family, I removed it. That was 12
+sequences, almost all snoRNAs. The detector has a positive control: 99.6 %
+of held-out sequences are found by their own family's model, so it can
+see. It also has a negative control: shuffled sequences that keep the
+neighbour statistics give the false-alarm rate. What remains is weak,
+below-threshold resemblance, which is mostly "also a hairpin-shaped
+microRNA". That's not leakage, and no split could remove it.
+**Likely follow-up:** "Why not remove the weak hits too?" → Because they're
+class-level similarity, the kind of general knowledge we *want* a model to
+transfer to new families. Removing them would mean removing every hairpin
+from the test set.
+**Source:** DECISIONS D-009; RESULTS.md structural audit.
+
+### Q: Tell me about a mistake you made in this project.
+**Draft answer:** My first structure-aware scan left out one flag,
+`--nohmmonly`. About 350 Rfam models have no base pairs, and for those the
+tool silently switches to a letters-only scoring mode whose scores aren't
+comparable to the family's threshold. So for those families I was comparing
+two different kinds of number. The positive control gave it away: sequences
+from those families found their own family only 88 % of the time, versus
+99.5 % for the rest. I stopped the run, added the flag, and rescanned
+everything; for those families recovery went to 99.99 %. What I took from it:
+a control isn't a box to tick. When it looks slightly off, that's the
+detector telling you it's broken.
+**Source:** logbook/2026-09-23-session-03.md (19:37); DECISIONS D-009.
+
 ### Q: Why a maximum length of 256?
 **Draft answer:** Three reasons. Memory: the Transformer baseline's
 activation memory grows with length, and naive attention grows with length

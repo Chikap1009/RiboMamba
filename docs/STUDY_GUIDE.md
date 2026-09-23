@@ -64,19 +64,21 @@ the target's **share of the ensemble** matters too.
 *(Phase 1 addition.)* The training data is **Rfam**, a catalogue of about
 4,000 RNA **families**. A family is a set of evolutionary relatives: different
 letters, same structure, same job. Relatives are the whole problem with
-testing. Split the data randomly and **89.6 %** of test sequences have a
+testing. Split the data randomly and **about 90 %** of test sequences have a
 ≥ 80 %-identical relative in training (we measured it), so a test score
 would measure memory. So we split by **clan** (a group of related families),
 or by family when there's no clan: whole groups go to train, validation or
 test. Then we removed the 775 held-out sequences that still had a close
-training relative, because Rfam doesn't link every related pair. Result:
-**99 % of test sequences have no detectable relative in training.** Along the
+training relative by letters, because Rfam doesn't link every related pair,
+and the 12 that Rfam's own structure-aware family models would call members
+of a training family. Result: **99 % of test sequences have no detectable
+relative in training.** Along the
 way we found that the HuggingFace copy of Rfam contains **every row twice**,
 the second copy labelled "No such family". Left in, that one label would have
 silently leaked every family into every split. After cleaning (T → U, only
 A/C/G/U, families of typical length ≤ 256, fragments removed, duplicates
-removed, at most 1,000 members per family) we have **452,867 / 57,054 /
-56,883** sequences for train / val / test. Each nucleotide is one **token**
+removed, at most 1,000 members per family) we have **452,867 / 57,052 /
+56,873** sequences for train / val / test. Each nucleotide is one **token**
 (vocabulary of 8: A, C, G, U plus pad, mask, begin, end), and batches group
 similar lengths so only **1.1 %** of the GPU's work is padding instead of
 54 %.
@@ -761,10 +763,14 @@ bad this would be. For 2,000 randomly chosen test sequences under a random
 split, we searched all training sequences with **MMseqs2**, a fast
 sequence-search tool, and recorded the closest relative of each:
 
-- **96 %** had a detectable relative in training;
-- **89.6 %** had one at least 80 % identical;
+- **96.5 %** had a detectable relative in training;
+- **90.3 %** had one at least 80 % identical;
 - **56 %** had one at least 95 % identical;
 - the median test sequence's closest training relative was **96 %** identical.
+
+(These are from the final audit. An earlier run, on a slightly different
+2,000-sequence sample, gave 89.6 % at ≥ 80 %: the same answer within the
+±1.3-point sampling uncertainty.)
 
 That test set would be a memory test.
 
@@ -786,13 +792,21 @@ which is what identity filters miss (covariation, §3.2). The identity check
 catches relatives the labels miss. **Each criterion covers the other's blind
 spot.**
 
-The final split: **452,867 / 57,054 / 56,883** sequences, **3,032 / 406 /
+There's a third kind of relative that neither catches reliably: one whose
+letters drifted far apart by covariation, but whose **structure** is still
+recognisably the same family. The right detector for that is the one Rfam
+itself uses to decide membership: its **covariance models** (§3.8b). Step 11
+scans every held-out sequence with them and removes any that Rfam would call
+a member of a *training* family. It found 12.
+
+The final split: **452,867 / 57,052 / 56,873** sequences, **3,032 / 406 /
 399** families. Rerunning the whole pipeline produces byte-identical files.
 
 ### 3.8 The audit, and what its numbers mean
 
-`scripts/audit_leakage.py` runs four checks; the full table is in
-`RESULTS.md`.
+`scripts/audit_leakage.py` runs four letter-based checks, and
+`scripts/audit_structural.py` runs the structure-based ones (§3.8b). The
+full tables are in `RESULTS.md`.
 
 1. **No clan and no family appears in two splits.** Also enforced by an
    assertion: the preparation script refuses to write a split that violates it.
@@ -802,8 +816,8 @@ The final split: **452,867 / 57,054 / 56,883** sequences, **3,032 / 406 /
 
 | | any detectable relative | ≥ 50 % identical | ≥ 80 % identical |
 |---|---|---|---|
-| our split, test | 1.0 % | 0.15 % | 0 (by construction) |
-| random split, test | 96.0 % | 93.0 % | 89.6 % |
+| our split, test | 1.05 % | 0.40 % | 0 (by construction) |
+| random split, test | 96.5 % | 93.3 % | 90.3 % |
 
    Read it carefully. The ≥ 80 % column is zero *because step 10 removed
    those sequences with the same search*, so it isn't independent evidence.
@@ -816,7 +830,68 @@ The final split: **452,867 / 57,054 / 56,883** sequences, **3,032 / 406 /
 
 Each proportion comes from 2,000 samples, so it carries a 95 % confidence
 interval of roughly ±1–2 percentage points for the large values. That's why
-the table in `RESULTS.md` prints "89.6 % ± 1.3".
+the table in `RESULTS.md` prints "90.3 % ± 1.3".
+
+### 3.8b The structure-aware audit: asking Rfam's own models
+
+**The idea.** A covariance model (CM) is Rfam's statistical description of
+one family. It scores single positions ("position 12 is usually G"), but
+also *pairs* of positions that must base-pair ("positions 3 and 20 must be
+complementary, whatever the letters"). So a relative that swapped G–C for
+A–U still fits perfectly. Scoring a sequence against a family's CM gives a
+**bit score**: how much more likely the sequence is as a family member than
+as random RNA. Each family has a curator-set pass mark, the **gathering (GA)
+threshold**, and Rfam's member lists are exactly the hits at or above it.
+So "scores ≥ GA against family F" means **"Rfam would call this a member of
+F"**. That's our definition of structural leakage.
+
+**The scan.** Infernal's `cmscan` scored all 113,937 held-out sequences
+against all 4,178 models of Rfam 15.0 (the release our data came from),
+using the flags Rfam itself uses. It took about two hours on the laptop's 20
+threads. Twelve held-out sequences scored as members of a training family,
+almost all snoRNAs, which step 11 then removed.
+
+**A mistake worth telling.** The first scan omitted one flag,
+`--nohmmonly`. 347 Rfam models have *no* base pairs, and for those `cmscan`
+quietly switches to a cheaper letters-only scoring whose bit scores aren't
+on the scale the GA thresholds were set on. The positive control (below)
+exposed it: sequences from zero-pair families found their own family only
+**87.9 %** of the time. With the flag: **99.99 %**, while families with pairs
+stayed at 99.54 %. The fix was to add the flag and rescan everything. The
+lesson: a control that looks slightly off is worth chasing, because that's
+how the detector tells you it's broken.
+
+**Why the controls matter.** A report of "zero leakage found" is only as
+good as the detector.
+- The **positive control** tests it where the answer is known to be *yes*:
+  every held-out sequence belongs to its own family, so its own family's
+  model should find it. It did, for **99.55 %** of all 113,925 held-out
+  sequences, so the detector can see.
+- The **negative control** tests it where the answer is known to be *no*:
+  each sequence's letters are shuffled, keeping which letter follows which,
+  so the result looks like RNA but belongs to no family. Any hits are false
+  alarms, and their rate is the noise floor.
+
+The final numbers:
+
+| | result |
+|---|---|
+| held-out sequences that are *members* of a training family | **0** (after step 11 removed 12) |
+| same check with Infernal's slower, more sensitive filters (2,000 sample) | **0** |
+| held-out sequences *weakly* resembling some training family | 4.6 % |
+| shuffled sequences weakly resembling some training family (noise floor) | **0.1 %** |
+
+The noise floor is what makes the 4.6 % readable: it's about 45 times what
+chance produces, so the resemblance is real. But it's below the membership
+threshold, and mostly "the same *kind* of RNA", e.g. every microRNA
+precursor is a ~70-nt hairpin. It isn't leakage, because a model *should*
+be able to use what it learned about hairpins on a new family, and no split
+could remove it anyway.
+
+One statistical footnote worth knowing: "0 hits in 2,000" does **not** mean
+the true rate is exactly zero. The **rule of three** says that with zero
+events in n trials, the true rate is below about 3/n with 95 % confidence,
+so here below 0.15 %.
 
 ### 3.9 Turning letters into batches
 
@@ -880,18 +955,22 @@ Two implementation details worth being able to explain:
 ### 3.10 What Phase 1 settled, and what it left open
 
 **Settled:**
-- Training corpus: Rfam, pinned and checksummed; 566,804 sequences after
-  cleaning and the leakage filter.
-- A clan/family split with a measured leakage audit. The audit's control
-  shows a random split would give 89.6 % of test sequences a near-twin in
-  training.
+- Training corpus: Rfam, pinned and checksummed; 566,792 sequences after
+  cleaning and both leakage filters.
+- A clan/family split, audited at two levels. By letters (MMseqs2), the
+  control shows a random split would give 90 % of test sequences a
+  near-twin in training. By structure (Rfam's covariance models), held-out
+  sequences that Rfam would call members of a training family were found
+  (12) and removed, with a positive control showing the detector finds
+  99.55 % of true memberships.
 - A frozen 8-token vocabulary, and a loader with 1.1 % padding waste.
 
 **Left open, honestly:**
-- The audit checks **sequence** similarity only. Two families with the same
-  *structure* but no detectable sequence similarity would pass. A model
-  could have "seen the shape" without seeing the sequence. A structure-aware
-  check would need a tool such as Infernal; not done.
+- The structure-aware audit inherits Rfam's curation: it uses Rfam's GA
+  thresholds, so a family whose threshold is set loosely or tightly makes
+  the check correspondingly looser or stricter. Weak, sub-threshold
+  resemblance between held-out and training families remains (class-level,
+  e.g. hairpin-shaped microRNAs) and is reported, not removed.
 - The test set is one random draw (seed 0). Which families land in test
   changes with the seed. The most famous RNA, tRNA, happens to sit in
   validation, not training. Repeating key results over several seeds is a
