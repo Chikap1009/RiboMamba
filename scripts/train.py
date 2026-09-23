@@ -40,6 +40,7 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--d-model", type=int, default=384)
     p.add_argument("--n-layers", type=int, default=8)
     p.add_argument("--n-heads", type=int, default=6)
+    p.add_argument("--dropout", type=float, default=0.0, help="D-012: dropout rate during training")
     # optimisation (D-011)
     p.add_argument("--lr", type=float, default=1e-3, help="peak learning rate")
     p.add_argument("--min-lr-ratio", type=float, default=0.1, help="cosine decays to this fraction of the peak")
@@ -144,7 +145,8 @@ def main() -> None:
 
     torch.manual_seed(cfg["seed"])
     np.random.seed(cfg["seed"])
-    model_cfg = TransformerConfig(d_model=cfg["d_model"], n_layers=cfg["n_layers"], n_heads=cfg["n_heads"])
+    model_cfg = TransformerConfig(d_model=cfg["d_model"], n_layers=cfg["n_layers"], n_heads=cfg["n_heads"],
+                                  dropout=cfg.get("dropout", 0.0))      # runs before D-012 had none
     model = TransformerDenoiser(model_cfg).to(device)
     ema_model = copy.deepcopy(model).requires_grad_(False)
     optimizer = make_optimizer(model, cfg)

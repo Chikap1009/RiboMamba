@@ -72,6 +72,17 @@ def test_rope_scores_depend_only_on_offset():
     assert not torch.isclose(score(2, 5), score(2, 9), atol=1e-3)     # different offset: different score
 
 
+def test_dropout_is_active_in_training_and_off_in_evaluation():
+    torch.manual_seed(0)
+    model = TransformerDenoiser(TransformerConfig(d_model=32, n_layers=2, n_heads=4, dropout=0.2))
+    ids = torch.tensor([[BOS_ID, 6, MASK_ID, 4, 7, 5, EOS_ID]])
+    mask = torch.ones_like(ids, dtype=torch.bool)
+    model.train()
+    assert not torch.allclose(model(ids, mask)[..., 4:], model(ids, mask)[..., 4:])   # random each call
+    model.eval()
+    torch.testing.assert_close(model(ids, mask), model(ids, mask))                  # deterministic
+
+
 def test_parameter_count_matches_formula():
     d, N, V = SMALL.d_model, SMALL.n_layers, VOCAB_SIZE
     # per block: 12 d^2 (attention 4 d^2 + MLP 8 d^2) + two LayerNorms (2d each);

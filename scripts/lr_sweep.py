@@ -12,7 +12,9 @@ Protocol (identical for every backbone, so no architecture gets more tuning):
      direction and apply rule 2 again; repeat until the winner is interior.
      Added after the Transformer sweep (winner 3e-4 = the grid's lower
      edge), before any other backbone was swept; it applies to all of them.
-  3. Optionally train the winner for the full budget.
+  3. Optionally train the winner for the full budget. SUPERSEDED 2026-09-24
+     (D-012): the 200k-step run overfit after ~10k steps; training length and
+     dropout are now chosen by scripts/dropout_sweep.py.
 
 Usage:
     python scripts/lr_sweep.py --prefix tf_M                  # sweep only
@@ -20,50 +22,15 @@ Usage:
 """
 
 import argparse
-import csv
 import json
-import subprocess
-import sys
 
 from ribomamba.paths import REPO_ROOT
+from ribomamba.sweeps import final_val_ema, run_to_completion
 
 GRID = [3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2]     # half-decade steps (x ~3.16 between neighbours)
 CANDIDATE_LRS = [3e-4, 1e-3, 3e-3]              # where every sweep starts
 SWEEP_STEPS, SWEEP_WARMUP = 8000, 1000
 FULL_STEPS, FULL_WARMUP, FULL_EVAL_EVERY = 200_000, 2000, 5000
-
-
-def eval_rows(run_name: str) -> list[dict]:
-    log = REPO_ROOT / "checkpoints" / run_name / "log.csv"
-    if not log.exists():
-        return []
-    with open(log) as f:
-        return [r for r in csv.DictReader(f) if r["val_bits_ema"]]
-
-
-def final_val_ema(run_name: str) -> float:
-    return float(eval_rows(run_name)[-1]["val_bits_ema"])
-
-
-def train(*args: str) -> None:
-    subprocess.run([sys.executable, str(REPO_ROOT / "scripts" / "train.py"), *args], check=True)
-
-
-def run_to_completion(name: str, steps: int, *new_run_args: str) -> None:
-    """Skip a finished run; resume an interrupted one; otherwise start it.
-
-    "Finished" means its log has an evaluation at the final step. A last.pt
-    alone is not enough: an interrupted run has one too, and choosing a
-    learning rate from a half-trained run would break the protocol.
-    """
-    rows = eval_rows(name)
-    if rows and int(rows[-1]["step"]) >= steps:
-        return
-    last = REPO_ROOT / "checkpoints" / name / "last.pt"
-    if last.exists():
-        train("--resume", str(last))
-    else:
-        train("--run-name", name, "--max-steps", str(steps), *new_run_args)
 
 
 def main() -> None:

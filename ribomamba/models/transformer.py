@@ -29,6 +29,8 @@ class TransformerConfig:
     mlp_ratio: int = 4        # MLP expands d -> 4d -> d
     rope_base: float = 10000.0
     vocab_size: int = VOCAB_SIZE
+    dropout: float = 0.0      # D-012: training-time dropout on attention weights and on each
+                              # residual branch; switched off automatically in eval mode
 
 
 class RotaryEmbedding(nn.Module):
@@ -68,6 +70,7 @@ class SelfAttention(nn.Module):
         self.qkv = nn.Linear(cfg.d_model, 3 * cfg.d_model, bias=False)   # W_Q, W_K, W_V in one matrix
         self.out = nn.Linear(cfg.d_model, cfg.d_model, bias=False)       # W_O: mixes the heads
         self.rope = RotaryEmbedding(self.head_dim, cfg.rope_base)
+        self.dropout = cfg.dropout
 
     def forward(self, x: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
         B, L, d = x.shape                                                 # x: (B, L, d)
@@ -77,7 +80,8 @@ class SelfAttention(nn.Module):
         q, k = self.rope(q), self.rope(k)                                 # positions enter here only
         # Boolean mask for PyTorch's fused attention: True = "this key may be looked at".
         # (B, 1, 1, L) broadcasts over heads and over query positions: nobody attends to padding.
-        o = F.scaled_dot_product_attention(q, k, v, attn_mask=attention_mask[:, None, None, :])  # (B, H, L, head_dim)
+        o = F.scaled_dot_product_attention(q, k, v, attn_mask=attention_mask[:, None, None, :],
+                                           dropout_p=self.dropout if self.training else 0.0)  # (B, H, L, head_dim)
         o = o.transpose(1, 2).reshape(B, L, d)                            # (B, L, d): heads side by side
         return self.out(o)                                                # (B, L, d)
 
@@ -92,10 +96,13 @@ class Block(nn.Module):
         self.attn = SelfAttention(cfg)
         self.norm2 = nn.LayerNorm(d)
         self.mlp = nn.Sequential(nn.Linear(d, hidden, bias=False), nn.GELU(), nn.Linear(hidden, d, bias=False))
+        # Dropout zeroes a random fraction p of each branch's outputs during training (and
+        # scales the rest by 1/(1-p) so the average is unchanged); identity in eval mode.
+        self.drop = nn.Dropout(cfg.dropout)
 
     def forward(self, x: torch.Tensor, attention_mask: torch.Tensor) -> torch.Tensor:
-        x = x + self.attn(self.norm1(x), attention_mask)    # communicate between positions (B, L, d)
-        x = x + self.mlp(self.norm2(x))                      # think within each position   (B, L, d)
+        x = x + self.drop(self.attn(self.norm1(x), attention_mask))    # communicate between positions (B, L, d)
+        x = x + self.drop(self.mlp(self.norm2(x)))                      # think within each position   (B, L, d)
         return x
 
 
