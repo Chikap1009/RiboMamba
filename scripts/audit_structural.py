@@ -10,6 +10,8 @@ Every val and test sequence is scanned with Infernal's cmscan against all
   A. positive control: is each held-out sequence's OWN family found (score >= GA)?
      If not, a clean result below could just mean a blind detector.
   B. leakage: held-out sequences scoring >= GA against a family that is in TRAIN.
+     Zero BY CONSTRUCTION with the fast filters, because prepare_data.py step 11
+     removed exactly these (same scan, same cache); check D is the independent test.
   C. weak resemblance: held-out sequences with any E <= 1e-3 hit to a train
      family, next to a NEGATIVE control (the same sequences, dinucleotide-shuffled)
      that shows how often such hits happen by chance.

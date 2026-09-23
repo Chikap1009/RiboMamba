@@ -16,11 +16,17 @@ Pipeline (the row count after every step is printed and saved):
      relative (MMseqs2: >= 80% identity over >= 80% of its length). Rfam does
      not link every pair of related families through a clan; this catches
      the related pairs it misses.
+ 11. remove from val/test every sequence that Rfam's own covariance model of a
+     TRAINING family scores as a member (bit score >= that family's GA
+     threshold; Infernal cmscan, Rfam 15.0). Catches structural relatives
+     whose letters differ too much for step 10 (D-009).
 
 Thresholds were chosen from the numbers printed by scripts/explore_data.py
-(decisions D-007 and D-008).
+(decisions D-007, D-008, D-009).
 
 Usage:  python scripts/prepare_data.py
+        (first run ~2 hours: step 11 scans every held-out sequence against
+        4,178 models; results are cached per sequence, so reruns take seconds)
 Output: data/processed/{train,val,test}.parquet   columns: sequence, family, clan, group, length
         data/processed/prepare_stats.json          every count printed below
         splits/rfam_split.tsv                      which family went where (committed to Git)
@@ -33,6 +39,7 @@ import numpy as np
 import polars as pl
 
 from ribomamba.data.similarity import best_identity, search
+from ribomamba.data.structure_search import cmscan, gathering_thresholds
 from ribomamba.paths import PROCESSED_DIR, RAW_DIR, REPO_ROOT
 
 MAX_LEN = 256             # D-007: longest sequence kept (VRAM, oracle cost; keeps 95% of families)
@@ -140,6 +147,30 @@ def remove_near_duplicates_of_train(df: pl.DataFrame, stats: dict) -> pl.DataFra
     return pl.concat([train, held_out.filter(pl.Series(~near_dup))])
 
 
+def remove_structural_members_of_train(df: pl.DataFrame, stats: dict) -> pl.DataFrame:
+    """Step 11: drop val/test sequences scoring >= GA against a training family's model."""
+    ga = gathering_thresholds()
+    train = df.filter(pl.col("split") == "train")
+    train_families = set(train["family"])
+    held_out = df.filter(pl.col("split") != "train").with_row_index("query").with_columns(
+        pl.col("query").cast(pl.Int64))
+    hits = cmscan(held_out["sequence"].to_list())
+    members = hits.filter(
+        pl.col("family").is_in(list(train_families)),
+        pl.col("score") >= pl.col("family").replace_strict(ga, return_dtype=pl.Float64),
+    )
+    removed = held_out.join(members.select("query").unique(), on="query", how="semi")
+    stats["11_removed_structural_members_of_train"] = {
+        "val": int((removed["split"] == "val").sum()),
+        "test": int((removed["split"] == "test").sum()),
+        "pairs": (removed.join(members, on="query")
+                  .group_by(pl.col("family").alias("held_out_family"), pl.col("family_right").alias("train_family"))
+                  .agg(pl.col("query").n_unique().alias("n")).sort("n", descending=True).to_dicts()),
+    }
+    kept = held_out.join(members.select("query").unique(), on="query", how="anti").drop("query")
+    return pl.concat([train, kept])
+
+
 def check_no_leakage_by_construction(df: pl.DataFrame) -> None:
     """Audit check 1 and 2, as hard assertions: the script refuses to write a leaky split."""
     for label in ("group", "family", "clan"):
@@ -153,8 +184,10 @@ def main() -> None:
     stats = {"config": dict(MAX_LEN=MAX_LEN, FRAGMENT_FRACTION=FRAGMENT_FRACTION,
                             PER_FAMILY_CAP=PER_FAMILY_CAP, VAL_FRACTION=VAL_FRACTION,
                             TEST_FRACTION=TEST_FRACTION, SEED=SEED,
-                            NEAR_DUP_IDENTITY=NEAR_DUP_IDENTITY, NEAR_DUP_COVERAGE=NEAR_DUP_COVERAGE)}
+                            NEAR_DUP_IDENTITY=NEAR_DUP_IDENTITY, NEAR_DUP_COVERAGE=NEAR_DUP_COVERAGE,
+                            STRUCTURAL_FILTER="Rfam 15.0 CMs, score >= GA, cmscan --nohmmonly --toponly --rfam")}
     df = remove_near_duplicates_of_train(assign_splits(clean(stats)), stats)
+    df = remove_structural_members_of_train(df, stats)
     check_no_leakage_by_construction(df)
 
     PROCESSED_DIR.mkdir(parents=True, exist_ok=True)

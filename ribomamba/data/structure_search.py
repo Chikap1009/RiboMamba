@@ -50,40 +50,23 @@ def gathering_thresholds() -> dict[str, float]:
     return ga
 
 
-def cmscan(sequences: list[str], sensitive_filters: bool = False) -> pl.DataFrame:
-    """Score every sequence against every Rfam model; return hits with E-value <= 0.01.
+# Explicit column types: a scan with zero hits (the expected outcome for
+# shuffled sequences) must still give a table whose columns can be joined on.
+HIT_SCHEMA = {"seq_hash": pl.String, "family": pl.String, "score": pl.Float64,
+              "evalue": pl.Float64, "seq_from": pl.Int64, "seq_to": pl.Int64}
+CHUNK = 2000   # sequences per cmscan call; each finished chunk is saved at once
 
-    `--toponly`: search each RNA only in its own 5'->3' direction.
-    `--rfam`: Rfam's faster pre-filters (default). With sensitive_filters=True,
-    Infernal's default filters are used instead: ~11x slower, more sensitive
-    to weak hits.
 
-    Results are cached on disk under a key made from the exact input, flags
-    and model file, because a full scan of the held-out set takes ~2 hours
-    and gives identical output every time (Infernal is deterministic).
+def _sequence_hash(sequence: str) -> str:
+    return hashlib.sha256(sequence.encode()).hexdigest()[:32]
 
-    Returns one row per hit: query (index into `sequences`), family, score
-    (bits), evalue, seq_from, seq_to.
-    """
-    prepare_cm_database()
-    flags = ["--toponly", "-E", "0.01"] + ([] if sensitive_filters else ["--rfam"])
-    fasta = "".join(f">{i}\n{s}\n" for i, s in enumerate(sequences))
-    key = hashlib.sha256((fasta + " ".join(flags) + CM_GZ.name + str(CM_GZ.stat().st_size))
-                         .encode()).hexdigest()[:16]
-    CACHE_DIR.mkdir(parents=True, exist_ok=True)
-    table = CACHE_DIR / f"{key}.tbl"
-    if not table.exists():
-        query_file = CACHE_DIR / f"{key}.fasta"
-        query_file.write_text(fasta)
-        partial = CACHE_DIR / f"{key}.tbl.partial"      # renamed only when complete, so an
-        subprocess.run(                                   # interrupted run is never mistaken for a result
-            ["cmscan", "--cpu", str(os.cpu_count()), *flags, "--tblout", partial,
-             "--fmt", "2", "-o", os.devnull, CM, query_file],
-            check=True,
-        )
-        partial.rename(table)
-        query_file.unlink()
 
+def _run_cmscan(named: dict[str, str], flags: list[str], workdir: Path) -> pl.DataFrame:
+    """One cmscan call on {name: sequence}; returns its hits as a table."""
+    fasta, table = workdir / "chunk.fasta", workdir / "chunk.tbl"
+    fasta.write_text("".join(f">{name}\n{seq}\n" for name, seq in named.items()))
+    subprocess.run(["cmscan", "--cpu", str(os.cpu_count()), *flags, "--tblout", table,
+                    "--fmt", "2", "-o", os.devnull, CM, fasta], check=True)
     rows = []
     with open(table) as f:
         for line in f:
@@ -92,13 +75,66 @@ def cmscan(sequences: list[str], sensitive_filters: bool = False) -> pl.DataFram
             fields = line.split(maxsplit=26)
             # --fmt 2 columns used: 1 model name, 3 query name, 9/10 sequence
             # coordinates, 16 bit score, 17 E-value (see Infernal user guide, tblout)
-            rows.append((int(fields[3]), fields[1], float(fields[16]), float(fields[17]),
+            rows.append((fields[3], fields[1], float(fields[16]), float(fields[17]),
                          int(fields[9]), int(fields[10])))
-    # Explicit types: a scan with zero hits (the expected outcome for shuffled
-    # sequences) must still give a table whose columns can be joined on.
-    schema = {"query": pl.Int64, "family": pl.String, "score": pl.Float64,
-              "evalue": pl.Float64, "seq_from": pl.Int64, "seq_to": pl.Int64}
-    return pl.DataFrame(rows, schema=schema, orient="row")
+    return pl.DataFrame(rows, schema=HIT_SCHEMA, orient="row")
+
+
+def cmscan(sequences: list[str], sensitive_filters: bool = False) -> pl.DataFrame:
+    """Score every sequence against every Rfam model; return hits with E-value <= 0.01.
+
+    Flags, following Rfam's own genome-annotation recipe:
+      --nohmmonly  score EVERY model as a full covariance model. Without it,
+                   cmscan quietly scores the 347 models that have zero base
+                   pairs with a letters-only HMM, whose bit scores are not on
+                   the scale their GA thresholds were set on (session 03 bug).
+      --toponly    search each RNA only in its own 5'->3' direction.
+      --rfam       Rfam's faster pre-filters (default here). With
+                   sensitive_filters=True, Infernal's default filters are
+                   used instead: ~11x slower, more sensitive to weak hits.
+
+    Cache: a sequence's hits depend only on that sequence (checked: its
+    E-values are identical whether scanned alone or in a batch), so results
+    are stored PER SEQUENCE under data/processed/cmscan_cache/<flags>/. Only
+    sequences never scanned before with these flags are sent to cmscan, in
+    chunks of CHUNK, and each chunk is saved as soon as it finishes: an
+    interrupted multi-hour run loses at most one chunk.
+
+    Returns one row per hit: query (index into `sequences`), family, score
+    (bits), evalue, seq_from, seq_to.
+    """
+    prepare_cm_database()
+    flags = ["--nohmmonly", "--toponly", "-E", "0.01"] + ([] if sensitive_filters else ["--rfam"])
+    flags_key = hashlib.sha256((" ".join(flags) + CM_GZ.name + str(CM_GZ.stat().st_size))
+                               .encode()).hexdigest()[:12]
+    cache = CACHE_DIR / flags_key
+    cache.mkdir(parents=True, exist_ok=True)
+    scanned_file, hits_file = cache / "scanned.parquet", cache / "hits.parquet"
+    (cache / "flags.txt").write_text(" ".join(flags) + "\n")   # human-readable record of the key
+
+    scanned = (set(pl.read_parquet(scanned_file)["seq_hash"]) if scanned_file.exists() else set())
+    hashes = [_sequence_hash(s) for s in sequences]
+    todo = {h: s for h, s in zip(hashes, sequences) if h not in scanned}   # dict: also de-duplicates
+    todo_items = list(todo.items())
+    for start in range(0, len(todo_items), CHUNK):
+        chunk = dict(todo_items[start:start + CHUNK])
+        new_hits = _run_cmscan(chunk, flags, cache)
+        old_hits = pl.read_parquet(hits_file) if hits_file.exists() else pl.DataFrame(schema=HIT_SCHEMA)
+        scanned |= set(chunk)
+        # write to temporary files, then rename: a crash mid-write can't corrupt the cache
+        pl.concat([old_hits, new_hits]).write_parquet(cache / "hits.tmp")
+        pl.DataFrame({"seq_hash": sorted(scanned)}).write_parquet(cache / "scanned.tmp")
+        (cache / "hits.tmp").rename(hits_file)
+        (cache / "scanned.tmp").rename(scanned_file)
+        print(f"  cmscan {flags_key}: {min(start + CHUNK, len(todo_items)):,}/{len(todo_items):,} "
+              f"new sequences scanned", flush=True)
+    for leftover in ("chunk.fasta", "chunk.tbl"):
+        (cache / leftover).unlink(missing_ok=True)
+
+    hits = pl.read_parquet(hits_file) if hits_file.exists() else pl.DataFrame(schema=HIT_SCHEMA)
+    queries = pl.DataFrame({"query": range(len(sequences)), "seq_hash": hashes},
+                           schema={"query": pl.Int64, "seq_hash": pl.String})
+    return queries.join(hits, on="seq_hash", how="inner").drop("seq_hash").sort("query")
 
 
 def dinucleotide_shuffle(sequence: str, rng: np.random.Generator) -> str:
