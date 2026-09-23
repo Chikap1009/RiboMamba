@@ -582,3 +582,17 @@ raised.
   a larger size is warranted, for all backbones alike.
 - Operational: keep peak memory well below the free VRAM and watch step
   time, because exceeding it under WSL slows everything silently.
+
+**Amendment, 2026-09-24 01:50 — boundary rule for the learning-rate sweep.**
+The Transformer sweep gave final EMA validation bits/nt 1.9138 (3×10⁻⁴),
+1.9252 (10⁻³), 1.9441 (3×10⁻³). The winner sat on the **edge** of the
+grid, so the true optimum may lie below it, and the pre-registered rule
+had no provision for that (an oversight in the protocol). Added rule 2b:
+while the winner is the smallest or largest value tried, add the next value
+on the half-decade grid in that direction (…, 10⁻⁴, 3×10⁻⁴, 10⁻³, …) and
+re-apply the same rule. The amendment was made **after** seeing the
+Transformer sweep and **before** any other backbone's sweep, and it is a
+symmetric, mechanical rule applied identically to every backbone, so it
+cannot favour one architecture. The full run that had started with 3×10⁻⁴
+was stopped at step ~500 (no checkpoint yet) and restarts with the winner
+of the extended sweep.
