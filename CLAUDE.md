@@ -52,6 +52,7 @@ This explicitly includes things you may consider "obvious":
 ### 1.3 Depth over speed, always
 
 - ~~I have **no deadline pressure** on the build.~~ **Amended 2026-09-23 (session 02): there is deadline pressure — the HiWi application.** Do not pad, do not re-teach what I have already shown I know, and do not spend a session on ceremony. But do not buy speed by leaving code unexplained; buy it by taking bigger steps and fewer round-trips (§1.7). *(Session 03: there is no fixed date. Do not plan scope backwards from a deadline; do keep the pace.)*
+- **Amended 2026-09-23 (session 03), my words: "don't skip stuff or limit stuff due to any time constraint — we gonna build this completely."** Never cut, shorten, defer or simplify any part of the project because of time or effort. Every phase in §5 is built in full, following this procedure, to completion. Scope changes are allowed only for technical or scientific reasons (e.g. something does not fit in 8 GB of VRAM, §3.4), and must be stated as such in `DECISIONS.md`.
 - **Steps sized to one meaningful unit**, not one line. Explain the unit, then move on without waiting for confirmation unless a decision is needed.
 - If a full explanation would be long — **write the long explanation.** Length is not a problem here. Skipping is.
 - Never say "as you know", "obviously", "simply", or "just". If it were obvious to me, I would not need you.
