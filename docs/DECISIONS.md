@@ -596,3 +596,55 @@ symmetric, mechanical rule applied identically to every backbone, so it
 cannot favour one architecture. The full run that had started with 3×10⁻⁴
 was stopped at step ~500 (no checkpoint yet) and restarts with the winner
 of the extended sweep.
+
+---
+
+## D-012 — Regularise with dropout, chosen by a pre-registered sweep over shorter full schedules
+**Date:** 2026-09-24   **Phase:** 2   **Logbook:** logbook/2026-09-23-session-03.md (04:15)
+**Status:** accepted (written before any dropout run existed)
+
+**Context.** The planned 200,000-step run (D-011, lr 3×10⁻⁴) **overfit**:
+validation bits/nt on unseen families was best at step 10,000 (1.9020,
+≈ 3.3 epochs) and worsened steadily to 1.9348 at step 45,000, while
+training fell from ≈ 1.96 to 1.41. The model memorises training families
+instead of learning what transfers. D-011 had flagged the risk ("66 epochs
+is many passes"), but the run length was set too long, a planning error
+caught by the validation curve. The run was stopped at step 46,100
+(resumable). Its `best.pt` (1.9020) is kept as a reference.
+
+**Decision.**
+1. Add **dropout** to the Transformer: on the attention weights and on the
+   output of each residual branch (attention, MLP), active only in
+   training (`TransformerConfig.dropout`, `--dropout`).
+2. **Pre-registered sweep** (`scripts/dropout_sweep.py`): dropout ∈ {0,
+   0.1, 0.2} at the learning rate chosen in D-011 (3×10⁻⁴); **30,000
+   steps** each (≈ 10 epochs) with a complete warmup + cosine schedule;
+   evaluation every 2,500 steps; early stopping via `best.pt`.
+   **Rule:** lowest *best-during-run* EMA validation bits/nt; if the winner
+   is the largest rate tried, extend the grid (0.3, 0.4).
+3. The dropout-0 run doubles as a control: it separates the effect of the
+   shorter, fully annealed schedule from the effect of dropout.
+4. **The identical protocol (LR sweep → dropout sweep, same steps and rules)
+   applies to every backbone in Phase 4.**
+
+**Alternatives rejected.**
+- *Early stopping on the long run alone* (use its step-10k checkpoint):
+  that checkpoint was taken with the learning rate still near its peak,
+  never annealed; a schedule that fully decays by the best point usually
+  does better, and the comparison needs a principled, repeatable recipe.
+- *Smaller model* (S, 4.7 M): capacity reduction is a blunter tool, and it
+  changes the parameter target for Phase 4; kept in reserve if dropout
+  doesn't close the gap.
+- *More weight decay*: a second knob to sweep; dropout is the standard first
+  regulariser for Transformers of this size.
+- *More data*: the limit is the number of **families** (3,032 in train), not
+  sequences; raising the per-family cap adds relatives of families already
+  memorised.
+
+**Consequences / trade-offs accepted.**
+- ≈ 4.5 h of GPU for the sweep (replacing ≈ 7 h the long run would still
+  have spent overfitting).
+- The large train–validation gap may partly be irreducible (unseen
+  families genuinely differ); the sweep measures how much regularisation
+  can recover. That gap is itself a result worth reporting.
+

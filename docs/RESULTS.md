@@ -195,8 +195,25 @@ Validation = full val split, fixed noise (seed 1234), EMA weights.
 **Chosen: 3×10⁻⁴** (lowest at 8k, and now interior to the grid, so rule 2b is
 satisfied). 10⁻⁴ and 3×10⁻⁴ differ by only 0.003 bits (one seed, fixed
 validation noise), so the result is insensitive to the learning rate in that
-range; 10⁻³ and above are clearly worse. Full run: `tf_M_full`, 200,000 steps,
-warmup 2,000, started 2026-09-24 02:12 (results below when finished).
+range; 10⁻³ and above are clearly worse.
+
+### The planned 200,000-step run overfit (stopped at step 46,100)
+
+`tf_M_full`: lr 3×10⁻⁴, warmup 2,000, cosine planned over 200,000 steps,
+commit `8b1c932`, seed 0. Stopped 2026-09-24 04:16 at step 46,100 (epoch 15);
+`best.pt` = step 10,000, `last.pt` = step 45,000 (resumable).
+
+| step | 5k | **10k** | 15k | 20k | 25k | 30k | 35k | 40k | 45k |
+|---|---|---|---|---|---|---|---|---|---|
+| val bits/nt (EMA) | 1.9141 | **1.9020** | 1.9044 | 1.9133 | 1.9214 | 1.9278 | 1.9303 | 1.9330 | 1.9348 |
+| val bits/nt (live) | 1.9188 | 1.9177 | 1.9178 | 1.9373 | 1.9397 | 1.9384 | 1.9286 | 1.9330 | 1.9398 |
+
+Training bits/nt (batch estimates) fell from ≈1.96 to **1.41** by step 46,000.
+Validation on unseen families was best at step 10,000 (≈3.3 epochs) and
+worsened steadily afterwards: **overfitting** to the training families.
+Best so far: **1.9020 bits/nt**, 0.064 below the best counting model
+(1.9663). The remaining ~150k steps were not run (they could only memorise
+more). Response: D-012 (dropout sweep with full schedules over 30,000 steps).
 
 ---
 
