@@ -28,6 +28,14 @@ for _nt in NUCLEOTIDES:
     _BYTE_TO_ID[ord(_nt)] = VOCAB.index(_nt)
 
 
+FIRST_NUCLEOTIDE_ID = VOCAB.index("A")   # 4: nucleotides are the last four ids (frozen by a test)
+
+
+def is_nucleotide(ids):
+    """True where an id is A, C, G or U (works on numpy arrays and torch tensors)."""
+    return ids >= FIRST_NUCLEOTIDE_ID
+
+
 def encode(sequence: str) -> np.ndarray:
     """'GGAC' -> array([6, 6, 4, 5], dtype=int8). Only A, C, G, U are accepted.
 
