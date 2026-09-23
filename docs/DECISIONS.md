@@ -465,3 +465,58 @@ Final split **452,867 / 57,052 / 56,873**.
   loosely or tightly make the check correspondingly looser or stricter.
 - With the fast filters, check B (member of a train family) is zero by
   construction; check D is the independent evidence.
+
+---
+
+## D-010 — The Transformer denoiser, and framing every sequence with `<bos>`/`<eos>`
+**Date:** 2026-09-24   **Phase:** 2   **Logbook:** logbook/2026-09-23-session-03.md (00:24)
+**Status:** accepted (size provisional until the VRAM/throughput measurement, D-011)
+
+**Context.** Masked diffusion needs a denoiser: partly masked sequence in,
+a distribution over A/C/G/U per position out, looking both ways. Phase 4
+swaps this box for BiMamba, so the interface must be backbone-agnostic and
+the Transformer must be a strong, standard baseline, not a strawman.
+
+**Decision.**
+- **Architecture:** pre-norm Transformer encoder; multi-head
+  self-attention via PyTorch's fused `scaled_dot_product_attention`;
+  rotary position encoding (RoPE); GELU MLP ×4; no biases in linear
+  layers; GPT-2 initialisation (std 0.02, residual output layers
+  ÷ √(2N)). Starting size d = 384, 8 layers, 6 heads = 14.17 M parameters.
+- **No time input**: the masks themselves show the noise level, and the
+  optimal prediction for absorbing diffusion doesn't depend on t (Ou et al.
+  2024).
+- **Special tokens are never predicted**: their logits are −∞.
+- **Every sequence is framed `<bos> x₁…x_L <eos>`**; markers are never
+  masked or scored.
+
+**Why the framing (measured, not assumed).** With an all-`<mask>` input,
+every position holds the same vector, so every attention output is the
+same, whatever the weights. RoPE only encodes relative offsets, and padding
+is invisible to attention, so the model cannot know where the molecule
+begins or ends. On a 4-sequence memorisation task, bits/nt at t = 1 were
+2.11 without markers (no better than knowing nothing) versus 1.58 with them
+(near the 1.6-bit optimum). Generation starts at 100 % masked, where the
+blindness is total, and RNA has strongly end-dependent features (the ends
+of a molecule often pair with each other; tRNAs end in CCA). The markers
+cost no parameters: the tokens were reserved in Phase 1 (D-006).
+
+**Alternatives rejected.**
+- *Learned absolute position embeddings*: add L_max × d parameters (which
+  complicates parameter matching with Mamba), give distance from the start
+  but not distance to the end, and don't generalise past the table.
+- *Sinusoidal absolute positions*: same end-blindness; RoPE's relative
+  offsets suit motifs that mean the same thing anywhere.
+- *A time-conditioned denoiser (as in image diffusion)*: extra machinery
+  with no theoretical benefit for absorbing diffusion, and it would need a
+  separate design for Mamba.
+- *Post-norm blocks* (the original 2017 Transformer): less stable to train
+  at depth without careful warmup.
+- *Naive attention* (store the L × L grid): memory grows with L²; the fused
+  kernel computes the same thing in tiles.
+
+**Consequences / trade-offs accepted.**
+- Two extra tokens per sequence (≈ 2 % more compute at a median length of 93).
+- The BiMamba and autoregressive Mamba must use the same framing, so the
+  comparison stays like-for-like (the AR model needs `<bos>`/`<eos>`
+  anyway).
