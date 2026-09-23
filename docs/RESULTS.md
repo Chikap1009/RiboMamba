@@ -190,7 +190,13 @@ Validation = full val split, fixed noise (seed 1234), EMA weights.
 | 3×10⁻⁴ | 1.9339 | 1.9165 | 1.9125 | **1.9138** |
 | 10⁻³ | 1.9499 | 1.9393 | 1.9303 | 1.9252 |
 | 3×10⁻³ | 1.9576 | 1.9587 | 1.9481 | 1.9441 |
-| 10⁻⁴ | *(boundary extension, running)* | | | |
+| 10⁻⁴ (boundary extension) | 1.9389 | 1.9216 | 1.9163 | 1.9166 |
+
+**Chosen: 3×10⁻⁴** (lowest at 8k, and now interior to the grid, so rule 2b is
+satisfied). 10⁻⁴ and 3×10⁻⁴ differ by only 0.003 bits (one seed, fixed
+validation noise), so the result is insensitive to the learning rate in that
+range; 10⁻³ and above are clearly worse. Full run: `tf_M_full`, 200,000 steps,
+warmup 2,000, started 2026-09-24 02:12 (results below when finished).
 
 ---
 
