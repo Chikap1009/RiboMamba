@@ -709,3 +709,71 @@ Nature Methods 2022) as a second oracle, pinned in `environment.yml`, and:
   truth; there is still no wet-lab validation.
 - ~221 MB of extra packages (EternaFold pulls in a C++ toolchain and
   OpenMPI).
+
+---
+
+## D-014 — How the harness measures, and how architectures will be compared
+**Date:** 2026-09-24   **Phase:** 3   **Logbook:** logbook/2026-09-24-session-04.md
+**Status:** proposed (accepted when the protocol in RESULTS.md is frozen; the
+open items are Chirag's decisions listed there)
+
+**Context.** Phase 4's question, whether a BiMamba backbone generates more
+designable RNA than a Transformer or an autoregressive Mamba, will be
+answered by whatever the harness measures. Common metrics can be won by
+trivial cheats (low MFE by GC-rich letters, novelty and diversity by random
+letters, MFE match by flimsy designs), and a single trained model per
+architecture says nothing about the architecture.
+
+**Decision.**
+1. **Graded ensemble measures, not exact-structure ones.** The ensemble
+   defect (NED) is the headline structural measure; P(target), MFE match and
+   the energy gap are reported but carry no unconditional claim. Measured
+   reason: on real 74–223-nt RNAs the exact structure's probability is
+   0.000–0.07 and the nearest rival is a one-pair variant at ≈ 0 kcal/mol.
+2. **Structure beyond chance** by 50 dinucleotide shuffles per sequence
+   (`beats_shuffles`, ties counted half, so chance is exactly 0.5).
+3. **Every number on a calibrated scale:** five length-matched reference
+   sets (real, a second real sample, training, shuffled, random), and
+   generated samples drawn with the reference's lengths one-to-one.
+4. **Two oracles:** ViennaRNA primary; EternaFold as the robustness check
+   (D-013).
+5. **Architecture claims at the level of trained models:** five training
+   seeds per architecture, exact seed-level permutation test, Holm across
+   the five primary tests; bootstrap intervals (family-cluster for real
+   sequences) for effect sizes.
+6. **Sampling at T = 1.0** for the primary comparison (no per-model
+   tuning); steps chosen on validation by a rule written before the
+   ablation.
+7. **Pre-registration enforced in code**: the test split cannot be loaded
+   until RESULTS.md carries "Status: FROZEN on <date>".
+
+**Alternatives rejected.**
+- *Raw MFE or MFE per nucleotide as quality:* rewards composition (a
+  GC-rich random 80-mer: −26.0 kcal/mol but z = +1.46 against its shuffles).
+- *P(target) or MFE match as the headline:* a frame error rate where a bit
+  error rate is needed; can reverse architecture rankings.
+- *Three training seeds:* the exact seed-level test can then never reach
+  p < 0.05 (minimum 2/20 = 0.10). This was my first recommendation, and it
+  was wrong.
+- *Bootstrap over one model's samples as evidence about an architecture:*
+  captures sampling noise, not training-seed variation.
+- *Choosing the best temperature per model:* a tuning knob that could
+  favour one architecture; T = 1.0 is the distribution each model actually
+  learned. The full temperature curve is reported for all as secondary.
+- *Fréchet-style distances in a pretrained RNA language model's embedding
+  space:* their scale depends on a model that may have been trained on our
+  held-out families; replaced by calibrated Wasserstein and k-mer distances
+  on interpretable quantities.
+- *Diversity as a score to maximise:* 57 % of real validation sequences
+  have a ≥ 80 % sibling among 1,000; diversity is a guardrail against
+  collapse instead.
+
+**Consequences / trade-offs accepted.**
+- Five seeds per architecture costs ≈ 4 extra 30,000-step runs per
+  backbone (≈ 5–6 GPU-hours each at Transformer speed).
+- The seed-level exact test is conservative: with five seeds and Holm over
+  five tests, a claim needs near-complete separation of the seeds. A "no
+  detectable difference" outcome would be a limit of five seeds, and effect
+  sizes with intervals are reported regardless.
+- Validation numbers depend on one split draw (seed 0); the proposed
+  replication split addresses this descriptively.

@@ -623,6 +623,24 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Where it appears:** `sanity_samples.py` (novelty via MMseqs2); the Phase 3 harness.
 - **First explained:** session 03 (novelty); session 04 (full set).
 
+### Guardrail (in an evaluation)
+- **Definition:** A pass/fail condition that must hold for a model's scores to be interpretable at all, without being a score itself. Ours: ≤ 5 % of samples copying a training sequence (≥ 80 % identity), ≥ 95 % distinct samples, mean GC within ±0.05 of real RNA.
+- **Analogy:** A power-on self-test: if it fails, you don't bother reading the benchmark numbers.
+- **Where it appears:** The frozen protocol, P7.
+- **First explained:** session 04.
+
+### Winner's curse
+- **Definition:** When you pick the best of several candidates using a noisy measurement, the chosen one's measured value is, on average, better than its true value, because it partly won by luck.
+- **Analogy:** The fastest chip in a quick speed test partly got a lucky measurement; retest it and it looks slightly slower.
+- **Where it appears:** The baseline checkpoint was chosen on one fixed noise draw (1.9040); averaging 4 draws gives 1.9061.
+- **First explained:** session 04.
+
+### Common random numbers
+- **Definition:** Giving every setting or model being compared the same random numbers (same lengths, same sampling seed, same noise draws), so that differences come from the settings, not from the dice.
+- **Analogy:** Testing two circuits with the same input vectors rather than two different random vector sets.
+- **Where it appears:** The sampling ablation (seed 0 for all 48 settings); E1 (noise seeds 1234–1237 for every model); length-matched samples.
+- **First explained:** session 04.
+
 ### Goodhart's law (oracle exploitation)
 - **Definition:** "When a measure becomes a target, it ceases to be a good measure." A generator steered or selected by one imperfect oracle can learn that oracle's quirks and score well without being good.
 - **Analogy:** A design tuned against a SPICE model with a bug looks perfect in simulation and fails on silicon.
@@ -757,6 +775,12 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Definition:** Each test at the 5 % level has a 5 % false-alarm chance; with 20 independent tests the chance of at least one false "win" is 1 − 0.95²⁰ ≈ 64 % (the **family-wise error**). **Holm–Bonferroni** (Holm 1979) controls it: sort the m p-values from smallest up, compare the smallest with 0.05/m, the next with 0.05/(m−1), and so on, and stop at the first that fails.
 - **Analogy:** Check 20 timing paths with a noisy measurement and one will "fail" by chance most of the time.
 - **Where it appears:** The frozen protocol's primary endpoints.
+- **First explained:** session 04.
+
+### Permutation test (exact, seed-level)
+- **Definition:** A test that asks how often a difference at least as large as the observed one would appear if the group labels were meaningless: try every way of relabelling the observations and count. With each trained model as one observation, 3 vs 3 models allow C(6,3) = 20 relabellings, so the smallest possible two-sided p is 2/20 = 0.10; 5 vs 5 allow 252, smallest p ≈ 0.008.
+- **Analogy:** Shuffling the name tags on the dies and checking whether the "fast process" still looks fast.
+- **Where it appears:** `seed_permutation_test` in `ribomamba/eval/stats.py`; the reason the protocol asks for five seeds per architecture.
 - **First explained:** session 04.
 
 ### z-score
@@ -972,6 +996,18 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Analogy:** Specifying an exact part number on a BOM, not "any 10k resistor".
 - **Where it appears:** `environment.yml`. It matters most for the folding oracle, because a different ViennaRNA version could give different energies.
 - **First explained:** session 02.
+
+### MPI, `mpirun`
+- **Definition:** MPI (Message Passing Interface) is a standard for running one program as several cooperating processes. `mpirun -np 4 prog` starts 4 copies that talk to each other. EternaFold's conda build is written this way: one coordinator process hands work to workers, so started alone it waits forever for workers that don't exist.
+- **Analogy:** A foreman with no crew: started without `mpirun`, the job never gets done.
+- **Where it appears:** `ribomamba/eval/eternafold.py` always launches EternaFold through `mpirun -np P` (P ≥ 2).
+- **First explained:** session 04.
+
+### Most probable (Viterbi) structure vs MEA structure
+- **Definition:** Two ways to turn a folding model's ensemble into one predicted structure. **Viterbi** / most probable: the single structure with the highest probability (the same kind of answer as ViennaRNA's MFE). **MEA** (maximum expected accuracy): the structure whose base pairs have the highest expected overlap with the ensemble; it can differ, and EternaFold uses it by default.
+- **Analogy:** The single most likely word sequence from a decoder versus the sequence that gets the most individual letters right on average.
+- **Where it appears:** We take EternaFold's Viterbi structure (`--viterbi`), so it's comparable with ViennaRNA's MFE (D-013).
+- **First explained:** session 04.
 
 ### Checksum (SHA-256)
 - **Definition:** A fixed-length fingerprint computed from a file's bytes. If even one byte changes, the fingerprint changes completely. Comparing it with the publisher's value proves the download is intact and unaltered.
