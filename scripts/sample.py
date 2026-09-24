@@ -26,17 +26,8 @@ import torch
 from ribomamba.data.tokenizer import decode
 from ribomamba.diffusion.masked import sample, sample_lengths
 from ribomamba.eval.reference import reference_sample
-from ribomamba.models.transformer import TransformerConfig, TransformerDenoiser
+from ribomamba.models.checkpoint import load_model
 from ribomamba.paths import PROCESSED_DIR
-
-
-def load_model(checkpoint: Path, weights: str, device) -> tuple[torch.nn.Module, dict]:
-    state = torch.load(checkpoint, map_location="cpu", weights_only=False)
-    cfg = state["config"]
-    model = TransformerDenoiser(TransformerConfig(d_model=cfg["d_model"], n_layers=cfg["n_layers"],
-                                                  n_heads=cfg["n_heads"]))
-    model.load_state_dict(state["ema" if weights == "ema" else "model"])
-    return model.to(device).eval(), state
 
 
 def main() -> None:
