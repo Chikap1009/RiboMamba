@@ -558,6 +558,27 @@ time (random 5 %, real 13 %).
    shuffle): 0.570 here. The two differ in lengths (training lengths then,
    validation lengths now) and ties (counted as losses then, half now).
 
+**Checks on the ablation** (`data/eval/seed_calibration.sh`, commit
+`d01f3e9`–`654d838`, docs-only difference; 15:43–15:56):
+- *Reproducibility:* regenerating T 1.0 / 16 steps / seed 0 with the final
+  code gives a **byte-identical** FASTA (`cmp`).
+- *Are the bootstrap intervals honest?* Four more sampling seeds (1–4) at
+  T 1.0 / 256 steps, same lengths:
+
+  | metric | means for seeds 0–4 | sd across seeds | sd implied by the bootstrap interval (half-width / 1.96) |
+  |---|---|---|---|
+  | beats_shuffles | 0.570, 0.561, 0.554, 0.571, 0.567 | 0.0073 | 0.0094 |
+  | ned_mfe | 0.249, 0.252, 0.254, 0.241, 0.246 | 0.0052 | 0.0041 |
+  | mfe_z | −0.291, −0.266, −0.238, −0.295, −0.297 | 0.025 | 0.037 |
+  | gc | 0.465, 0.465, 0.466, 0.464, 0.469 | 0.0020 | 0.0032 |
+  | ef_ned_vienna | 0.453, 0.460, 0.466, 0.454, 0.465 | 0.0058 | 0.0041 |
+
+  Ratios 0.63–1.41. An sd from 5 values has 4 degrees of freedom, so its
+  95 % range relative to the truth is about 0.35–1.67 (√(χ²₄/4)); all five
+  fall inside. **The bootstrap intervals match the real sampling-seed
+  variation.** This covers sampling randomness only; training-seed
+  variation is measured in Phase 4 (5 seeds per architecture).
+
 **The pre-registered steps rule returns N = 16** (`--stage table`,
 `steps_rule`). Whether the protocol should use it for every backbone is an
 open question for the freeze (protocol P5 and logbook 15:45).
@@ -593,9 +614,10 @@ targets are oracle-consistent by construction and remain the primary set.
 EternaFold's training FASTA files (shipped with bioconda `eternafold`
 1.3.1) against our validation split: exact matches 0 (40 against train);
 MMseqs2 at ≥ 80 % coverage: ≥ 50 % identity **0.30 %** of validation
-sequences (170 tRNA, 1 tRNA-Sec), ≥ 80 % 0.23 %, ≥ 95 % 0.02 %. Script:
-logbook 2026-09-24 session 04, 13:31 (scratchpad `ef_overlap.py`; to be
-promoted to `scripts/` when rerun on test after the freeze).
+sequences (170 tRNA, 1 tRNA-Sec), ≥ 80 % 0.23 %, ≥ 95 % 0.02 %. Command: `python
+scripts/check_oracle_overlap.py --split val` (commit after `654d838`;
+reproduces the first, scratchpad measurement of 13:31 exactly). The test
+version runs right after the freeze (protocol P9).
 
 ---
 
