@@ -200,6 +200,29 @@ results, the temperature curves, the replication split.
 4. Phase 4 trains and selects every model on validation; each final model
    is evaluated on test exactly once with this protocol.
 
+### Post-freeze records (P9 steps 1–3; records, not amendments)
+
+**Step 1 — 2026-09-24 19:24.** Freeze commit `67687ed` (this section's
+status line + `environment.lock.yml`); `pytest` 79 passed at the frozen code.
+
+**Step 2 — test target sets, 2026-09-24 19:24–19:25.** `python
+scripts/build_targets.py --split test` at `67687ed` (clean tree), seed 0.
+
+| set | targets | median length | native = target under ViennaRNA | native NED (median) | SHA-256 of `data/targets/<set>.parquet` |
+|---|---|---|---|---|---|
+| `rfam_test` (primary) | **397** (399 families; 2 with < 4 pairs dropped) | 87 | 100 % (by construction) | 0.113 | `2051aa7ca93e4e23f4ca95ccc73787dd2cef1df0f5bc775206831102e4a62051` |
+| `bprna_test` | **141** | 98 | 4.3 % | 0.254 | `5509062b7a058b2c6774613ede77b3167fc545bc9b1c2f5dfb3b86c211d59068` |
+| `eterna100_test` | **75** (of 100; ≤ 256 nt) | 97 | 100 % (sample solutions) | 0.104 | `65eb1b18a8a113a1dc70d074daccc5e919c4be068e2f66a7db2ac77eda973257` |
+
+bpRNA funnel to `bprna_test`: 7,336 candidates → member of a test family
+727 → no ≥ 80 % training hit 724 → one per family **141**.
+
+**Step 3 — EternaFold training data vs test, 2026-09-24 19:25.** `python
+scripts/check_oracle_overlap.py --split test` at `67687ed`: exact matches
+0 (all four training files); MMseqs2 (≥ 80 % coverage) ≥ 50 % identity
+**0 of 56,873** (validation: 0.30 %, all tRNA; tRNA sits in validation, not
+test). The second oracle has seen nothing related to the test set.
+
 ---
 
 ## Train/test overlap audit
