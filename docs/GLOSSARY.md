@@ -521,6 +521,18 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Where it appears:** Markov models with k ≥ 5 (train keeps improving, unseen-family validation worsens); watched in every training run via validation bits/nt.
 - **First explained:** session 03.
 
+### Regularisation, dropout, early stopping
+- **Definition:** **Regularisation** is anything that makes memorising harder so the model learns what transfers. **Dropout** randomly switches off a fraction of the network's internal signals at each training step (off during evaluation). **Early stopping** keeps the checkpoint with the best validation score instead of the last one.
+- **Analogy:** Studying with random pages of your notes missing (dropout); handing in the exam at your best moment rather than after you start second-guessing (early stopping).
+- **Where it appears:** `TransformerConfig.dropout`, `scripts/dropout_sweep.py` (D-012; dropout did not help here); `best.pt` in every run.
+- **First explained:** session 03.
+
+### Structure beyond chance (MFE vs dinucleotide shuffle)
+- **Definition:** Fold a sequence and a dinucleotide-shuffled copy of it (same letters, same neighbour statistics) and compare their minimum free energies. Real structural RNAs usually fold more stably than their shuffles; sequences whose stability comes only from composition don't.
+- **Analogy:** Checking that a circuit's good timing comes from its design, not merely from using fast cells: re-randomise the netlist with the same cells and compare.
+- **Where it appears:** `scripts/sanity_samples.py`: real validation RNA 79.4 % more stable than its shuffle, Phase 2 baseline samples 54.6 % (chance = 50 %).
+- **First explained:** session 03.
+
 ### Hyperparameter sweep; boundary effect
 - **Definition:** Training the same model with several values of a setting (e.g. learning rate) and picking the best by a fixed rule. If the winner is the smallest or largest value tried, the true optimum may lie outside the range, so the range is extended.
 - **Analogy:** Sweeping a bias voltage to find the best operating point; if the best reading is at the end of your sweep, sweep further.

@@ -193,6 +193,34 @@ almost no sequence, and the information is mostly in which positions pair,
 not in which letters appear. A model has to learn "grammar", not vocabulary.
 **Source:** RESULTS.md, Phase 2 reference points.
 
+### Q: Does your baseline actually generate RNA-like molecules?
+**Draft answer:** Partly, and I measured exactly which part. The samples are
+novel (none has even a 50 %-identical relative in training, so it's not
+copying) and their letter composition matches real RNA. But real RNA folds
+more stably than a shuffled version of itself about 79 % of the time, and
+our baseline's samples only 55 %, barely above chance. So the Transformer
+learned what RNA letters look like much better than how RNA folds. That's
+the gap the rest of the project targets: whether Mamba captures pairing
+better, and whether conditioning on a target structure fixes it.
+**Likely follow-up:** "Why compare to shuffles instead of just looking at
+the folding energy?" → Folding energy depends a lot on GC content. The
+shuffle keeps the letters and their neighbour statistics, so any extra
+stability must come from how the letters are arranged, which is the
+structure.
+**Source:** RESULTS.md, sanity preview.
+
+### Q: Your training overfit. What did you do?
+**Draft answer:** Validation on unseen families peaked after about three
+passes over the data while training kept improving, so the model started
+memorising training families. I stopped the long run (the best checkpoint
+is always kept, so nothing was lost), then tested dropout under a rule
+written in advance. Dropout slowed learning but didn't stop the overfitting;
+every run still peaked around 3–4 passes at about 1.90 bits. So I report that
+as a finding (the transferable signal between families seems limited at
+this scale), use early stopping, and give the Mamba models the identical
+protocol.
+**Source:** DECISIONS D-012; RESULTS.md.
+
 ### Q: Why a maximum length of 256?
 **Draft answer:** Three reasons. Memory: the Transformer baseline's
 activation memory grows with length, and naive attention grows with length

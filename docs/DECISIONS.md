@@ -648,3 +648,12 @@ caught by the validation curve. The run was stopped at step 46,100
   families genuinely differ); the sweep measures how much regularisation
   can recover. That gap is itself a result worth reporting.
 
+**Outcome (2026-09-24 08:49).** Best-during-run EMA validation bits/nt:
+dropout 0 → **1.9040** (step 10k), 0.1 → 1.9081 (12.5k), 0.2 → 1.9178
+(12.5k). **Dropout 0 chosen by the rule.** Dropout slowed learning but did
+not stop overfitting: every run peaks at ≈ 3–4 epochs. The Phase 2
+baseline is `tf_M_do0/best.pt` (step 10,000). For Phase 4 the same
+protocol stands (LR sweep, then dropout sweep {0, 0.1, 0.2} × 30k steps,
+best-during-run), because a Mamba backbone may respond to dropout
+differently; only the rule is fixed, not the answer.
+

@@ -215,6 +215,55 @@ Best so far: **1.9020 bits/nt**, 0.064 below the best counting model
 (1.9663). The remaining ~150k steps were not run (they could only memorise
 more). Response: D-012 (dropout sweep with full schedules over 30,000 steps).
 
+### Dropout sweep (D-012) → the Phase 2 baseline
+
+`python scripts/dropout_sweep.py --prefix tf_M` (lr 3×10⁻⁴ from the LR sweep;
+30,000 steps, warmup 1,000, cosine to 10 %; eval every 2,500; seed 0; code
+identical across runs: `d0fff97` for dropout 0, `094639b` (docs-only
+difference) for 0.1 and 0.2). Finished 2026-09-24 08:49. Validation bits/nt,
+EMA weights:
+
+| dropout | 2.5k | 5k | 7.5k | 10k | 12.5k | 15k | 20k | 25k | 30k | **best** | train at 30k |
+|---|---|---|---|---|---|---|---|---|---|---|---|
+| **0** | 1.9278 | 1.9126 | 1.9048 | **1.9040** | 1.9063 | 1.9099 | 1.9205 | 1.9294 | 1.9343 | **1.9040** | 1.615 |
+| 0.1 | 1.9351 | 1.9199 | 1.9127 | 1.9091 | **1.9081** | 1.9096 | 1.9205 | 1.9343 | 1.9447 | 1.9081 | 1.719 |
+| 0.2 | 1.9535 | 1.9326 | 1.9210 | 1.9179 | **1.9178** | 1.9197 | 1.9268 | 1.9344 | 1.9418 | 1.9178 | 1.800 |
+
+**Rule result: dropout 0** (interior of the grid's lower end; 0 has no lower
+neighbour). **Phase 2 baseline = `tf_M_do0/best.pt`, step 10,000, 1.9040
+bits/nt** on unseen families: 0.062 bits below the best counting model
+(1.9663). Dropout slowed learning but did not prevent overfitting; every run
+peaks at 10–12.5k steps (≈ 3–4 epochs). With the long run's 1.9020 (a
+different protocol, not used), the best reachable level for this model and
+data sits at ≈ 1.90 bits/nt.
+
+### Sanity preview of generated sequences (not the Phase 3 protocol)
+
+`python scripts/sample.py --checkpoint checkpoints/tf_M_do0/best.pt --n 1000
+--steps 256 --out samples/tf_M_do0.fasta` (seed 0; bf16 forward, float64
+letter sampling; commit `bd3c940`), then `python scripts/sanity_samples.py
+--samples samples/tf_M_do0.fasta` (seed 0; commit `f13d60d`). Real = 1,000
+random validation sequences (seed 0). MFE: ViennaRNA 2.7.2, 37 °C.
+
+| | generated | real (validation) |
+|---|---|---|
+| distinct / total | 1000 / 1000 | 1000 / 1000 |
+| median length | 93 | 90 |
+| nearest training relative ≥ 50 % identity (≥ 80 % coverage) | **0 %** | 0 % |
+| GC content | 0.463 | 0.479 |
+| MFE per nucleotide (kcal/mol) | −0.238 | −0.311 |
+| paired fraction of positions | 0.566 | 0.600 |
+| MFE − MFE of own dinucleotide shuffle (mean, kcal/mol) | **−0.56** | **−6.97** |
+| share more stable than own shuffle | **54.6 %** | **79.4 %** |
+
+**Reading it.** Generated sequences are novel (no copying) and
+composition-matched, but they are barely more structured than chance
+(54.6 % vs 50 % for chance; real RNA 79.4 %). The baseline has mostly
+learned local sequence statistics, not the pairing that makes RNA fold,
+which is consistent with its modest gain over counting models. Sampling
+temperature and step count were not varied here (1.0, 256 steps); that
+ablation belongs to Phase 3.
+
 ---
 
 ## Phase 0 — oracle sanity checks (not experiments)

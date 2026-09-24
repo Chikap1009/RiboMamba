@@ -6,8 +6,9 @@
 > numbers mean and where they fall short".
 
 **Status:** Parts 1–2 written in full (end of Phase 0 content, 2026-09-22).
-Part 3 written at the end of the Phase 1 build (2026-09-23). Parts 4–10 are
-written at the end of their phases (CLAUDE.md §2.4), so this guide grows
+Part 3 written at the end of the Phase 1 build (2026-09-23). Part 4 written
+at the end of the Phase 2 build (2026-09-24; revised after its gate). Parts
+5–10 are written at the end of their phases (CLAUDE.md §2.4), so this guide grows
 with the work instead of being rushed at the end.
 
 ---
@@ -82,6 +83,24 @@ removed, at most 1,000 members per family) we have **452,867 / 57,052 /
 (vocabulary of 8: A, C, G, U plus pad, mask, begin, end), and batches group
 similar lengths so only **1.1 %** of the GPU's work is padding instead of
 54 %.
+
+*(Phase 2 addition.)* The generator is a **masked diffusion model**:
+training hides a random fraction t of the letters (from 0 % to 100 %) and
+teaches a network to fill them back in; generating starts from all-hidden
+and reveals letters step by step. The loss scores only the hidden letters,
+weighted by 1/t, which makes it a bound on the true likelihood, reported in
+**bits per nucleotide** (2.0 = knows nothing). The network is a standard
+14-million-parameter Transformer. Every sequence is framed with start and
+end markers, because without them the model provably can't tell positions
+apart when everything is hidden. Settings were chosen by rules written in
+advance, and those rules apply identically to Mamba later. The baseline
+reaches **1.904 bits/nt** on families it has never seen, better than the
+best counting model (1.966), and it overfits after about three passes over
+the data (dropout didn't cure that). Its generated RNA is novel (no
+copies of training sequences) and letter-realistic, but **barely more
+structured than chance**: 55 % of samples fold better than their own
+shuffles, against 79 % of real RNA. Closing that gap is what the rest of the
+project is about.
 
 ---
 
@@ -1178,14 +1197,82 @@ split, the 8-letter counting model scores **1.817**, which would look
 sequences' relatives in training. Under a leaky split, a trivial memoriser
 appears to beat a neural network.
 
-### 4.10 The full baseline run
+### 4.10 Training for real: overfitting, dropout, and the baseline
 
-*(To be completed when `tf_M_full` finishes: 200,000 steps, ≈ 66 epochs;
-the validation curve, the best checkpoint, and what samples look like.)*
+**The plan was wrong, and the validation curve said so.** The first "full"
+run was planned for 200,000 steps (about 66 passes over the data).
+Validation on unseen families was best at step **10,000 (1.902 bits)** and
+then got steadily worse (1.935 by step 45,000), while training kept
+improving (down to 1.41 bits). That's **overfitting**: the model began
+memorising the training families instead of learning what transfers to new
+ones. The run was stopped. Nothing was lost, since the best checkpoint is
+always kept, and about seven hours of GPU time were saved.
+
+**The standard remedy is dropout.** During training, a random fraction of
+the network's internal signals is switched off at each step, so no single
+memorised pathway can be relied on. It's off during evaluation. It was
+tested with the same honesty as the learning rate: a rule written in
+advance, dropout 0 / 0.1 / 0.2, 30,000 steps each on a fully decaying
+schedule, best validation wins.
+
+| dropout | best validation bits/nt | reached at step |
+|---|---|---|
+| **0** | **1.9040** | 10,000 |
+| 0.1 | 1.9081 | 12,500 |
+| 0.2 | 1.9178 | 12,500 |
+
+**Dropout didn't help.** It slowed learning, but every run still peaked
+after 3–4 passes and then declined. The floor of about **1.90 bits/nt** on
+unseen families held across schedules and dropout rates. It looks like a
+property of how much transfers *between* RNA families with this data and
+model, not a tuning failure. The Phase 2 baseline is therefore the dropout-0
+run at step 10,000 (**1.904**), chosen by the rule. We did *not* swap in the
+long run's marginally better 1.902, because it came from a different
+protocol, and the Mamba models must be given exactly the same one.
+
+**What the baseline generates.** 1,000 sequences, compared with 1,000 real
+validation sequences:
+- **Novel**: none has even a 50 %-identical relative in training, so it
+  isn't copying.
+- **Realistic composition**: GC content 0.46 against 0.48.
+- **But barely more structured than chance.** Real RNA folds more stably
+  than a letter-shuffled version of itself (keeping neighbour statistics)
+  **79 %** of the time. The generated sequences manage **55 %**, against 50 %
+  for pure chance. On average real RNA beats its shuffle by 7 kcal/mol, the
+  generated sequences by 0.6.
+
+So the baseline has learned what RNA *letters* look like far better than
+how RNA *folds*. That's consistent with its modest gain over the counting
+models (1.904 vs 1.966), and it's the most important finding to carry
+forward.
 
 ### 4.11 What Phase 2 settles, and what it leaves open
 
-*(Completed at the end of the phase.)*
+**Settled:**
+- A working masked-diffusion pipeline (forward masking, 1/t-weighted loss,
+  sampler), verified by exact tests: the hand-worked loss example, and the
+  2-bit "knows nothing" check.
+- A standard Transformer denoiser behind a backbone-agnostic interface,
+  with `<bos>`/`<eos>` framing (D-010), which fixes a measured
+  position-blindness problem.
+- A tuning protocol with rules fixed in advance (learning rate, then
+  dropout), which every Phase 4 backbone gets identically.
+- The baseline: 14.2 M parameters, **1.904 bits/nt** on unseen families,
+  against a best counting model of 1.966 and a know-nothing 2.000.
+
+**Left open, honestly:**
+- **Generated RNA is barely more structured than chance (55 % vs real
+  79 %).** Phase 3 must measure this properly (with confidence intervals,
+  sampling temperature and step count). Phase 4 asks whether a Mamba
+  backbone captures pairing better. Phase 5's structure conditioning may be
+  essential for design.
+- Overfitting after ~3 passes, and the ≈ 1.90 floor. Larger models, other
+  regularisers and more data per family were not tried; the limiting factor
+  seems to be the number of distinct families.
+- One seed so far. Differences of a few thousandths of a bit (e.g. 1.9020 vs
+  1.9040) are within run-to-run noise until seeds say otherwise.
+- The diffusion loss is an upper bound on the true likelihood, so the true
+  bits/nt may be somewhat lower.
 
 ## Part 5 — How we evaluated honestly  *(Phase 3)*
 
