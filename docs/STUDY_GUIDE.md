@@ -1314,6 +1314,276 @@ forward.
 
 ## Part 5 — How we evaluated honestly  *(Phase 3)*
 
+*(Drafted during the Phase 3 build, 2026-09-24. The sampling ablation's
+results and the frozen protocol are added when they exist; the section is
+revised after the Phase 3 gate.)*
+
+### 5.1 What this phase is for
+
+By the end of Phase 2 we had a model that generates RNA and one worrying
+number: its samples beat their own shuffles only 55 % of the time, against
+79 % for real RNA. Before building anything else, we need an evaluation we
+can trust, because Phase 4's entire question ("is Mamba better?") will be
+answered by it. An evaluation that can be fooled will be fooled, usually
+by accident, and usually in the direction the researcher hopes for.
+
+So Phase 3 builds the **harness** (the code that scores generated RNA),
+measures what real RNA scores on it, and writes down, in advance, exactly
+how the final comparison will be run. Only then is the test set unlocked.
+
+### 5.2 A testbench the design didn't write
+
+In chip design you would never let the design under test write its own
+testbench, and a testbench written *after* looking at which vectors pass
+is worthless. An evaluation is a testbench for a model. It is honest if:
+it measures what we care about; it has a scale (reference points above and
+below); a trivial cheat can't win it; it comes with error bars; it was
+fixed before the results; and it doesn't hinge on one instrument's quirks.
+
+The most useful question to ask of any metric is: **what is the dumbest
+generator that would score well on it?**
+
+| metric | the trivial cheat that wins it |
+|---|---|
+| low MFE ("stable") | GC-rich random letters |
+| novelty (unlike training) | random letters |
+| diversity | random letters |
+| "folds well" | copying training sequences |
+| realistic letter statistics | a 4-letter counting model |
+| MFE = target | flimsy designs that hold the target half the time |
+| a metric chosen after seeing results | whichever model you prefer |
+| one oracle as judge | a model that learns the oracle's quirks |
+
+No metric is honest alone. They are chosen so that each covers another's
+blind spot, exactly like the three leakage checks of Phase 1.
+
+### 5.3 Two settings
+
+The harness serves two situations. In the **unconditional** setting
+(Phases 2 and 4) the model receives no target; it should produce good RNA,
+and each sample's *own* MFE structure plays the role of the target. In the
+**design** setting (Phase 5) the model receives a target structure and must
+produce sequences that fold into it. Both use the same metrics; only the
+reference structure differs.
+
+### 5.4 From "does it fold?" to "how firmly?"
+
+The field's standard design test is **MFE match**: does the oracle's
+predicted structure equal the target? It is pass/fail, like "slack ≥ 0" in
+timing, and Phase 0 showed its flaw: `GGGAAACCC` passes while holding its
+target only 50.7 % of the time. Worse, it can reverse a comparison: a model
+with many flimsy passes beats a model with fewer rock-solid ones.
+
+The fix is to look at the whole **ensemble**, the Boltzmann distribution
+over all structures from Phase 0. The obvious measure is the probability of
+the exact target, P(target) = e^(−ΔG/RT)/Z. On nine-letter hairpins it works
+beautifully (0.507 vs 0.939). But on real RNA it collapses. We measured six
+real validation RNAs of 74–223 nucleotides: the probability of each one's
+exact MFE structure was between 0.000 and 0.069, and the "nearest rival"
+was, in five of six, the same structure with one end pair frayed, at an
+energy difference of 0.00 kcal/mol. With a hundred nucleotides there are
+thousands of near-copies of any structure, and the probability spreads
+across them.
+
+The analogy that makes this click comes from communications. P(target) is
+a **frame error rate**: the chance that every bit of a packet is right. If
+each of 100 nucleotides is independently right 98 % of the time, the whole
+frame is right only 0.98¹⁰⁰ ≈ 13 % of the time, though the molecule is 98 %
+correct. What we want is a **bit error rate**. That is the **ensemble
+defect**: the expected number of nucleotides in the wrong state (paired to
+the wrong partner, or paired when they should be free, or free when they
+should be paired), divided by the length.
+
+> NED = 1 − (1/N) · Σᵢ P(nucleotide i is in its target state)
+
+Tiny example: a 10-nucleotide target, and a molecule that spends 60 % of its
+time exactly in it and 40 % in a variant with the end pair open (2
+nucleotides wrong). Expected wrong nucleotides = 0.4 × 2 = 0.8, so NED =
+0.08, while P(target) = 0.6. Measured: `GGGAAACCC` has NED 0.316 (about three
+of its nine nucleotides wrong on average), `GGGAAACCA` 0.028, real RNAs
+0.08–0.22. The nucleic-acid design field (NUPACK) optimises exactly this
+quantity for exactly this reason.
+
+The **energy gap** to the nearest rival, Phase 0's noise margin, has the
+same problem as P(target) at real lengths (the rival is a trivial variant,
+gap ≈ 0), so it is recorded but never carries a claim.
+
+We check the ensemble defect independently of ViennaRNA's clever
+algorithm: for short sequences our test lists *every* possible structure
+by brute force, scores each, and computes probability and NED from their
+definitions. They agree, to about one part in a billion, except for one
+sequence where they differed by 0.06 %. Chasing that found a genuine
+boundary inconsistency inside ViennaRNA 2.7.2: with its default dangling-end
+model, its partition function treats structures whose outer pair closes on
+the last nucleotide 0.017 kcal/mol more favourably than its own energy
+evaluator does. Far below the precision of the energy tables, so we keep
+the standard settings and note it, but it is a good example of why a
+second, independent route to the same number is worth building.
+
+### 5.5 Structure beyond chance, and the composition trap
+
+"Lower MFE is better" is a trap. A random 80-letter sequence with 70 % G+C
+has an MFE of −26.0 kcal/mol, which looks impressively stable. Yet its own
+dinucleotide shuffles average −29.3: it is *less* stable than its own
+rearrangements. All of its stability comes from composition (G–C pairs are
+strong), none from the arrangement of the letters.
+
+The dinucleotide shuffle (Phase 1) keeps the letter counts and which letter
+follows which, the raw ingredients of stacking energy, and destroys the
+arrangement. Comparing a sequence with 50 shuffles of itself gives two
+numbers:
+
+- the **z-score**, (MFE − mean of shuffles) / spread of shuffles: how many
+  sigma below its own rearrangements the sequence is. The GC-rich random
+  sequence scores +1.46; a real microRNA hairpin −4.3.
+- **beats_shuffles**, the chance that the sequence beats a random shuffle
+  of itself, with ties counted as half. For any sequence whose letter
+  order carries no structure this is exactly 0.5 on average, because the
+  sequence and its shuffle are then equally likely arrangements of the
+  same pieces (a test checks this on random sequences).
+
+### 5.6 The scale: what real RNA scores
+
+A number without a scale is not a result. For every evaluation the harness
+scores five reference sets alongside the generated one, all with *exactly*
+the same lengths, because every folding metric depends on length: real
+held-out RNA; a second, independent real sample (the noise floor); training
+RNA (the family shift); shuffled real RNA; and random letters. Generated
+samples are drawn with those same lengths, one to one. On validation:
+
+| | real | second real sample | training RNA | shuffled | random |
+|---|---|---|---|---|---|
+| beats its shuffles | **0.792** | 0.800 | 0.828 | 0.496 | 0.503 |
+| MFE z-score | **−2.15** | −2.20 | −2.90 | −0.01 | −0.02 |
+| ensemble defect (own MFE) | **0.175** | 0.168 | 0.163 | 0.248 | 0.242 |
+| has a ≥ 80 % twin in the same set | 0.57 | 0.56 | 0.21 | 0 | 0 |
+
+Read it like a calibrated instrument. Shuffled and random sequences land on
+0.5 and z ≈ 0, exactly as theory says. The two real samples agree within
+their error bars, which tells us how much two honest measurements of the
+same thing differ. Training families are somewhat more structured than the
+validation families: the family shift from Phase 1, visible in a new metric.
+
+### 5.7 Novelty, diversity, and why real RNA isn't "diverse"
+
+**Novelty** asks whether a sample copies its teachers: its identity to the
+nearest *training* sequence. **Diversity** asks whether the model repeats
+itself: how similar samples are to *each other*. Random letters score
+perfectly on both, so both are only ever reported next to quality.
+
+The reference table holds a surprise worth quoting: **57 % of real
+validation sequences have a near-twin (≥ 80 % identical) among 1,000 real
+validation sequences.** Real RNA comes in families of close relatives. A
+generator that perfectly imitated real RNA would *also* produce near-twins.
+So "more diverse" cannot be read as "better" without this reference, and
+the protocol uses diversity as a guardrail against collapse (≥ 95 %
+distinct samples), not as a score to maximise.
+
+### 5.8 A second oracle, and why one judge isn't enough
+
+Everything above comes from ViennaRNA, a model with quirks. Phase 5 will
+steer generation using it, and **Goodhart's law** warns what happens: when
+a measure becomes a target, it stops being a good measure. A generator
+optimised against an imperfect judge learns the judge's blind spots, like
+a circuit tuned against a buggy SPICE model that fails on silicon.
+
+The second judge is **EternaFold**, chosen because it is a *different kind*
+of model: not hand-measured energy tables but a statistical model whose
+parameters were *learned* from tens of thousands of chemical-mapping
+experiments on RNAs designed by players of the Eterna game. Its scores are
+not in kcal/mol, so we compare only what both can say: predicted
+structures and ensemble defects. A result both judges agree on is more
+credible; one only the steering judge likes is suspect. Both still share
+blind spots (neither sees pseudoknots or 3D contacts), so agreement is
+evidence, not truth.
+
+Two practical surprises, both worth telling. First, the conda build of
+EternaFold never finished a prediction, even for a 9-letter sequence: it
+was compiled for MPI (parallel computing), where the main process only
+hands work to workers, and started alone it has no workers and spins
+forever. Launched through `mpirun` it works, and our tests reproduce the
+exact example structure from its documentation. Second, EternaFold ships
+its own training data, so we checked whether *the judge* had seen our
+held-out RNA: 0.30 % of validation sequences have a relative in it, all
+tRNAs.
+
+On the reference sets, EternaFold agrees with the ranking on its own terms
+(its ensemble defect for ViennaRNA's structures: 0.335 for real RNA, 0.46
+for shuffled and random), although the two judges predict the *identical*
+structure only 13 % of the time even for real RNA, a reminder of how
+uncertain structure prediction itself is.
+
+### 5.9 Statistics: error bars that count the right thing
+
+- **Bootstrap.** Treat the sample as a stand-in for the population,
+  resample it with replacement 10,000 times, recompute the number, and read
+  off the middle 95 %. Ten outcomes of which seven succeed give an interval
+  of 40–100 %; 546 of 1,000 give 51.7–57.9 %. It works for any statistic,
+  which is its point.
+- **Count the right unit.** Real test sequences come in families, and
+  relatives behave alike. Measuring 1,000 transistors from 10 wafers tells
+  you about 10 wafers, not 1,000 independent devices. So intervals on real
+  data resample *families* (a cluster bootstrap); our test shows that
+  ignoring this makes intervals about √10 too narrow when families have 10
+  identical members.
+- **Two kinds of randomness.** A thousand samples from one trained model
+  describe *that model*. Retrain with another random seed and the numbers
+  move. An architecture claim needs several trained models per
+  architecture, and here the numbers bite: the exact test that treats each
+  trained model as one observation can **never** reach p < 0.05 with three
+  seeds per architecture (the smallest possible p is 2/20 = 0.10), while
+  with five it can (2/252 ≈ 0.008). So the protocol uses five seeds, for a
+  mathematical reason, not a stylistic one.
+- **Pairing.** Evaluate both models on the same targets, lengths and random
+  numbers and compare per item: target difficulty cancels, like
+  common-mode noise in a differential pair. Our test shows a +0.02 effect
+  that is invisible unpaired and unmistakable paired.
+- **Multiple comparisons.** Twenty tests at the 5 % level give a 64 % chance
+  of at least one false "win". The protocol names five primary tests in
+  advance and corrects them together (Holm–Bonferroni); everything else is
+  reported as exploratory.
+
+### 5.10 Pre-registration, enforced in code
+
+The evaluation protocol is written into `RESULTS.md` before the test set is
+touched, and, unusually, **before the competing models exist**, so none of
+its choices can have been fitted to them. The code enforces it: every
+function that reads the test split refuses to run until `RESULTS.md`
+contains the line "Status: FROZEN on <date>". The rule that design
+targets are chosen by was likewise committed before any target set was
+built, and the grid of the sampling ablation was written in the logbook
+before its first sample.
+
+### 5.11 Design targets, and a surprise in bpRNA
+
+Targets for Phase 5 come from two places. The primary set takes one real
+sequence from each held-out family and uses its predicted structure as the
+target: every target is solvable (the real sequence solves it), which gives
+a built-in positive control, and there is no quality filter, because
+choosing natives that fold nicely would choose easy targets. The second set
+takes structures annotated in bpRNA by comparative analysis or experiment,
+after a strict screen: no pseudoknots, only pairs our oracle can form,
+nothing from a training family or clan (Rfam's own models decide), no
+near-copy of a training sequence. The screen found that **72 % of bpRNA's
+pseudoknot-free structures contain a pair ViennaRNA can never form** (a
+non-canonical pair, or a hairpin loop shorter than three), so they can't be
+design targets for our oracle at all.
+
+### 5.12 Mistakes and surprises in this phase
+
+- **A pool that never finished and never failed.** The first large folding
+  run was started by piping a script into Python. Its worker processes each
+  tried to re-import a script file that didn't exist, died, and were
+  silently restarted: 179,339 times in ten minutes, with no error shown. The
+  code now refuses to start in that situation. Lesson: a job that neither
+  finishes nor fails needs a guard in the code, not only in habits.
+- **One file versus many.** EternaFold wants an output *directory* for
+  several sequences but an output *file* for one; a batch that happened to
+  contain a single sequence would have crashed. Found by a test.
+- **My seed recommendation was wrong.** The concept block suggested three
+  training seeds per architecture; writing the statistics showed three can
+  never support a claim (5.9), so the protocol asks for five.
+
 ## Part 6 — What Mamba is, and why we chose it  *(Phase 4)*
 
 ## Part 7 — Steering the model toward a target shape  *(Phase 5)*

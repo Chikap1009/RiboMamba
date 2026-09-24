@@ -284,3 +284,64 @@ as a finding (the transferable signal between families seems limited at
 this scale), use early stopping, and give the Mamba models the identical
 protocol.
 **Source:** DECISIONS D-012; RESULTS.md.
+
+---
+
+## Phase 3 — The evaluation harness
+
+*(Drafts in Claude's words, written during the build; rewritten from
+Chirag's own gate answers after the Phase 3 gate.)*
+
+### Q: How do you know a generated RNA is "good"? Isn't lower folding energy better?
+**Draft answer:** Lower energy on its own is a trap, because it mostly
+measures composition. A random sequence with 70 % G and C has an MFE of
+about −26 kcal/mol, but it's actually *less* stable than shuffled versions
+of itself. So I compare every sequence with 50 dinucleotide shuffles of
+itself, which keep the letters and their neighbour statistics and only
+destroy the arrangement. Real validation RNA beats its own shuffles 79 % of
+the time; shuffled and random sequences sit at exactly 50 %, as they
+should. Then I measure how firmly a sequence holds its structure, with the
+ensemble defect, and I check both against a second oracle.
+**Likely follow-up:** "Why the ensemble defect and not the probability of
+the structure?" → At real lengths the exact structure's probability is near
+zero even for good RNA (0.000–0.07 on real 74–223-nt sequences), because
+probability spreads over thousands of near-identical variants. It's a frame
+error rate; the ensemble defect is the bit error rate.
+**Source:** logbook/2026-09-24-session-04.md (12:37, 13:44).
+
+### Q: Why use two folding programs?
+**Draft answer:** Because the model will later be steered by one of them,
+and anything optimised against an imperfect judge learns the judge's
+quirks: Goodhart's law. EternaFold is a genuinely different model, with
+parameters learned from chemical-mapping experiments rather than Turner's
+energy tables, so if a result holds under both, it's less likely to be a
+ViennaRNA artefact. I only compare structure-level outputs across the two,
+because EternaFold's scores aren't in kcal/mol. And I checked that the
+second oracle hadn't seen our held-out RNA in its own training data: only
+0.3 % of validation sequences, all tRNAs, have a relative there.
+**Likely follow-up:** "Why not RNAstructure?" → It uses the same Turner
+parameters, so it shares ViennaRNA's blind spots.
+**Source:** DECISIONS D-013.
+
+### Q: How many training runs do you need to claim one architecture is better?
+**Draft answer:** At least five per architecture, and I can show why. If
+each trained model is one observation, the exact permutation test with
+three versus three can never give p below 0.10, even if every run of one
+architecture beats every run of the other, because there are only 20 ways
+to split six runs into two groups of three. With five versus five there are
+252, and complete separation gives p ≈ 0.008. I also correct for the five
+primary tests I declared in advance, with Holm–Bonferroni. I'd actually
+recommended three at first; writing the statistics showed that was wrong.
+**Likely follow-up:** "Why not bootstrap over samples instead?" → A thousand
+samples from one trained model tell you about that model, not about the
+architecture. It's within-die versus die-to-die variation.
+**Source:** RESULTS.md, frozen protocol P4/P8; `seed_permutation_test`.
+
+### Q: What stops you from tuning the evaluation until your model wins?
+**Draft answer:** Three things. The protocol, meaning metrics, primary
+endpoints, sampling settings, targets and statistics, is written in
+RESULTS.md and frozen before the test set is used, and before the Mamba
+models even exist, so it can't have been fitted to them. The code enforces
+it: the test split can't be loaded until the file says "FROZEN". And every
+endpoint gets reported for every model, including losses.
+**Source:** RESULTS.md; `ribomamba/eval/protocol.py`.
