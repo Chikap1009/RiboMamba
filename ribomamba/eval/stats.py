@@ -6,6 +6,7 @@ Every function answers one question (STUDY_GUIDE Part 5; logbook session 04):
   cluster_bootstrap_ci    ... when items come in correlated groups (RNA families)?
   hierarchical_bootstrap  ... when there are several trained models (seeds), each with many items?
   paired_test             do two models differ, measured on the SAME items (targets, lengths)?
+  seed_permutation_test   do two ARCHITECTURES differ, with each trained model (seed) as one observation?
   holm                    which of several tests survive the multiple-comparisons correction?
 
 All randomness comes from an explicit seed, so every interval is reproducible.
@@ -13,7 +14,7 @@ Intervals are percentile bootstrap intervals (Efron 1979): resample, recompute,
 read off the 2.5th and 97.5th percentiles.
 """
 
-from itertools import product
+from itertools import combinations, product
 
 import numpy as np
 
@@ -105,6 +106,29 @@ def paired_test(a, b, n_boot: int = N_BOOT, n_perm: int = N_BOOT, level: float =
         p = float((hits + 1) / (n_perm + 1))                            # +1: the observed pattern itself
     est, low, high = bootstrap_ci(d, n_boot=n_boot, level=level, seed=seed)
     return {"mean_diff": est, "ci_low": low, "ci_high": high, "p_value": p, "n": len(d)}
+
+
+def seed_permutation_test(scores_a, scores_b) -> dict:
+    """Exact two-sided permutation test on per-seed scores (one number per trained model).
+
+    If the architecture made no difference, the labels "A" and "B" on the
+    n_a + n_b trained models would be interchangeable. We try EVERY way of
+    relabelling them and count how often the difference of means is at least
+    as large (in absolute value) as the real one. The smallest possible p is
+    2 / C(n_a + n_b, n_a): 0.10 for 3 vs 3 seeds (so 3 seeds can never reach
+    0.05), 0.0079 for 5 vs 5.
+    """
+    a, b = np.asarray(scores_a, dtype=float), np.asarray(scores_b, dtype=float)
+    pooled = np.concatenate([a, b])
+    observed = abs(a.mean() - b.mean())
+    count = total = 0
+    for chosen in combinations(range(len(pooled)), len(a)):
+        mask = np.zeros(len(pooled), dtype=bool)
+        mask[list(chosen)] = True
+        total += 1
+        count += abs(pooled[mask].mean() - pooled[~mask].mean()) >= observed - 1e-12
+    return {"mean_diff": float(a.mean() - b.mean()), "p_value": count / total,
+            "min_possible_p": 2 / total if len(a) == len(b) else 1 / total, "n_a": len(a), "n_b": len(b)}
 
 
 def holm(p_values, alpha: float = 0.05) -> tuple[np.ndarray, np.ndarray]:

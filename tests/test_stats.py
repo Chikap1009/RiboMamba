@@ -4,7 +4,7 @@ import numpy as np
 import pytest
 
 from ribomamba.eval.stats import (bootstrap_ci, cluster_bootstrap_ci, hierarchical_bootstrap, holm,
-                                  paired_test)
+                                  paired_test, seed_permutation_test)
 
 
 def test_bootstrap_matches_the_normal_formula_for_a_proportion():
@@ -86,6 +86,17 @@ def test_hierarchical_bootstrap_includes_seed_to_seed_variation():
     _, lo_pooled, hi_pooled = bootstrap_ci(pooled, seed=0)
     assert np.mean(reps) == pytest.approx(0.3, abs=0.03)
     assert np.percentile(reps, 97.5) - np.percentile(reps, 2.5) > 10 * (hi_pooled - lo_pooled)
+
+
+def test_seed_permutation_test_exact_values():
+    # Complete separation: only the real labelling and its mirror image are as extreme.
+    r = seed_permutation_test([1.1, 1.2, 1.3], [1.0, 0.9, 0.8])
+    assert r["p_value"] == pytest.approx(2 / 20) and r["min_possible_p"] == pytest.approx(0.1)
+    r = seed_permutation_test([2, 2.1, 2.2, 2.3, 2.4], [1, 1.1, 1.2, 1.3, 1.4])
+    assert r["p_value"] == pytest.approx(2 / 252)
+    assert seed_permutation_test([1, 2, 3], [1, 2, 3])["p_value"] == pytest.approx(1.0)
+    # One overlap (A's worst seed below B's best): no longer the most extreme labelling.
+    assert seed_permutation_test([2, 2.1, 2.2, 2.3, 1.05], [1, 1.1, 1.2, 1.3, 1.4])["p_value"] > 2 / 252
 
 
 def test_holm_textbook_example():
