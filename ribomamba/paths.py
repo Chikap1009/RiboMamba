@@ -8,3 +8,4 @@ REPO_ROOT = Path(__file__).resolve().parents[1]
 DATA_DIR = REPO_ROOT / "data"            # ignored by Git (.gitignore, D-002)
 RAW_DIR = DATA_DIR / "raw"               # downloads, exactly as published
 PROCESSED_DIR = DATA_DIR / "processed"   # cleaned + split, what training reads
+EVAL_DIR = DATA_DIR / "eval"             # evaluation harness outputs (re-creatable, Phase 3)
