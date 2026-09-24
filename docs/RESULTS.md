@@ -430,6 +430,79 @@ ablation belongs to Phase 3.
 
 ---
 
+## Phase 3 — the evaluation harness on validation
+
+Everything in this section uses **validation data only** (unseen families);
+the test split was locked in code throughout. Oracles: ViennaRNA 2.7.2
+(37 °C, dangles 2), EternaFold 1.3.1 (D-013).
+
+### The reference scale
+
+`python scripts/evaluate_samples.py` (commit `24b99aa`; val, n = 1000,
+seed 0; 5 min 44 s on 20 threads; output
+`data/eval/reference_val_n1000_s0.{json,parquet}`). Five sets, all with the
+lengths of `real`, in its order (`ribomamba/eval/reference.py`). Means with
+95 % bootstrap intervals (10,000 resamples, seed 0).
+
+| metric | real | real2 (noise floor) | train (length-matched) | shuffled real | random letters |
+|---|---|---|---|---|---|
+| beats_shuffles (0.5 = chance) | **0.792** [0.775, 0.810] | 0.800 [0.783, 0.816] | 0.828 [0.813, 0.844] | 0.496 [0.478, 0.514] | 0.503 [0.485, 0.521] |
+| MFE z-score vs 50 shuffles | **−2.15** [−2.32, −1.99] | −2.20 [−2.37, −2.03] | −2.90 [−3.11, −2.69] | −0.01 [−0.07, 0.05] | −0.02 [−0.09, 0.04] |
+| NED of own MFE structure | **0.175** [0.168, 0.182] | 0.168 [0.161, 0.175] | 0.163 [0.156, 0.171] | 0.248 [0.240, 0.256] | 0.242 [0.235, 0.250] |
+| P(own MFE structure) | 0.110 [0.101, 0.119] | 0.115 | 0.118 | 0.079 | 0.078 |
+| MFE per nt (kcal/mol) | −0.311 | −0.316 | −0.329 | −0.241 | −0.225 |
+| paired fraction | 0.600 | 0.606 | 0.620 | 0.555 | 0.533 |
+| EternaFold NED of ViennaRNA's MFE structure | 0.335 [0.325, 0.344] | 0.339 | 0.319 | 0.461 | 0.450 |
+| the two oracles predict the identical structure | 0.134 [0.113, 0.155] | 0.123 | 0.141 | 0.059 | 0.049 |
+| GC content | 0.479 | 0.481 | 0.469 | 0.479 | 0.499 |
+| has a ≥ 80 %-identity sibling in the same set | 0.572 [0.541, 0.602] | 0.563 | 0.208 | 0 | 0 |
+| has a ≥ 50 %-identity training relative | 0 | 0 | 1.000 † | 0 | 0 |
+
+† The training set's own members: the novelty detector's positive control.
+
+**Reading it.** Shuffled and random sequences sit at 0.5 and z ≈ 0, as
+theory predicts (a letter order without structure is exchangeable with its
+shuffles). The two independent real samples agree within their intervals:
+that is the noise floor for any comparison at n = 1000. Training families
+are somewhat more structured than validation families (the family shift).
+EternaFold ranks real above shuffled/random on its own terms. Real RNA has
+many near-twins within a sample (families of relatives), so diversity is
+read against this reference, not maximised.
+
+### Likelihood estimator for endpoint E1 (Phase 2 baseline)
+
+`python scripts/eval_likelihood.py --checkpoint checkpoints/tf_M_do0/best.pt
+--split val --draws 4` (code at commit `38f7c48`; the run recorded
+`38f7c48-dirty` because of an uncommitted logbook edit, docs only; noise
+seeds 1234–1237; 2026-09-24 14:40, 90 s on the GPU).
+
+| | bits/nt |
+|---|---|
+| value recorded in the checkpoint during training (`best_val`) | 1.90399 |
+| draw 0 (seed 1234, identical batches and noise to training's evaluation) | **1.9040** (reproduced exactly) |
+| draws 1, 2, 3 | 1.9071, 1.9058, 1.9076 |
+| **mean of 4 draws** | **1.9061**, family-cluster 95 % CI [1.8910, 1.9213] (406 families) |
+| spread between draws (sd) | 0.0016 |
+
+**Reading it.** The estimator reproduces training's number exactly (the
+known-answer check). Averaging draws matters little: the draw-to-draw noise
+(0.0016) is about ten times smaller than the uncertainty from *which
+families* are held out (± 0.015), so 4 draws suffice. Draw 0 is 0.002 lower
+than the average: selecting the best checkpoint on a single fixed draw
+carries a small optimistic bias ("winner's curse"), which is why the
+protocol averages 4 draws for the final number.
+
+### Does the second oracle's training data overlap ours?
+
+EternaFold's training FASTA files (shipped with bioconda `eternafold`
+1.3.1) against our validation split: exact matches 0 (40 against train);
+MMseqs2 at ≥ 80 % coverage: ≥ 50 % identity **0.30 %** of validation
+sequences (170 tRNA, 1 tRNA-Sec), ≥ 80 % 0.23 %, ≥ 95 % 0.02 %. Script:
+logbook 2026-09-24 session 04, 13:31 (scratchpad `ef_overlap.py`; to be
+promoted to `scripts/` when rerun on test after the freeze).
+
+---
+
 ## Phase 0 — oracle sanity checks (not experiments)
 
 Hand-calculated predictions from session 01, checked against ViennaRNA.
