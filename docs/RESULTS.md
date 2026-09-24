@@ -13,7 +13,171 @@ Two rules govern this file (CLAUDE.md §3.5):
 
 ## Frozen evaluation protocol
 
-*(Not yet written. To be completed in Phase 3, before any test-set evaluation.)*
+**Status: DRAFT, not frozen** (session 04, 2026-09-24). Under review by
+Chirag. Values marked **[PENDING]** are filled in from validation-only
+measurements before the freeze. The test split stays locked in code
+(`ribomamba/eval/protocol.py`) until this line reads "FROZEN on <date>".
+
+### P1. Principles
+
+1. **Validation for every choice, test for the final answer.** Every
+   setting (sampling steps, thresholds, target rules, hyperparameters) is
+   chosen on validation. The test split is used only to evaluate final
+   models, with this protocol, once per model.
+2. **Frozen before the competitors exist.** This protocol is frozen before
+   any Phase 4 model (BiMamba, autoregressive Mamba) has been trained, so
+   none of its choices can have been fitted to them.
+3. **Everything is reported.** Every primary and secondary endpoint is
+   reported for every model, whichever way it comes out, negative results
+   included (CLAUDE.md §3.5). Example sequences shown anywhere are drawn at
+   random (seeded), never picked.
+4. **Changes after the freeze** are appended as dated amendments with a
+   reason, never edits, and only if they are mechanical, apply identically
+   to every model, and are made before the results they affect exist (the
+   D-011 conditions).
+
+### P2. Instruments (the oracles)
+
+- **Primary oracle:** ViennaRNA **2.7.2** (Turner 2004 parameters), 37 °C,
+  dangles = 2, lonely pairs allowed, as fixed in
+  `ribomamba/eval/folding.py::model_details`. Known quirk: its dangles-2
+  partition function weights structures closing on the last nucleotide
+  0.017 kcal/mol differently from RNAeval (≤ 0.06 % effect on probabilities
+  in our tests; session 04 logbook, 12:50).
+- **Second oracle (robustness):** EternaFold **1.3.1**, parameters
+  `EternaFoldParams.v1`, most probable (Viterbi) structure and base-pair
+  probabilities (cutoff 10⁻⁵), run under `mpirun` (D-013). Used only for
+  structure-level metrics; never for steering or selection.
+- **Environment:** `environment.yml` plus a full lock file
+  `environment.lock.yml` (`conda env export`) committed at the freeze.
+- **Code:** metric definitions are the code in `ribomamba/eval/` at the
+  freeze commit, pinned by known-answer tests (`tests/test_folding.py`,
+  `test_stats.py`, `test_distributions.py`, `test_eternafold.py`,
+  `test_harness.py`).
+
+### P3. What is evaluated on the test split
+
+- **Likelihood:** all 56,873 test sequences (399 families).
+- **Unconditional generation:** a reference of n = 1,000 test sequences
+  (`reference_sample("test", 1000, seed 0)`) with its four companion sets
+  (`real2`, `train`, `shuffled`, `random`; `ribomamba/eval/reference.py`).
+  Every model generates 1,000 sequences with exactly these lengths, in
+  this order.
+- **Design (Phase 5):** target sets `rfam_test` and `bprna_test`, built by
+  `scripts/build_targets.py --split test --seed 0` (rule in its docstring,
+  committed before any target set existed) right after the freeze; their
+  SHA-256 checksums are appended here when built. Primary set: `rfam_test`.
+  [PENDING: Eterna100 as an external secondary set, Chirag's decision.]
+
+### P4. Models and fairness (Phase 4)
+
+Three models: Transformer diffusion (Phase 2 baseline architecture),
+BiMamba diffusion, autoregressive Mamba. Identical data, split, tokeniser,
+`<bos>`/`<eos>` framing, batch size (16,384 tokens) and training length;
+parameter counts within ±2 % of 14,174,976; each tuned by the same
+protocol (D-011 learning-rate sweep with the boundary rule, then the D-012
+dropout sweep over 30,000 steps, best-during-run EMA validation checkpoint).
+**Five training seeds per model** for the final configuration (the sweep
+run that won is seed 0). Reason for five: with three seeds per model the
+smallest possible p-value of the seed-level test (P8) is 0.10, so no claim
+could ever pass; with five it is 0.008. [PENDING: Chirag's confirmation.]
+[PENDING: one replication on a second split seed (one training seed per
+model, hyperparameters reused), reported descriptively, Chirag's decision.]
+
+### P5. Sampling
+
+- Diffusion models: temperature **T = 1.0** (the distribution the model
+  learned, the one its likelihood measures; no per-model tuning),
+  **[PENDING] N steps**, chosen on validation by the rule written before
+  the ablation (logbook 13:39): the smallest grid value whose
+  `beats_shuffles` and `ned_mfe` at T = 1.0 lie inside the 95 % intervals
+  of the 512-step setting.
+- Autoregressive model: T = 1.0, **length-constrained** (`<eos>` forbidden
+  before the target length and forced at it), so it receives the same
+  lengths as the diffusion models.
+- Bf16 network, float64 letter sampling (as in Phase 2); sampling seed 0.
+- Secondary: the temperature curve T ∈ {0.5, 0.6, …, 1.2} at N steps, for
+  every model.
+
+### P6. Metrics (definitions in code; the essential ones restated)
+
+- `beats_shuffles`: probability that a sequence's MFE is lower than that of
+  a random dinucleotide shuffle of itself (50 shuffles; ties count ½);
+  0.5 = no structure beyond chance.
+- `ned_mfe`: normalised ensemble defect of the sequence against its own MFE
+  structure (0 = holds it perfectly).
+- `ef_ned_vienna`: EternaFold's ensemble defect for ViennaRNA's MFE
+  structure (the cross-oracle check of `ned_mfe`).
+- `ned_target`, `p_target`, `mfe_match`, `energy_gap` (design, against a
+  given target); `mean_pairwise_hamming` among designs.
+- Test likelihood in **bits per nucleotide**: diffusion models, the
+  1/t-weighted NELBO averaged over 4 fixed noise draws per sequence (seeds
+  1234–1237, identical for every model); autoregressive model, the exact
+  negative log-likelihood of the framed sequence.
+
+### P7. Endpoints
+
+**Phase 4 primary endpoints** (5 tests, Holm-corrected together):
+
+| # | endpoint | direction | comparisons |
+|---|---|---|---|
+| E1 | test bits/nt | lower | BiMamba vs Transformer (both bounds; like for like) |
+| E2 | mean `beats_shuffles` of 1,000 samples | higher | BiMamba vs Transformer; BiMamba vs AR Mamba |
+| E3 | mean `ned_mfe` of 1,000 samples | lower | BiMamba vs Transformer; BiMamba vs AR Mamba |
+
+**Robustness condition:** a primary-endpoint win on E3 counts as
+oracle-robust only if `ef_ned_vienna` moves in the same direction;
+otherwise it is reported as ViennaRNA-dependent.
+
+**Guardrails** (checked for every model; a model failing one has its E2/E3
+reported but flagged as not interpretable): ≤ 5 % of samples with a
+≥ 80 %-identity training relative (copying); ≥ 95 % distinct samples
+(collapse); mean GC within ±0.05 of the real reference (composition).
+
+**Phase 5 primary endpoints** (targets `rfam_test`; K = 16 designs per
+target per method; Holm-corrected together; the list of methods compared
+is fixed by a dated amendment before their first test run):
+
+| # | endpoint | direction |
+|---|---|---|
+| D1 | mean over targets of the best (lowest) `ned_target` among the K designs | lower |
+| D2 | share of targets with ≥ 1 design whose MFE structure equals the target | higher |
+
+Secondary (reported, not tested for claims): everything else the harness
+computes, including AR vs diffusion likelihood (not like for like: an exact
+likelihood against an upper bound), EternaFold versions of every endpoint,
+`p_target`, energy gaps, diversity among successful designs, Wasserstein
+and k-mer distances to real RNA, `bprna_test` results, the temperature
+curves.
+
+### P8. Statistics and decision rules
+
+- **Architecture claims (Phase 4):** each trained model (seed) gives one
+  score per endpoint; models are compared with the exact seed-level
+  permutation test (`seed_permutation_test`, 5 vs 5, two-sided).
+  The p-values of the 5 primary tests are Holm-adjusted; "X beats Y on E"
+  requires an adjusted p ≤ 0.05. Otherwise the wording is "no detectable
+  difference with 5 seeds", never "equal".
+- **Effect sizes:** every difference is reported with a 95 % bootstrap
+  interval (10,000 resamples): over families (cluster bootstrap) for
+  anything computed on real test sequences, over samples for generated
+  sets, over targets (paired) for design endpoints.
+- **Design (Phase 5):** per-target paired comparisons (`paired_test`,
+  sign-flip); seed handling as above if the compared methods are trained
+  models.
+- **Uncertainty of a single model's number:** bootstrap interval as above;
+  proportions from ≥ 1,000 items; zero counts reported with the rule of
+  three.
+
+### P9. Order of operations after the freeze
+
+1. Commit `environment.lock.yml`; add "FROZEN on <date>" here (this
+   unlocks the test split in code).
+2. Build `rfam_test` / `bprna_test`; append their checksums here.
+3. Run the EternaFold training-data overlap check on test (as done for
+   validation; session 04, 13:31); append.
+4. Phase 4 trains and selects every model on validation; each final model
+   is evaluated on test exactly once with this protocol.
 
 ---
 
