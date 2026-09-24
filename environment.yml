@@ -13,6 +13,8 @@ dependencies:
                      # evaluation oracle, and another version may give other energies.
   - mmseqs2=18.8cc5c   # fast sequence search; used for the train/test leakage audit
   - infernal=1.1.5     # covariance-model (structure-aware) search; Rfam's own tool (D-009)
+  - eternafold=1.3.1   # second, independent folding oracle: parameters learned from Eterna's
+                       # chemical-mapping experiments, not Turner's tables (Phase 3, D-013)
   - polars=1.44        # fast table processing (20 M Rfam rows in seconds, low memory)
   - huggingface_hub=1.9  # downloads dataset files from the HuggingFace Hub at a pinned revision
   - numpy=2.5
