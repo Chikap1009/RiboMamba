@@ -176,6 +176,70 @@ a control isn't a box to tick. When it looks slightly off, that's the
 detector telling you it's broken.
 **Source:** logbook/2026-09-23-session-03.md (19:37); DECISIONS D-009.
 
+### Q: Why a maximum length of 256?
+**Draft answer:** Three reasons. Memory: the Transformer baseline's
+activation memory grows with length, and naive attention grows with length
+squared. My rough estimate was ~2.7 GB at 256 versus ~7.4 GB at 512 on an
+8 GB card. The oracle folds in O(N³), so 512-nt sequences cost ~8× more to
+evaluate. And MFE prediction gets less reliable for long RNAs. The cost is
+honest: 256 keeps 95 % of Rfam families, and the 185 dropped ones are the
+long RNAs, the ribosomal RNAs, RNase P and tmRNA, which we don't claim to
+design. I applied the cut per family (by median length) first, because
+otherwise short fragments of ribosomal RNA would slip in as if they were
+whole molecules.
+**Likely follow-up:** "Doesn't that favour the Transformer, since Mamba's
+advantage is at long lengths?" → Yes, it probably does, and I'd state it as
+a limitation. It makes our comparison conservative for Mamba. If Mamba still
+wins at ≤ 256, that's a stronger claim; if it loses, the length regime is
+part of the explanation.
+**Source:** DECISIONS D-007.
+
+### Q: Why tokenise one nucleotide per token?
+**Draft answer:** Base pairs link single nucleotides, and masked diffusion
+hides and predicts whole tokens. With 3-letter tokens, one token could sit
+half in a stem and half in a loop, so the model couldn't mask or predict
+one base independently. The alphabet is only 4 letters and our sequences
+are at most 256 long, so there's nothing to gain from compressing. The
+vocabulary is 8 tokens: A, C, G, U plus pad, mask, begin and end. The
+begin/end tokens are reserved now so the autoregressive baseline shares the
+same embedding table, which keeps the parameter matching exact.
+**Source:** DECISIONS D-006.
+
+### Q: What is padding, and how did you handle its cost?
+**Draft answer:** A GPU processes a batch as one rectangle, so shorter
+sequences are padded to the longest one in the batch, and an attention mask
+marks which positions are real so padding never influences the model or the
+loss. Padding is wasted compute. With random batches, 54 % of all positions
+in our training set were padding. I group similar lengths into the same
+batch (shuffling within big pools, so batches stay random between epochs),
+which brought it to 1.1 %, roughly halving the cost of an epoch.
+**Source:** logbook/2026-09-23-session-03.md (04:27).
+
+---
+
+## Phase 2 — Masked diffusion and the Transformer baseline
+
+### Q: Why masked diffusion instead of generating left to right like GPT?
+**Draft answer** *(Chirag's quiz answer, sharpened)*: A base can pair with
+something on its left or its right, so the model needs information from both
+sides. Left to right, if position 1 has to pair with position 9, position 9
+hasn't been written yet when position 1 is chosen. Masked diffusion starts
+with everything hidden and reveals letters gradually, and at every step the
+model sees both sides of whatever is already written. It's awkward, not
+impossible, to do it left to right, since the chain rule is exact. That's why
+I keep an autoregressive Mamba as a baseline, to test it empirically.
+**Source:** Phase 2 gate, Q1; STUDY_GUIDE §4.2.
+
+### Q: Why do you put start and end markers around every sequence?
+**Draft answer** *(Chirag's quiz answer, sharpened)*: When every position is
+masked, which is exactly how generation starts, every position has the same
+vector, so the Transformer gives every position the same output: it can't
+tell position 3 from position 50. The start and end markers tell each
+position how far it is from the start and the end, so it has something
+position-specific to learn from. I measured it: 2.11 bits without markers,
+1.58 with them, on a memorisation test.
+**Source:** Phase 2 gate, Q5/Q7; DECISIONS D-010.
+
 ### Q: Your model gets ~1.9 bits per nucleotide. Is that good?
 **Draft answer:** On its own the number means little, so I calibrated it.
 Knowing nothing is exactly 2 bits for four letters. Letter frequencies alone
@@ -220,42 +284,3 @@ as a finding (the transferable signal between families seems limited at
 this scale), use early stopping, and give the Mamba models the identical
 protocol.
 **Source:** DECISIONS D-012; RESULTS.md.
-
-### Q: Why a maximum length of 256?
-**Draft answer:** Three reasons. Memory: the Transformer baseline's
-activation memory grows with length, and naive attention grows with length
-squared. My rough estimate was ~2.7 GB at 256 versus ~7.4 GB at 512 on an
-8 GB card. The oracle folds in O(N³), so 512-nt sequences cost ~8× more to
-evaluate. And MFE prediction gets less reliable for long RNAs. The cost is
-honest: 256 keeps 95 % of Rfam families, and the 185 dropped ones are the
-long RNAs, the ribosomal RNAs, RNase P and tmRNA, which we don't claim to
-design. I applied the cut per family (by median length) first, because
-otherwise short fragments of ribosomal RNA would slip in as if they were
-whole molecules.
-**Likely follow-up:** "Doesn't that favour the Transformer, since Mamba's
-advantage is at long lengths?" → Yes, it probably does, and I'd state it as
-a limitation. It makes our comparison conservative for Mamba. If Mamba still
-wins at ≤ 256, that's a stronger claim; if it loses, the length regime is
-part of the explanation.
-**Source:** DECISIONS D-007.
-
-### Q: Why tokenise one nucleotide per token?
-**Draft answer:** Base pairs link single nucleotides, and masked diffusion
-hides and predicts whole tokens. With 3-letter tokens, one token could sit
-half in a stem and half in a loop, so the model couldn't mask or predict
-one base independently. The alphabet is only 4 letters and our sequences
-are at most 256 long, so there's nothing to gain from compressing. The
-vocabulary is 8 tokens: A, C, G, U plus pad, mask, begin and end. The
-begin/end tokens are reserved now so the autoregressive baseline shares the
-same embedding table, which keeps the parameter matching exact.
-**Source:** DECISIONS D-006.
-
-### Q: What is padding, and how did you handle its cost?
-**Draft answer:** A GPU processes a batch as one rectangle, so shorter
-sequences are padded to the longest one in the batch, and an attention mask
-marks which positions are real so padding never influences the model or the
-loss. Padding is wasted compute. With random batches, 54 % of all positions
-in our training set were padding. I group similar lengths into the same
-batch (shuffling within big pools, so batches stay random between epochs),
-which brought it to 1.1 %, roughly halving the cost of an epoch.
-**Source:** logbook/2026-09-23-session-03.md (04:27).

@@ -1274,6 +1274,44 @@ forward.
 - The diffusion loss is an upper bound on the true likelihood, so the true
   bits/nt may be somewhat lower.
 
+### 4.12 Easy mix-ups (from the Phase 2 quiz; reread these)
+
+- **Nats vs bits.** −ln(0.25) = **1.386 nats**; −log₂(0.25) = **2 bits**.
+  Same quantity, different log base; divide nats by ln 2 ≈ 0.693 to get
+  bits. "Knows nothing" is 2 bits = 1.386 nats per nucleotide.
+- **Dropout did *not* fix the overfitting.** All three settings peaked after
+  about 3 passes; the rule chose dropout 0. What protects the baseline is
+  **early stopping**: we keep the best checkpoint (step 10,000), not the
+  last.
+- **Why validation gets *worse* on unseen families:** what the model
+  memorises is family-specific (particular letter chunks) and none of it
+  transfers to a new family. The 8-letter counting model does the same:
+  2.08 bits, worse than guessing, because confident wrong predictions cost
+  more than uniform guesses (the penalty −ln p grows without bound as p → 0).
+- **A counting model** (k-th order Markov) just counts, in the training
+  data, which letter follows each k-letter context, and predicts with those
+  frequencies. k = 4 captures RNA's general local habits; k = 8 memorises
+  families.
+- **"More stable than its own shuffle" reads on a scale from 50 % to 79 %.**
+  Random letters: 50 % (a sequence and its shuffle are both random
+  arrangements, a coin flip). Real RNA: 79 % (evolution arranged the
+  letters to pair). Our baseline: 55 %, so novel but barely structured.
+  Copies of training RNA would score ~79 % *and* show training relatives;
+  the other sanity number (0 % relatives) rules copying out.
+- **Mamba is not blind to the right-hand side.** Plain Mamba scans left to
+  right; **BiMamba also scans right to left**, so it sees both sides, but
+  through a compressed running summary rather than attention's direct
+  i → j lookup. That difference is the Phase 4 question.
+- **A fair backbone comparison** keeps identical: the diffusion process,
+  data and split, tokenisation, **parameter count, compute (steps/tokens),
+  tuning protocol and evaluation**. Then any difference can only come
+  from the backbone.
+- **Why a winner on the edge of a sweep isn't final:** the optimum may lie
+  beyond the edge, so test the next value. **Why adding that rule late was
+  legitimate:** it's mechanical, identical for every backbone, added before
+  any other backbone was tuned, recorded with its date, and it only touched
+  validation-based tuning, never the test set.
+
 ## Part 5 — How we evaluated honestly  *(Phase 3)*
 
 ## Part 6 — What Mamba is, and why we chose it  *(Phase 4)*
