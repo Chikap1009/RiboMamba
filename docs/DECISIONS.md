@@ -196,6 +196,24 @@ newest PyTorch. Nothing we need is missing, and we'll revisit only if a
 newer `mamba-ssm` wheel appears. About 3 GB of disk for PyTorch plus its
 bundled CUDA libraries.
 
+**Outcome (2026-09-25, session 04).** The pin paid off. `mamba-ssm`
+2.3.2.post1 and `causal-conv1d` 1.7.0 install and run on this machine from
+the authors' prebuilt wheels for exactly this stack (CUDA 12 / torch 2.10 /
+C++11 ABI true / CPython 3.12 / x86_64), and a Mamba2 block runs on the
+RTX 4060 under WSL2. Two details worth knowing:
+- `pip install mamba-ssm` **fails** here. PyPI carries only source archives,
+  and building them needs the CUDA compiler `nvcc`, which this environment
+  does not have (PyTorch ships CUDA *runtime* libraries, not the compiler).
+  The error is `NameError: name 'bare_metal_version' is not defined` from
+  their setup script, which is really "no nvcc found". The fix is to install
+  the release wheels by URL, as `environment.yml` now does.
+- Installing them pulls in ~20 further packages (einops, transformers,
+  tokenizers, tilelang, cutlass-dsl, z3-solver, …). Checked afterwards:
+  torch 2.10.0+cu128, ViennaRNA 2.7.2, polars and numpy unchanged, and all
+  79 tests still pass. `environment.lock.yml` is deliberately **not**
+  regenerated: it is the snapshot of the environment at the Phase 3 protocol
+  freeze, and rebuilding the evaluation oracles from it must stay possible.
+
 ---
 
 ## D-005 — Rfam is the training corpus; datasets are pinned to exact versions

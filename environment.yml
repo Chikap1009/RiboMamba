@@ -26,4 +26,12 @@ dependencies:
       # causal-conv1d (Phase 4) ship prebuilt wheels for (D-004).
       - --extra-index-url https://download.pytorch.org/whl/cu128
       - torch==2.10.0+cu128
+      # Mamba (Phase 4). These contain compiled CUDA kernels, and PyPI has only source
+      # archives: pip would try to compile them, which fails here because the environment has
+      # PyTorch's CUDA runtime but no CUDA compiler (nvcc). So we install the authors' prebuilt
+      # wheels from their GitHub releases, choosing the one matching this stack exactly:
+      # CUDA 12, torch 2.10, C++11 ABI true, CPython 3.12, x86_64 (the reason torch is pinned
+      # to 2.10, D-004). Verified working on the RTX 4060 under WSL2 (session 04).
+      - https://github.com/Dao-AILab/causal-conv1d/releases/download/v1.7.0/causal_conv1d-1.7.0+cu12torch2.10cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
+      - https://github.com/state-spaces/mamba/releases/download/v2.3.2.post1/mamba_ssm-2.3.2.post1+cu12torch2.10cxx11abiTRUE-cp312-cp312-linux_x86_64.whl
       - -e .             # this repository's own code (ribomamba/), "editable" (see pyproject.toml)

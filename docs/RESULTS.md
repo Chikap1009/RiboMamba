@@ -714,6 +714,41 @@ improvements would be reported as "not detectable with 5 seeds", with
 their effect sizes and intervals. Informational: this does not change the
 frozen protocol, and a Mamba backbone's own seed spread may differ.
 
+### Does Mamba run here, and how fast? (single-block micro-benchmark)
+
+Run 2026-09-25 05:00 in the scratchpad (throwaway code, not part of the
+repository; Phase 4 repeats it on the full models with
+`scripts/measure_memory.py`). `Mamba2(d_model=384, d_state=128, d_conv=4,
+expand=2)` from `mamba-ssm` 2.3.2.post1 vs one Phase 2 Transformer block
+(d 384, 6 heads), bf16 autocast, forward + backward + AdamW step, 10 timed
+steps after 2 warm-up steps, batch 16.
+
+| | parameters per block | L = 64 | L = 256 | L = 1024 |
+|---|---|---|---|---|
+| Mamba2 block | 993,572 | 5.6 ms | 6.0 ms | **11.7 ms** |
+| Transformer block | 1,771,008 | 3.6 ms | **3.8 ms** | 21.7 ms |
+| peak memory, either | | 0.06–0.08 GB | 0.13–0.14 GB | 0.44–0.45 GB |
+
+**Reading it.**
+- **The kernels work** on the RTX 4060 under WSL2. This was the largest
+  technical risk in the project (D-004) and it is now cleared.
+- **The crossover is real and sits above our data.** At 1,024 nucleotides the
+  Mamba block is 1.9× *faster* than attention; at our 256-nucleotide cap it
+  is 1.6× *slower* per block. This is the measured version of the note in
+  STUDY_GUIDE §3.6: the length cap chosen for the 8 GB card favours the
+  Transformer, so the Phase 4 comparison is **conservative for Mamba**.
+- **At equal parameters the gap widens**, because a Mamba2 block holds fewer
+  parameters than a Transformer block of the same width: matching 14.17 M
+  needs ≈ 14 Mamba blocks against 8 Transformer blocks, so ≈ 84 ms vs
+  ≈ 30 ms per step at L = 256, i.e. **≈ 2.8× the training time**. A 30,000-step
+  run would take ≈ 3.7 h instead of 1.35 h, putting Phase 4's GPU budget at
+  ≈ 60–70 h rather than the 33–58 h estimated before this measurement.
+- Caveats: one block in isolation, fixed batch, no data loading; `d_state`
+  is Mamba2's default 128 and a smaller state would be cheaper. Whether to
+  match parameters by depth or by width is a Phase 4 design decision, taught
+  before it is made. The honest number for the protocol's compute-matching
+  comes from the full models.
+
 ---
 
 ## Phase 0 — oracle sanity checks (not experiments)
