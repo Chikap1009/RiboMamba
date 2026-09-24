@@ -657,3 +657,55 @@ protocol stands (LR sweep, then dropout sweep {0, 0.1, 0.2} × 30k steps,
 best-during-run), because a Mamba backbone may respond to dropout
 differently; only the rule is fixed, not the answer.
 
+
+---
+
+## D-013 — A second, independent folding oracle: EternaFold, used for structure-level checks only
+**Date:** 2026-09-24   **Phase:** 3   **Logbook:** logbook/2026-09-24-session-04.md (13:18)
+**Status:** accepted
+
+**Context.** Every structural number in this project comes from one
+oracle, ViennaRNA 2.7.2 with Turner 2004 parameters. The oracle is a model
+with quirks (special bonuses for particular hairpin loops, approximations
+for dangling ends, no pseudoknots). Phase 5 will *steer* generation with
+it, and a generator optimised against one imperfect scorer can learn its
+quirks and score well without being good (Goodhart's law). We need a way to
+tell "good RNA" from "good at pleasing ViennaRNA".
+
+**Decision.** Add **EternaFold 1.3.1** (bioconda; Wayment-Steele et al.,
+Nature Methods 2022) as a second oracle, pinned in `environment.yml`, and:
+1. use it only for **structure-level** outputs: its single most probable
+   structure (`--viterbi`, the same kind of estimate as an MFE structure)
+   and its base-pair probabilities, from which we compute ensemble defects;
+   never its raw scores, which are not kcal/mol;
+2. ViennaRNA remains the primary oracle and the only one used for steering
+   or selection; results are *reported* under both, with their agreement;
+3. run it through `mpirun` (≥ 2 processes) in batches, because the bioconda
+   build is compiled for MPI and otherwise never finishes.
+
+**Alternatives rejected.**
+- *RNAstructure:* a different program, but built on the same Turner
+  nearest-neighbour parameters, so it shares ViennaRNA's blind spots; weak
+  independence.
+- *CONTRAfold:* EternaFold's predecessor (same model class), trained on
+  far less data, mostly natural structures.
+- *LinearPartition / LinearFold:* faster approximate algorithms, not a
+  different model (they run with ViennaRNA's or CONTRAfold's parameters).
+- *A 3D or deep-learning predictor:* much more expensive, less reliable for
+  RNA, and deep-learning structure predictors are known to generalise
+  poorly across families, which is exactly our test condition.
+- *EternaFold's default MEA estimator for "predicted structure":* a
+  different estimator (maximises expected accuracy, and allows isolated
+  pairs with gamma = 6); the Viterbi structure is the like-for-like
+  counterpart of an MFE structure.
+
+**Consequences / trade-offs accepted.**
+- EternaFold was trained partly on natural structures. Its training data
+  overlaps our validation set only for tRNA (0.30 % of validation sequences
+  have a ≥ 50 %-identical relative in it); the test-set version of this
+  check runs after the protocol freeze.
+- Two oracles can still share blind spots (both are secondary-structure
+  only, both ignore pseudoknots and 3D contacts). Agreement is evidence, not
+  truth; there is still no wet-lab validation.
+- ~221 MB of extra packages (EternaFold pulls in a C++ toolchain and
+  OpenMPI).
