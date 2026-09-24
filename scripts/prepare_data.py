@@ -32,8 +32,10 @@ Output: data/processed/{train,val,test}.parquet   columns: sequence, family, cla
         splits/rfam_split.tsv                      which family went where (committed to Git)
 """
 
+import argparse
 import hashlib
 import json
+from pathlib import Path
 
 import numpy as np
 import polars as pl
@@ -50,6 +52,10 @@ TEST_FRACTION = 0.10      # ... and in test; the rest (~80%) is train
 NEAR_DUP_IDENTITY = 0.8   # D-008: step 10 thresholds (the conventional 80% used by e.g.
 NEAR_DUP_COVERAGE = 0.8   #        CD-HIT-based RNA splits), applied on top of the family split
 SEED = 0                  # every random choice below derives from this one number
+SPLIT_SEED = SEED         # WHICH groups are held out (--split-seed); the cleaning and the
+                          # per-family draw always use SEED, so every split sees the same corpus
+                          # and only the held-out families change (frozen protocol P4's
+                          # replication split). --split-seed 0 reproduces the frozen data.
 PLACEHOLDER_FAMILY = "No such family"
 
 
@@ -101,7 +107,7 @@ def stable_hash(text: str) -> str:
     Python's built-in hash() of a string is deliberately randomised per
     process, so it can't be used to make a reproducible split.
     """
-    return hashlib.sha256(f"{SEED}:{text}".encode()).hexdigest()
+    return hashlib.sha256(f"{SPLIT_SEED}:{text}".encode()).hexdigest()
 
 
 def assign_splits(df: pl.DataFrame) -> pl.DataFrame:
@@ -181,20 +187,32 @@ def check_no_leakage_by_construction(df: pl.DataFrame) -> None:
 
 
 def main() -> None:
+    global SPLIT_SEED
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--split-seed", type=int, default=SEED,
+                   help="which groups are held out; 0 (default) reproduces the frozen split")
+    p.add_argument("--out-dir", type=Path,
+                   help="where to write (default: data/processed for seed 0, data/processed_split<k> otherwise)")
+    args = p.parse_args()
+    SPLIT_SEED = args.split_seed
+    out_dir = args.out_dir or (PROCESSED_DIR if SPLIT_SEED == SEED
+                               else PROCESSED_DIR.with_name(f"processed_split{SPLIT_SEED}"))
+    split_table = "rfam_split.tsv" if SPLIT_SEED == SEED else f"rfam_split_seed{SPLIT_SEED}.tsv"
+
     stats = {"config": dict(MAX_LEN=MAX_LEN, FRAGMENT_FRACTION=FRAGMENT_FRACTION,
                             PER_FAMILY_CAP=PER_FAMILY_CAP, VAL_FRACTION=VAL_FRACTION,
-                            TEST_FRACTION=TEST_FRACTION, SEED=SEED,
+                            TEST_FRACTION=TEST_FRACTION, SEED=SEED, SPLIT_SEED=SPLIT_SEED,
                             NEAR_DUP_IDENTITY=NEAR_DUP_IDENTITY, NEAR_DUP_COVERAGE=NEAR_DUP_COVERAGE,
                             STRUCTURAL_FILTER="Rfam 15.0 CMs, score >= GA, cmscan --nohmmonly --toponly --rfam")}
     df = remove_near_duplicates_of_train(assign_splits(clean(stats)), stats)
     df = remove_structural_members_of_train(df, stats)
     check_no_leakage_by_construction(df)
 
-    PROCESSED_DIR.mkdir(parents=True, exist_ok=True)
+    out_dir.mkdir(parents=True, exist_ok=True)
     stats["splits"] = {}
     for split in ("train", "val", "test"):
         part = df.filter(pl.col("split") == split).drop("split").sort("family", "sequence")
-        part.write_parquet(PROCESSED_DIR / f"{split}.parquet")
+        part.write_parquet(out_dir / f"{split}.parquet")
         stats["splits"][split] = dict(
             sequences=part.height, share=round(part.height / df.height, 4),
             families=part["family"].n_unique(), groups=part["group"].n_unique(),
@@ -206,11 +224,11 @@ def main() -> None:
     table = (df.group_by("family", "clan", "group", "split").len("n_sequences")
              .sort("split", "group", "family"))
     (REPO_ROOT / "splits").mkdir(exist_ok=True)
-    table.write_csv(REPO_ROOT / "splits" / "rfam_split.tsv", separator="\t")
+    table.write_csv(REPO_ROOT / "splits" / split_table, separator="\t")
     largest = df.group_by("group", "split").len().sort("len", descending=True).head(10)
     stats["largest_groups"] = largest.to_dicts()
 
-    with open(PROCESSED_DIR / "prepare_stats.json", "w") as f:
+    with open(out_dir / "prepare_stats.json", "w") as f:
         json.dump(stats, f, indent=2)
     printable = {k: v for k, v in stats.items() if k != "4_dropped_long_families"}
     printable["4_dropped_long_families"] = f"{len(stats['4_dropped_long_families'])} families (list in JSON)"
