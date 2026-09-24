@@ -95,6 +95,21 @@ def stage_table(args) -> None:
     with pl.Config(tbl_rows=100, tbl_cols=30, tbl_width_chars=250):
         print(table.select(["temperature", "steps", "sampling_seconds", *TABLE_METRICS, "distinct_fraction",
                             *TABLE_DISTANCES]))
+    print(f"steps rule (fixed 13:39, before any result): N = {steps_rule(table)}")
+
+
+def steps_rule(table: pl.DataFrame, temperature: float = 1.0) -> int | None:
+    """The pre-registered rule: the smallest grid N whose beats_shuffles AND ned_mfe at T = 1.0
+    lie inside the 95 % intervals of the 512-step setting (more steps can only help; this finds
+    where the gain has stopped)."""
+    at_t = table.filter(pl.col("temperature") == temperature).sort("steps")
+    if at_t.filter(pl.col("steps") == max(STEPS)).is_empty():
+        return None
+    ref = at_t.filter(pl.col("steps") == max(STEPS)).row(0, named=True)
+    for row in at_t.iter_rows(named=True):
+        if all(ref[f"{m}_low"] <= row[m] <= ref[f"{m}_high"] for m in ("beats_shuffles", "ned_mfe")):
+            return int(row["steps"])
+    return None
 
 
 def main() -> None:
