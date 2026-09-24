@@ -1569,7 +1569,60 @@ pseudoknot-free structures contain a pair ViennaRNA can never form** (a
 non-canonical pair, or a hairpin loop shorter than three), so they can't be
 design targets for our oracle at all.
 
-### 5.12 Mistakes and surprises in this phase
+The result on validation: 402 targets from held-out Rfam families and 183
+from bpRNA. And one more lesson about oracles: for the bpRNA targets,
+ViennaRNA predicts the annotated structure for the *real* sequence only
+6.6 % of the time. The folding program and the comparative annotations
+disagree about most natural RNAs. Success on those targets therefore means
+"reaching a structure the oracle doesn't even assign to the natural
+sequence", which is why they are a secondary set and why the natural
+sequence's score is reported as a reference point, not a ceiling.
+
+### 5.12 Turning the sampling knobs: temperature and steps
+
+A masked-diffusion sampler has two knobs. **Temperature** divides the
+model's scores before they become probabilities; this is literally the
+Boltzmann formula from Phase 0 with the model's score playing the role of
+negative energy, so lowering it concentrates the sampler on its favourite
+letters, exactly as cooling concentrates a molecule on its lowest-energy
+fold. **Steps** set how many letters are revealed at once: with 16 steps
+a 93-letter sequence reveals about six letters per step, drawn without
+seeing each other, so two pairing partners revealed together can't agree.
+
+We measured all 48 combinations of 8 temperatures and 6 step counts on the
+Phase 2 baseline, 1,000 samples each, with the grid and the selection rule
+written down before the first sample. Three findings:
+
+1. **Steps didn't matter.** Sixteen steps and 512 gave the same numbers
+   within error bars. Revealing letters one at a time only helps a model
+   that knows which letters must agree; this one mostly doesn't.
+2. **Cooling traded realism for a little structure.** Going from
+   temperature 1.2 to 0.5 raised "beats its shuffles" from 0.55 to 0.63,
+   but the sequences drifted AU-rich (GC from 0.47 to 0.40, real RNA 0.48),
+   and their four-letter-word statistics ended up *further* from real RNA
+   than random letters are.
+3. **Nothing made the folds sharper.** In all 48 settings the samples held
+   their own structures no more firmly than random letters do: ensemble
+   defect 0.24–0.26, random 0.24, real RNA 0.175. EternaFold, judging
+   independently, agrees.
+
+This turns Phase 2's worry into a precise statement: the baseline makes
+novel, diverse, letter-realistic RNA whose folding is close to that of
+shuffled RNA, and **no sampling setting can substitute for a model that
+hasn't learned pairing**. That is exactly the gap Phase 4 (does a
+different backbone learn pairing better?) and Phase 5 (conditioning on a
+target structure) address.
+
+A subtle point about the rule for choosing the number of steps. It was
+written in advance: take the smallest step count that does as well as 512
+steps. For this model it returns 16. But that answer describes *this*
+model: a backbone that did learn pairing might need more steps, and fixing
+16 for everyone would quietly handicap it. So the recommendation for the
+protocol is 256 steps for every model, and the reason it is legitimate to
+depart from the rule is checkable: for the baseline, 16 and 256 give the
+same result, so the change cannot have been made to flatter or hurt it.
+
+### 5.13 Mistakes and surprises in this phase
 
 - **A pool that never finished and never failed.** The first large folding
   run was started by piping a script into Python. Its worker processes each
