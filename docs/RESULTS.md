@@ -13,10 +13,16 @@ Two rules govern this file (CLAUDE.md §3.5):
 
 ## Frozen evaluation protocol
 
-**Status: DRAFT, not frozen** (session 04, 2026-09-24). Under review by
-Chirag. Values marked **[PENDING]** are filled in from validation-only
-measurements before the freeze. The test split stays locked in code
-(`ribomamba/eval/protocol.py`) until this line reads "FROZEN on <date>".
+**Status: FROZEN on 2026-09-24**
+
+Drafted in session 04 from validation-only measurements, reviewed by
+Chirag, who approved all five open recommendations (five seeds, a
+replication split, Eterna100 as a secondary set, T = 1.0, 256 steps). The
+freeze commit is the one that adds this line together with
+`environment.lock.yml` (hash in the logbook, 2026-09-24 session 04). Until
+that commit the test split was locked in code (`ribomamba/eval/protocol.py`)
+and was never read. From here on this section is only appended to, with
+dated amendments (P1.4).
 
 ### P1. Principles
 
@@ -67,7 +73,11 @@ measurements before the freeze. The test split stays locked in code
   `scripts/build_targets.py --split test --seed 0` (rule in its docstring,
   committed before any target set existed) right after the freeze; their
   SHA-256 checksums are appended here when built. Primary set: `rfam_test`.
-  [PENDING: Eterna100 as an external secondary set, Chirag's decision.]
+  Secondary sets: `bprna_test`, and `eterna100_test`: the 75 Eterna100-V2
+  puzzles of ≤ 256 nt (pinned in `scripts/download_data.py`), an external,
+  evaluation-only set that is never used for tuning. Its positive control is
+  the benchmark's ViennaRNA-2 sample solution: all 75 fold into their target
+  under ViennaRNA 2.7.2 (checked 2026-09-24).
 
 ### P4. Models and fairness (Phase 4)
 
@@ -80,24 +90,29 @@ dropout sweep over 30,000 steps, best-during-run EMA validation checkpoint).
 **Five training seeds per model** for the final configuration (the sweep
 run that won is seed 0). Reason for five: with three seeds per model the
 smallest possible p-value of the seed-level test (P8) is 0.10, so no claim
-could ever pass; with five it is 0.008. [PENDING: Chirag's confirmation.]
-[PENDING: one replication on a second split seed (one training seed per
-model, hyperparameters reused), reported descriptively, Chirag's decision.]
+could ever pass; with five it is 0.008.
+
+**Replication split:** the whole pipeline is repeated once on a second
+clan/family split (split seed 1: the hash prefix in `prepare_data.py`
+changes from "0:" to "1:"; steps 10–11 rerun), with one training run per
+model using the hyperparameters chosen on split 0, evaluated with this
+protocol on split 1's own test set. Reported descriptively (does the
+direction of each primary endpoint repeat?), with no significance test.
 
 ### P5. Sampling
 
 - Diffusion models: temperature **T = 1.0** (the distribution the model
   learned, the one its likelihood measures; no per-model tuning).
-  **Steps: [PENDING, Chirag's decision].** The rule written before the
+  **Steps: N = 256 for every model.** The rule written before the
   ablation (logbook 13:39: the smallest grid value whose `beats_shuffles`
   and `ned_mfe` at T = 1.0 lie inside the 95 % intervals of the 512-step
-  setting) returned **N = 16** for the Transformer baseline. Recommended
-  instead: **N = 256 for every model**, because a step count that is
-  cost-optimal for one backbone (whose samples don't benefit from more
-  steps) could handicap a backbone that captures pairing and does benefit;
-  256 = the maximum length, about one letter revealed per step. The choice
-  is result-neutral for the baseline (0.565 at 16 vs 0.570 at 256, inside
-  each other's intervals) and costs ~100 s per 1,000 samples.
+  setting) returned N = 16 for the Transformer baseline. It was not used,
+  for a stated reason: a step count that is cost-optimal for one backbone
+  (whose samples don't benefit from more steps) could handicap a backbone
+  that captures pairing and does benefit; 256 = the maximum length, about
+  one letter revealed per step. The choice is result-neutral for the
+  baseline (0.565 at 16 vs 0.570 at 256, inside each other's intervals)
+  and costs ~100 s per 1,000 samples.
 - Autoregressive model: T = 1.0, **length-constrained** (`<eos>` forbidden
   before the target length and forced at it), so it receives the same
   lengths as the diffusion models.
@@ -153,8 +168,8 @@ Secondary (reported, not tested for claims): everything else the harness
 computes, including AR vs diffusion likelihood (not like for like: an exact
 likelihood against an upper bound), EternaFold versions of every endpoint,
 `p_target`, energy gaps, diversity among successful designs, Wasserstein
-and k-mer distances to real RNA, `bprna_test` results, the temperature
-curves.
+and k-mer distances to real RNA, `bprna_test` and `eterna100_test`
+results, the temperature curves, the replication split.
 
 ### P8. Statistics and decision rules
 
@@ -580,8 +595,8 @@ time (random 5 %, real 13 %).
   variation is measured in Phase 4 (5 seeds per architecture).
 
 **The pre-registered steps rule returns N = 16** (`--stage table`,
-`steps_rule`). Whether the protocol should use it for every backbone is an
-open question for the freeze (protocol P5 and logbook 15:45).
+`steps_rule`). Not adopted as the cross-backbone setting: the frozen
+protocol uses 256 steps for every model, for the reason stated in P5.
 
 ### Design target sets (validation)
 

@@ -714,8 +714,9 @@ Nature Methods 2022) as a second oracle, pinned in `environment.yml`, and:
 
 ## D-014 — How the harness measures, and how architectures will be compared
 **Date:** 2026-09-24   **Phase:** 3   **Logbook:** logbook/2026-09-24-session-04.md
-**Status:** proposed (accepted when the protocol in RESULTS.md is frozen; the
-open items are Chirag's decisions listed there)
+**Status:** accepted 2026-09-24 with the protocol freeze (Chirag approved all
+five open recommendations: five seeds, a replication split, Eterna100 as a
+secondary set, T = 1.0, and 256 steps rather than the rule's 16)
 
 **Context.** Phase 4's question, whether a BiMamba backbone generates more
 designable RNA than a Transformer or an autoregressive Mamba, will be
@@ -742,8 +743,11 @@ architecture says nothing about the architecture.
    the five primary tests; bootstrap intervals (family-cluster for real
    sequences) for effect sizes.
 6. **Sampling at T = 1.0** for the primary comparison (no per-model
-   tuning); steps chosen on validation by a rule written before the
-   ablation.
+   tuning), **256 steps for every model**. The rule written before the
+   ablation returned 16 for the Transformer; it was not adopted because a
+   step count at which one backbone has plateaued could handicap a
+   backbone that benefits from more steps, and 16 vs 256 is result-neutral
+   for the baseline (0.565 vs 0.570).
 7. **Pre-registration enforced in code**: the test split cannot be loaded
    until RESULTS.md carries "Status: FROZEN on <date>".
 
