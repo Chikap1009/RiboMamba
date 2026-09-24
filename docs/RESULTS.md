@@ -659,6 +659,63 @@ version runs right after the freeze (protocol P9).
 
 ---
 
+## Phase 4 preparation — Transformer training seeds (validation only)
+
+The first compute of the frozen protocol's P4 (five seeds per model), run
+during the Phase 3 gate because it needs no new code: the Transformer's
+chosen configuration retrained with seeds 1–4 (`python
+scripts/seed_replicates.py --prefix tf_M --seeds 1 2 3 4`, commit
+`e65151c`, 2026-09-24 19:33 → 2026-09-25 01:18; settings read from
+`tf_M_do0/config.json`). Seed 0 is the sweep winner `tf_M_do0`.
+
+| training seed | 0 | 1 | 2 | 3 | 4 | mean | sd |
+|---|---|---|---|---|---|---|---|
+| best val bits/nt, 1 fixed draw (selection value) | 1.9040 | 1.9070 | 1.9041 | 1.9077 | 1.9102 | 1.9066 | 0.0026 |
+| step of the best | 10,000 | 10,000 | 7,500 | 10,000 | 10,000 | | |
+| **val bits/nt, mean of 4 draws** (E1's estimator) | 1.9061 | 1.9093 | 1.9064 | 1.9102 | 1.9124 | 1.9089 | **0.0026** |
+| beats_shuffles (1,000 samples, T 1.0, 256 steps) | 0.570 | 0.560 | 0.548 | 0.558 | 0.583 | 0.564 | **0.0135** |
+| ned_mfe (same samples) | 0.249 | 0.241 | 0.250 | 0.248 | 0.242 | 0.246 | **0.0043** |
+| mfe_z | −0.29 | −0.25 | −0.17 | −0.23 | −0.31 | −0.25 | 0.055 |
+| EternaFold NED of ViennaRNA's structure | 0.453 | 0.454 | 0.460 | 0.461 | 0.450 | 0.456 | 0.0047 |
+| GC | 0.465 | 0.468 | 0.467 | 0.465 | 0.467 | 0.466 | 0.0016 |
+
+Likelihoods: `python scripts/eval_likelihood.py --checkpoint
+checkpoints/tf_M_do0_seed<k>/best.pt --split val --draws 4`; samples and
+scores: `scripts/sample.py … --lengths-from val --steps 256 --temperature
+1.0 --seed 0` then `scripts/evaluate_samples.py` (commit `6c88270`;
+`data/eval/seed_variation.sh`, 01:19–01:36). Every seed's draw 0
+reproduces its training-time value exactly. Guardrails pass for every seed
+(0 % copying, 100 % distinct, GC within 0.015 of real).
+
+**Reading it.**
+- Every seed peaks at 7.5–10k steps and then overfits: the Phase 2
+  pattern belongs to the model and data, not to one seed.
+- The single-draw selection value is 0.002–0.003 lower than the 4-draw
+  value for **every** seed: the winner's curse of choosing a checkpoint on
+  one fixed noise draw, which is why E1 averages 4 draws.
+- Retraining moves beats_shuffles more than sampling alone does (sd 0.0135
+  between trained models vs ≈ 0.009 within one), so for E2 the training
+  seed is a real source of variation; for NED it is mostly sampling noise
+  (0.0043 vs ≈ 0.004).
+
+**What the frozen 5-vs-5 test can detect** (`python
+scripts/power_seed_test.py`, deterministic; power = chance of detecting a
+real difference of Δ per-seed sd):
+
+| Δ / sd | 1 | 1.5 | 2 | 2.5 | 3 | 4 |
+|---|---|---|---|---|---|---|
+| P(p ≤ 0.01), the first Holm threshold | 0.07 | 0.20 | 0.41 | 0.57 | 0.76 | 0.96 |
+| P(p ≤ 0.05) | 0.28 | 0.53 | 0.78 | 0.91 | 0.98 | 1.00 |
+
+With the Transformer's seed spread, ~80 % power needs Δ ≈ 3 sd: about
+**0.008 bits/nt** on E1, **0.04** on E2 (baseline 0.56 → ~0.60; real RNA
+0.79), **0.013** on E3 (baseline 0.246; real 0.175). Smaller real
+improvements would be reported as "not detectable with 5 seeds", with
+their effect sizes and intervals. Informational: this does not change the
+frozen protocol, and a Mamba backbone's own seed spread may differ.
+
+---
+
 ## Phase 0 — oracle sanity checks (not experiments)
 
 Hand-calculated predictions from session 01, checked against ViennaRNA.
