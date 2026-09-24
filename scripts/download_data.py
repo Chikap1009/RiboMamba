@@ -14,6 +14,7 @@ Output:
     data/raw/bprna/data.parquet     102,318 bpRNA-1m sequences with structures (5 MB)
     data/raw/rfam_cm/Rfam.cm.gz     4,178 Rfam 15.0 covariance models (45 MB)
     data/raw/rfam_clanin/Rfam.clanin  Rfam 15.0 clan membership, 146 clans (Phase 3)
+    data/raw/eterna100/eterna100_puzzles.tsv  Eterna100 V1/V2 design targets (Phase 3)
 """
 
 import hashlib
@@ -60,6 +61,15 @@ URL_FILES = {
         "https://ftp.ebi.ac.uk/pub/databases/Rfam/15.0/Rfam.clanin",
         "Rfam.clanin",
         "7673c105ca4fea52eee19c01ba7ba9b5e76eed490ec126df09a039b2ae8f5d11",
+    ),
+    # Eterna100 design benchmark (Anderson-Lee et al. 2016; V2 structures redesigned for
+    # ViennaRNA 2), pinned to a repository commit (MIT licence). An external, evaluation-only
+    # target set for Phase 5 (frozen protocol P3). Recorded on first download 2026-09-24.
+    "eterna100": (
+        "https://raw.githubusercontent.com/eternagame/eterna100-benchmarking/"
+        "e7a123076859865652de2a1b8be3bf2fcd5039c7/data/eterna100_puzzles.tsv",
+        "eterna100_puzzles.tsv",
+        "303da43d5404433bb4a006b421f73001ca9b90f43596e0ffad35d167dc806c61",
     ),
 }
 

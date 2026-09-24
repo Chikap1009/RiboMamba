@@ -28,8 +28,13 @@ rule"; STUDY_GUIDE Part 5):
          status can't be defined at the level our split uses.
          Then one target per family (seeded), like the rfam set.
 
+  eterna100  (test only: an external, evaluation-only set) the Eterna100 V2
+         puzzles of <= 256 nt (75 of 100), pinned in scripts/download_data.py;
+         the benchmark's ViennaRNA-2 sample solution is the "native".
+
 Usage: python scripts/build_targets.py --split val    (test: refused until the protocol freeze)
-Output: data/targets/{rfam,bprna}_<split>.parquet and <split>_funnel.json; SHA-256s printed.
+Output: data/targets/{rfam,bprna}_<split>.parquet (+ eterna100_test.parquet) and
+        <split>_funnel.json; SHA-256s printed.
 """
 
 import argparse
@@ -143,6 +148,22 @@ def bprna_targets(split: str, seed: int) -> tuple[pl.DataFrame, dict]:
     return b.select(["id", "source", "family", "sequence", "length", "target"]), funnel
 
 
+def eterna100_targets(split: str, seed: int) -> tuple[pl.DataFrame, dict]:
+    """Eterna100 V2 puzzles of <= 256 nt: an external, EVALUATION-ONLY set (never used for tuning),
+    so it is built together with the test sets. Its 'native' is the benchmark's sample solution for
+    ViennaRNA 2 (a known answer: all 75 fold to their target under ViennaRNA 2.7.2)."""
+    t = pl.read_csv(RAW_DIR / "eterna100" / "eterna100_puzzles.tsv", separator="\t")
+    funnel = {"Eterna100": t.height}
+    t = t.select(pl.col("Puzzle #").cast(pl.String).alias("id"), pl.col("Puzzle Name").alias("family"),
+                 pl.col("Sample Solution (V2/Vienna2)").alias("sequence"),
+                 pl.col("Secondary Structure V2").alias("target"))
+    t = t.filter(pl.col("target").str.len_chars() <= MAX_LEN)
+    funnel[f"<= {MAX_LEN} nt"] = t.height
+    for s, target in zip(t["sequence"], t["target"]):
+        check_target(s, target)                    # every target reachable (its sample solution proves it)
+    return t.with_columns(pl.col("sequence").str.len_chars().alias("length")), funnel
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--split", required=True, choices=["val", "test"])
@@ -153,7 +174,10 @@ def main() -> None:
     TARGETS_DIR.mkdir(parents=True, exist_ok=True)
     report = {"command": f"python scripts/build_targets.py --split {args.split} --seed {args.seed}",
               "git_commit": git_commit()}
-    for name, build in (("rfam", rfam_targets), ("bprna", bprna_targets)):
+    sets = [("rfam", rfam_targets), ("bprna", bprna_targets)]
+    if args.split == "test":
+        sets.append(("eterna100", eterna100_targets))
+    for name, build in sets:
         table, funnel = build(args.split, args.seed)
         # The native sequence scored against its own target: the positive control.
         native = fold_many(table["sequence"].to_list(), targets=table["target"].to_list(), n_shuffles=0)
