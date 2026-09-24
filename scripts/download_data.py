@@ -13,6 +13,7 @@ Output:
     data/raw/rfam/data.parquet      20,051,822 Rfam family members (726 MB)
     data/raw/bprna/data.parquet     102,318 bpRNA-1m sequences with structures (5 MB)
     data/raw/rfam_cm/Rfam.cm.gz     4,178 Rfam 15.0 covariance models (45 MB)
+    data/raw/rfam_clanin/Rfam.clanin  Rfam 15.0 clan membership, 146 clans (Phase 3)
 """
 
 import hashlib
@@ -51,6 +52,14 @@ URL_FILES = {
         "https://ftp.ebi.ac.uk/pub/databases/Rfam/15.0/Rfam.cm.gz",
         "Rfam.cm.gz",
         "f8885ee1bdf7a085c9a68af94be68d23e63da647d8f9f09835d22a218d2bfe9f",
+    ),
+    # Which families belong to which clan, for ALL Rfam 15.0 families (our data only
+    # carries clans for the families it contains). Used to screen design targets at
+    # the clan level, like the split (Phase 3). Recorded on first download 2026-09-24.
+    "rfam_clanin": (
+        "https://ftp.ebi.ac.uk/pub/databases/Rfam/15.0/Rfam.clanin",
+        "Rfam.clanin",
+        "7673c105ca4fea52eee19c01ba7ba9b5e76eed490ec126df09a039b2ae8f5d11",
     ),
 }
 
