@@ -55,6 +55,9 @@ def main() -> None:
         train_lengths = torch.from_numpy(
             pl.read_parquet(PROCESSED_DIR / "train.parquet", columns=["length"])["length"].to_numpy().astype(np.int64))
         lengths = sample_lengths(args.n, train_lengths, g_cpu)
+    # Generate in order of length so each batch holds similar lengths (little padding);
+    # which length each sample gets was already decided at random above.
+    lengths = lengths.sort(descending=True).values
 
     tag = f"{state['config']['run_name']}@{state['step']}"
     args.out.parent.mkdir(parents=True, exist_ok=True)

@@ -47,8 +47,12 @@ def search(queries: list[str], targets: list[str]) -> pl.DataFrame:
              "--threads", str(os.cpu_count()), "-v", "1"],
             check=True,
         )
+        schema = {"query": pl.Int64, "target": pl.Int64, "fident": pl.Float64,
+                  "qcov": pl.Float64, "evalue": pl.Float64}
+        if (tmp / "hits.tsv").stat().st_size == 0:          # no query had any hit: a valid result
+            return pl.DataFrame(schema=schema)
         return pl.read_csv(tmp / "hits.tsv", separator="\t", has_header=False,
-                           new_columns=["query", "target", "fident", "qcov", "evalue"])
+                           new_columns=list(schema), schema_overrides=schema)
 
 
 def best_identity(hits: pl.DataFrame, n_queries: int, min_coverage: float = 0.8) -> np.ndarray:

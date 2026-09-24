@@ -108,7 +108,11 @@ def sample(model, lengths: torch.Tensor, num_steps: int, generator: torch.Genera
     B, W = z.shape
     times = torch.linspace(1.0, 0.0, num_steps + 1).tolist()
     for t, s in zip(times[:-1], times[1:]):
-        logits = model(z, attention_mask).double() / temperature                     # (B, W, V)
+        # The network runs in bf16, the precision it was trained in (and several times
+        # faster than fp32 on this GPU); the probabilities are then formed in float64.
+        with torch.autocast("cuda", dtype=torch.bfloat16, enabled=z.is_cuda):
+            logits = model(z, attention_mask)
+        logits = logits.double() / temperature                                        # (B, W, V)
         # float64 on purpose: sampling from low-precision probabilities is known to
         # quietly sharpen the distribution and cost diversity (Zheng et al. 2024).
         probs = torch.softmax(logits, dim=-1)                                         # (B, W, V); specials exactly 0
