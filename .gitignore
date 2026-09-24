@@ -3,6 +3,7 @@
 # "data/" would also match the code folder ribomamba/data/ (it did, once).
 /data/
 /checkpoints/
+/samples/
 
 # Python build/run by-products
 __pycache__/

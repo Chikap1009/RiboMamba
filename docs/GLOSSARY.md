@@ -295,6 +295,54 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Where it appears:** A headline metric in Phase 3. Defined precisely there.
 - **First explained:** session 01 (preview only).
 
+### Probability of a structure, P(target)
+- **Definition:** The share of time a sequence spends in one particular structure s: P(s) = e^(−ΔG(s)/RT) / Z, the structure's Boltzmann weight divided by the partition function. It counts only the *exact* structure: a variant differing by a single pair counts as "not the target".
+- **Analogy:** A frame error rate: the probability that *every* bit of a frame arrives correct.
+- **Where it appears:** Phase 3 harness. `GGGAAACCC` 0.507, `GGGAAACCA` (own MFE) 0.939. Real validation RNAs of 74–223 nt: 0.000–0.069 for their own MFE structure, because probability spreads over many near-identical variants.
+- **First explained:** session 02 (as "frequency in the ensemble"); at real lengths, session 04.
+
+### Base-pair probability (matrix)
+- **Definition:** For every pair of positions (i, j), the probability that i is paired with j, summed over the whole Boltzmann ensemble. Out of the same partition-function calculation; P(i unpaired) = 1 − Σ_j P(i, j).
+- **Analogy:** A per-bit reliability map instead of a single pass/fail for the whole word.
+- **Where it appears:** The input to the ensemble defect; also what EternaFold outputs (Phase 3).
+- **First explained:** session 04.
+
+### Ensemble defect (NED, normalised ensemble defect)
+- **Definition:** The expected number of nucleotides in the wrong state relative to a target (paired with the wrong partner, paired when they should be free, or free when they should be paired), averaged over the ensemble; divided by the length N it becomes NED, between 0 (perfect) and 1. NED = 1 − (1/N) Σ_i P(i is in its target state). Standard in nucleic-acid design (NUPACK; Dirks et al. 2004, Zadeh et al. 2011; verify before citing).
+- **Analogy:** A bit error rate, where P(target) is the frame error rate. With a 2 % error per nucleotide, NED = 0.02 but P(all 100 correct) = 0.98¹⁰⁰ ≈ 0.13.
+- **Where it appears:** Phase 3 harness, the graded structural measure. `GGGAAACCC` 0.316 (about 3 of 9 nucleotides wrong on average), `GGGAAACCA` 0.028; real validation RNAs 0.08–0.22 (session 04 sample).
+- **First explained:** session 04.
+
+### MFE z-score (against dinucleotide shuffles)
+- **Definition:** z = (MFE of the sequence − mean MFE of k dinucleotide shuffles) / standard deviation of those k shuffle MFEs. Negative = more stable than its own rearrangements, measured in units of their spread. It separates stability that comes from the *arrangement* of letters (real structure) from stability that comes from *composition* (GC-richness). Clote et al. 2005; Rivas & Eddy 2000 on why composition must be controlled (verify before citing).
+- **Analogy:** "How many sigma below the process mean" for a measured delay.
+- **Where it appears:** Phase 3 harness. A random 80-mer with 70 % GC: MFE −26.0 but z = +1.46 (*less* stable than its shuffles); real mir-221 (84 nt): MFE −31.9, z = −4.3; real validation RNAs −1.1 to −13.3.
+- **First explained:** session 04 (the one-shuffle version in session 03).
+
+### Target structure; native recovery
+- **Definition:** In design, the **target** is the dot-bracket structure the generated sequence must fold into. When a target comes from a real RNA, that RNA's own sequence (the **native**) is a known answer; checking how the native scores is a positive control for the target and the metric.
+- **Analogy:** A reference design that is known to meet the spec, run through the same sign-off flow.
+- **Where it appears:** Phase 3 target sets for the Phase 5 design evaluation.
+- **First explained:** session 04.
+
+### Non-canonical pair
+- **Definition:** A base pair other than G–C, A–U and G–U (e.g. A–G, G–G). Real structures contain some, but ViennaRNA's energy model cannot form them, so a target containing one is unreachable for our oracle.
+- **Analogy:** A connection your routing tool has no rule for: it can exist on silicon, but the tool will never produce it.
+- **Where it appears:** bpRNA structures must be screened for them before becoming targets.
+- **First explained:** session 04.
+
+### EternaFold (and CONTRAfold)
+- **Definition:** A secondary-structure predictor whose parameters were *learned from experimental data*: CONTRAfold's statistical model, retrained on tens of thousands of chemical-mapping measurements of RNAs designed by Eterna players (Wayment-Steele et al., Nature Methods 2022). Outputs base-pair probabilities and a predicted structure; its scores are not kcal/mol.
+- **Analogy:** An independent sign-off tool from a different vendor, calibrated on silicon measurements rather than on the same device models.
+- **Where it appears:** The second, independent oracle (Phase 3). bioconda `eternafold` 1.3.1.
+- **First explained:** session 04.
+
+### Eterna100
+- **Definition:** A benchmark of 100 target structures ("puzzles") from the Eterna game, graded by difficulty, widely used to compare RNA design methods (Anderson-Lee et al., J. Mol. Biol. 2016; verify before citing). Synthetic shapes, some longer than our 256-nt cap.
+- **Analogy:** A standard benchmark suite (like ISCAS circuits) that lets different tools be compared on identical problems.
+- **Where it appears:** Candidate external target set for Phase 5 (decided in Phase 3).
+- **First explained:** session 04.
+
 ### Genome, contig, accession
 - **Definition:** A **genome** is an organism's complete DNA. Sequencing produces it in pieces called **contigs**, and each stored piece gets an **accession**, a unique catalogue number such as `AAAA02036851.1`.
 - **Analogy:** A genome is a whole library; contigs are loose chapters; the accession is the shelf mark.
@@ -545,6 +593,42 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Where it appears:** RESULTS.md "Frozen evaluation protocol" (Phase 3). Motivated by: an MFE-only metric and an ensemble-probability metric can crown different architectures.
 - **First explained:** session 03 (Phase 1 gate, re-taught).
 
+### Garden of forking paths
+- **Definition:** The many small analysis choices (which metric, which temperature, which oracle, which target set, which threshold) that, if made after seeing results, let almost any model look like a winner, even with no deliberate cheating. 5 metrics × 5 temperatures × 2 oracles × 3 target sets = 150 possible headline numbers.
+- **Analogy:** Choosing the sign-off corner after seeing which corner the chip passes.
+- **Where it appears:** The reason for pre-registration (Phase 3).
+- **First explained:** session 04.
+
+### Primary vs secondary (exploratory) endpoint
+- **Definition:** A **primary endpoint** is one of the few pre-declared measurements on which the headline claim rests, tested with a correction for multiple comparisons. Everything else is **secondary / exploratory**: reported, but not allowed to carry a claim on its own.
+- **Analogy:** The few sign-off criteria that decide tape-out, versus the many diagnostic plots you also look at.
+- **Where it appears:** The frozen evaluation protocol (Phase 3).
+- **First explained:** session 04.
+
+### Sampling temperature
+- **Definition:** A number T that divides the model's logits before the softmax: p_i ∝ e^(logit_i / T), equivalently p_i ∝ p_i^(1/T). T < 1 sharpens the distribution toward the model's favourite letters; T > 1 flattens it. This is a Boltzmann distribution with energy = −logit, so it is the same maths as physical temperature in folding.
+- **Analogy:** Cooling a molecule concentrates it on its MFE; cooling the sampler concentrates it on its most probable letters.
+- **Where it appears:** `sample(..., temperature=…)` in `ribomamba/diffusion/masked.py`; the Phase 3 ablation. Example: (0.5, 0.3, 0.15, 0.05) becomes (0.685, 0.247, 0.062, 0.007) at T = 0.5 and (0.379, 0.294, 0.208, 0.120) at T = 2.
+- **First explained:** session 04.
+
+### Quality–diversity trade-off (Pareto frontier)
+- **Definition:** Settings that make samples better-folded (lower temperature, more steps) usually make them less varied, and vice versa. A **Pareto frontier** is the curve of settings where you can't improve one without worsening the other. Honest reports give both numbers, or the whole curve, never quality alone.
+- **Analogy:** A speed–power curve: comparing two chips at different supply voltages says nothing about the design unless you compare their curves.
+- **Where it appears:** Phase 3 temperature × steps ablation.
+- **First explained:** session 04.
+
+### Novelty, diversity, mode collapse
+- **Definition:** **Novelty**: how far each generated sequence is from its nearest *training* sequence (is it copying?). **Diversity**: how different the generated sequences are from *each other*. **Mode collapse**: a generator producing a few favourites over and over. Random letters score perfectly on novelty and diversity, so both only mean something next to quality.
+- **Analogy:** Novelty is "not a copy of an existing design"; diversity is "the design team proposed many different architectures, not one with renamed signals".
+- **Where it appears:** `sanity_samples.py` (novelty via MMseqs2); the Phase 3 harness.
+- **First explained:** session 03 (novelty); session 04 (full set).
+
+### Goodhart's law (oracle exploitation)
+- **Definition:** "When a measure becomes a target, it ceases to be a good measure." A generator steered or selected by one imperfect oracle can learn that oracle's quirks and score well without being good.
+- **Analogy:** A design tuned against a SPICE model with a bug looks perfect in simulation and fails on silicon.
+- **Where it appears:** Why Phase 3 adds a second, independent oracle; the risk in Phase 5's reward-guided steering.
+- **First explained:** session 02 (as a risk, STUDY_GUIDE §1.10); by name, session 04.
+
 ---
 
 ## Maths
@@ -644,6 +728,54 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Analogy:** Error bars on a measured yield from a sample of dies rather than the whole wafer.
 - **Where it appears:** The audit samples 2,000 sequences, so e.g. 89.6 % ± 1.3 %.
 - **First explained:** session 03.
+
+### Bootstrap (percentile bootstrap confidence interval)
+- **Definition:** A way to get error bars for *any* statistic without a formula (Efron 1979): treat your n measurements as a stand-in for the population, draw n of them *with replacement* many times (e.g. 10,000), recompute the statistic each time, and take the 2.5th and 97.5th percentiles of the results as the 95 % interval. Example: outcomes 1,0,1,1,0,1,1,1,0,1 (70 %) → interval ≈ [40 %, 100 %]; 546 of 1,000 → [51.7 %, 57.9 %].
+- **Analogy:** Estimating clock jitter from one long captured trace by re-cutting it into many pseudo-traces.
+- **Where it appears:** Every number in the Phase 3 harness.
+- **First explained:** session 04.
+
+### Cluster bootstrap
+- **Definition:** A bootstrap that resamples whole groups (here: RNA families) instead of individual items, because items in one group are correlated and don't count as independent evidence.
+- **Analogy:** Measuring 1,000 transistors from 10 wafers: the error bar must count wafers, because wafer-to-wafer variation dominates.
+- **Where it appears:** Phase 3 statistics for anything computed over real held-out sequences (e.g. test bits/nt).
+- **First explained:** session 04.
+
+### Two sources of randomness (sampling vs training seed)
+- **Definition:** A model's score varies because of *which samples were drawn* (the bootstrap measures this) and because of *which random seed it was trained with* (only retraining with other seeds measures this). A claim about an architecture needs the second.
+- **Analogy:** Many transistors on one die tell you about that die (within-die variation); a claim about the process needs several dies (die-to-die variation).
+- **Where it appears:** Phase 4: several training seeds per backbone (number fixed in the Phase 3 protocol).
+- **First explained:** session 04.
+
+### Paired comparison
+- **Definition:** Evaluate both models on the *same* items (same targets, same lengths, same random numbers) and analyse the per-item differences. Item difficulty cancels, so much smaller real differences become visible.
+- **Analogy:** Common-mode rejection in a differential pair: noise common to both inputs cancels, the difference survives.
+- **Where it appears:** Phase 3 statistics; Phase 4–5 comparisons.
+- **First explained:** session 04.
+
+### Multiple comparisons; family-wise error; Holm–Bonferroni
+- **Definition:** Each test at the 5 % level has a 5 % false-alarm chance; with 20 independent tests the chance of at least one false "win" is 1 − 0.95²⁰ ≈ 64 % (the **family-wise error**). **Holm–Bonferroni** (Holm 1979) controls it: sort the m p-values from smallest up, compare the smallest with 0.05/m, the next with 0.05/(m−1), and so on, and stop at the first that fails.
+- **Analogy:** Check 20 timing paths with a noisy measurement and one will "fail" by chance most of the time.
+- **Where it appears:** The frozen protocol's primary endpoints.
+- **First explained:** session 04.
+
+### z-score
+- **Definition:** How many standard deviations a value lies from a reference mean: z = (value − mean) / sd.
+- **Analogy:** "A 3σ corner."
+- **Where it appears:** The MFE z-score against shuffles.
+- **First explained:** session 04.
+
+### Hamming distance
+- **Definition:** The number of positions at which two equal-length strings differ. `GGGAAACC` vs `GCGAAAGC` → 2.
+- **Analogy:** The number of bit flips between two codewords.
+- **Where it appears:** Diversity among designs for the same target (Phase 3/5).
+- **First explained:** session 04.
+
+### Wasserstein-1 distance; Jensen–Shannon divergence
+- **Definition:** Two ways to measure how different two distributions are. **Wasserstein-1** ("earth mover's distance", for numbers like GC content): the least average distance you must move probability mass to turn one histogram into the other, in the units of the quantity. **Jensen–Shannon divergence** (for frequency tables like k-mer counts): an entropy-based difference, 0 for identical tables, at most 1 bit. Neither means anything without a calibration: the distance between two independent samples of *real* RNA (the noise floor).
+- **Analogy:** Wasserstein: the work to reshape one sand pile into another. Calibration: measuring the scope's noise floor with the probe grounded before trusting a small reading.
+- **Where it appears:** Phase 3 distributional comparison of generated vs real RNA.
+- **First explained:** session 04.
 
 ---
 
