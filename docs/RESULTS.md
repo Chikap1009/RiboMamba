@@ -87,11 +87,17 @@ model, hyperparameters reused), reported descriptively, Chirag's decision.]
 ### P5. Sampling
 
 - Diffusion models: temperature **T = 1.0** (the distribution the model
-  learned, the one its likelihood measures; no per-model tuning),
-  **[PENDING] N steps**, chosen on validation by the rule written before
-  the ablation (logbook 13:39): the smallest grid value whose
-  `beats_shuffles` and `ned_mfe` at T = 1.0 lie inside the 95 % intervals
-  of the 512-step setting.
+  learned, the one its likelihood measures; no per-model tuning).
+  **Steps: [PENDING, Chirag's decision].** The rule written before the
+  ablation (logbook 13:39: the smallest grid value whose `beats_shuffles`
+  and `ned_mfe` at T = 1.0 lie inside the 95 % intervals of the 512-step
+  setting) returned **N = 16** for the Transformer baseline. Recommended
+  instead: **N = 256 for every model**, because a step count that is
+  cost-optimal for one backbone (whose samples don't benefit from more
+  steps) could handicap a backbone that captures pairing and does benefit;
+  256 = the maximum length, about one letter revealed per step. The choice
+  is result-neutral for the baseline (0.565 at 16 vs 0.570 at 256, inside
+  each other's intervals) and costs ~100 s per 1,000 samples.
 - Autoregressive model: T = 1.0, **length-constrained** (`<eos>` forbidden
   before the target length and forced at it), so it receives the same
   lengths as the diffusion models.
@@ -491,6 +497,96 @@ families* are held out (± 0.015), so 4 draws suffice. Draw 0 is 0.002 lower
 than the average: selecting the best checkpoint on a single fixed draw
 carries a small optimistic bias ("winner's curse"), which is why the
 protocol averages 4 draws for the final number.
+
+### Sampling temperature × steps ablation (Phase 2 baseline)
+
+Grid and rule written before any result (logbook 13:39). `python
+scripts/sampling_ablation.py --checkpoint checkpoints/tf_M_do0/best.pt
+--prefix tf_M_do0 --stage all` (sampling 13:45–14:39, driver at commit
+`4691d19`, `sample.py` logic unchanged through `0e502e8`; evaluation
+14:41–15:42, harness code unchanged from `24b99aa` to `0e502e8`, checked
+with `git diff`). 1,000 samples per setting, lengths = the validation
+reference's (n 1000, seed 0), sampling seed 0 for every setting (common
+random numbers). Full table: `data/eval/ablation_tf_M_do0.csv`.
+
+**beats_shuffles** (95 % intervals ≈ ± 0.018; real 0.792, random 0.503):
+
+| T \ steps | 16 | 32 | 64 | 128 | 256 | 512 |
+|---|---|---|---|---|---|---|
+| 0.5 | 0.609 | 0.623 | 0.635 | 0.645 | 0.634 | 0.631 |
+| 0.6 | 0.598 | 0.597 | 0.629 | 0.612 | 0.624 | 0.622 |
+| 0.7 | 0.593 | 0.594 | 0.607 | 0.581 | 0.610 | 0.610 |
+| 0.8 | 0.580 | 0.571 | 0.595 | 0.561 | 0.606 | 0.593 |
+| 0.9 | 0.568 | 0.560 | 0.586 | 0.558 | 0.583 | 0.574 |
+| **1.0** | 0.565 | 0.544 | 0.575 | 0.561 | **0.570** | 0.572 |
+| 1.1 | 0.559 | 0.542 | 0.563 | 0.557 | 0.564 | 0.560 |
+| 1.2 | 0.546 | 0.539 | 0.555 | 0.553 | 0.548 | 0.552 |
+
+**At 256 steps, by temperature** (reference values from the table above):
+
+| T | 0.5 | 0.6 | 0.7 | 0.8 | 0.9 | 1.0 | 1.1 | 1.2 | real | random |
+|---|---|---|---|---|---|---|---|---|---|---|
+| MFE z-score | −0.66 | −0.61 | −0.52 | −0.46 | −0.37 | −0.29 | −0.27 | −0.21 | −2.15 | −0.02 |
+| NED (own MFE) | 0.250 | 0.249 | 0.254 | 0.242 | 0.247 | 0.249 | 0.245 | 0.249 | 0.175 | 0.242 |
+| EternaFold NED of ViennaRNA's structure | 0.465 | 0.455 | 0.458 | 0.452 | 0.454 | 0.453 | 0.451 | 0.452 | 0.335 | 0.450 |
+| GC content | 0.403 | 0.425 | 0.440 | 0.451 | 0.459 | 0.465 | 0.471 | 0.474 | 0.479 | 0.499 |
+| JSD of 4-mer spectrum to real (floor 0.0008; random 0.024) | 0.038 | 0.020 | 0.011 | 0.006 | 0.004 | 0.003 | 0.003 | 0.004 | — | 0.024 |
+
+Across all 48 settings: distinct samples 100 %; samples with a ≥ 80 %
+sibling in the set 0 % (real RNA 57 %); samples with a ≥ 50 % training
+relative ≤ 0.1 %; the two oracles agree on the exact structure 3–6 % of the
+time (random 5 %, real 13 %).
+
+**Reading it.**
+1. **Steps make no measurable difference** for this model: at T = 1.0 the
+   six step counts span 0.544–0.575, all inside each other's intervals.
+   Letters revealed together can't coordinate, but this model has little
+   pairing to coordinate.
+2. **Lower temperature trades realism for a little "structure beyond
+   chance".** From T = 1.2 to 0.5, beats_shuffles rises 0.548 → 0.634 and
+   the z-score −0.21 → −0.66, but the composition drifts AU-rich (GC 0.474
+   → 0.403) and the 4-letter-word statistics end up further from real RNA
+   than random letters are (JSD 0.038 vs 0.024). T ≤ 0.6 fails the GC
+   guardrail (± 0.05 of 0.479).
+3. **No setting makes the folds better defined than random letters.** NED
+   stays at 0.24–0.26 in all 48 settings (random 0.242, real 0.175), and
+   EternaFold agrees (0.45–0.47 vs random 0.450, real 0.335). The sampling
+   knobs can't substitute for a model that hasn't learned pairing, which
+   sharpens Phase 2's finding: the baseline generates novel, diverse,
+   letter-realistic RNA whose folding is close to that of shuffled RNA.
+4. Consistency with the Phase 2 preview (T 1.0, 256 steps: 54.6 % beat one
+   shuffle): 0.570 here. The two differ in lengths (training lengths then,
+   validation lengths now) and ties (counted as losses then, half now).
+
+**The pre-registered steps rule returns N = 16** (`--stage table`,
+`steps_rule`). Whether the protocol should use it for every backbone is an
+open question for the freeze (protocol P5 and logbook 15:45).
+
+### Design target sets (validation)
+
+`python scripts/build_targets.py --split val` (commit `0e502e8`, clean;
+seed 0; 2026-09-24 15:42). Rule: docstring of `scripts/build_targets.py`,
+committed (`a1017ec`) before any target set existed.
+
+| set | targets | median length | native = target under ViennaRNA | native NED (median) | SHA-256 |
+|---|---|---|---|---|---|
+| `rfam_val` | **402** (406 families; 4 with < 4 pairs dropped) | 85 | 100 % (by construction) | 0.115 | `8691cbdc…7e045` |
+| `bprna_val` | **183** (182 Rfam-seed comparative structures, 1 tRNA) | 91 | **6.6 %** | 0.238 | `d94db068…ea56a` |
+
+bpRNA funnel: 102,318 → 97,254 ACGU → 76,711 at 19–256 nt → 74,103 no
+pseudoknot brackets → 21,054 canonical pairs and hairpins ≥ 3 → 18,493
+≥ 4 pairs → 12,862 distinct → 7,336 not letter-for-letter in train → Rfam
+verdicts: train-family member 2,609, long-family fragment 260, family in a
+train clan 8, family outside our data 38, no family 942, validation family
+2,752, test family 727 → 2,752 with no ≥ 80 % training hit → **183** (one
+per family).
+
+**Reading it.** ViennaRNA reproduces the comparatively derived bpRNA
+structure for only 6.6 % of the natural sequences that carry it: the
+oracle and the annotations disagree for most natural RNAs. So `bprna`
+targets ask for structures the oracle does not predict for the native
+sequence; natives there are a reference point, not a ceiling. `rfam`
+targets are oracle-consistent by construction and remain the primary set.
 
 ### Does the second oracle's training data overlap ours?
 
