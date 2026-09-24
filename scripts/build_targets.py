@@ -118,7 +118,8 @@ def bprna_targets(split: str, seed: int) -> tuple[pl.DataFrame, dict]:
     train_clans = {clan_of[f] for f in train_families if f in clan_of}
     long_families = set(json.loads((PROCESSED_DIR / "prepare_stats.json").read_text())["4_dropped_long_families"])
 
-    def verdict(families: list[str]) -> str:
+    def verdict(families) -> str:
+        families = list(families)                  # polars passes each row's list as a Series
         if not families:
             return "no family"
         if any(f in train_families for f in families):
