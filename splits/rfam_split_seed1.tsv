@@ -1,0 +1,3838 @@
+family	clan	group	split	n_sequences
+ACAT		ACAT	test	95
+ASpks		ASpks	test	1000
+AbsR28		AbsR28	test	13
+Afu_203		Afu_203	test	15
+AgvB		AgvB	test	2
+Atu_L1		Atu_L1	test	6
+Atu_Ti1		Atu_Ti1	test	46
+BSR0441		BSR0441	test	1
+Bp1_738		Bp1_738	test	59
+Hammerhead_1	CL00010	CL00010	test	1000
+Hammerhead_3	CL00010	CL00010	test	506
+Hammerhead_HH10	CL00010	CL00010	test	88
+Hammerhead_HH9	CL00010	CL00010	test	864
+Hammerhead_II	CL00010	CL00010	test	437
+GlmY_tke1	CL00011	CL00011	test	145
+GlmZ_SraJ	CL00011	CL00011	test	116
+SNORA7	CL00025	CL00025	test	1000
+snR81	CL00025	CL00025	test	6
+SNORA56	CL00039	CL00039	test	122
+snR8	CL00039	CL00039	test	87
+SNORD15	CL00045	CL00045	test	1000
+snR13	CL00045	CL00045	test	55
+snR75	CL00045	CL00045	test	909
+snoZ5	CL00045	CL00045	test	16
+SNORD29	CL00051	CL00051	test	323
+SNORD36	CL00051	CL00051	test	1000
+SNORD38	CL00051	CL00051	test	848
+SNORD78	CL00051	CL00051	test	285
+snR47	CL00051	CL00051	test	108
+snoR69Y	CL00051	CL00051	test	742
+snoU36a	CL00051	CL00051	test	682
+snoZ223	CL00051	CL00051	test	752
+snosnR61	CL00051	CL00051	test	998
+snosnR69	CL00051	CL00051	test	105
+snosnR71	CL00051	CL00051	test	71
+SNORD60	CL00066	CL00066	test	658
+sn2903	CL00066	CL00066	test	28
+snoMe28S-G3255	CL00066	CL00066	test	42
+snoR1	CL00066	CL00066	test	568
+snosnR48	CL00066	CL00066	test	67
+SNORD101	CL00074	CL00074	test	474
+snoR60	CL00074	CL00074	test	813
+SNORND104	CL00077	CL00077	test	314
+snR58	CL00077	CL00077	test	5
+MIR171_1	CL00099	CL00099	test	1000
+MIR171_2	CL00099	CL00099	test	338
+mir-19	CL00110	CL00110	test	790
+mir-363	CL00110	CL00110	test	168
+c-di-GMP-I	CL00126	CL00126	test	1000
+c-di-GMP-I-GGC	CL00126	CL00126	test	1000
+c-di-GMP-I-UAU	CL00126	CL00126	test	17
+sR47	CL00132	CL00132	test	11
+sR60	CL00132	CL00132	test	6
+snoPyro_CD	CL00132	CL00132	test	43
+snoR9	CL00132	CL00132	test	5
+MIR827	CL00143	CL00143	test	48
+MIR827_2	CL00143	CL00143	test	12
+mir-8791	CL00146	CL00146	test	25
+mir-8799	CL00146	CL00146	test	1000
+let-7	CL00148	CL00148	test	1000
+mir-3596	CL00148	CL00148	test	30
+CRISPR-DR37		CRISPR-DR37	test	22
+CRISPR-DR40		CRISPR-DR40	test	3
+CRISPR-DR6		CRISPR-DR6	test	27
+CRISPR-DR60		CRISPR-DR60	test	3
+CbSR1		CbSR1	test	1
+CbSR9		CbSR9	test	1
+Clostridiales-1		Clostridiales-1	test	1000
+Collinsella-1		Collinsella-1	test	23
+CpoB_ybgF_thermometer		CpoB_ybgF_thermometer	test	139
+CssrB		CssrB	test	4
+DAOA-AS1_1		DAOA-AS1_1	test	119
+DAOA-AS1_2		DAOA-AS1_2	test	177
+DLX6-AS1_1		DLX6-AS1_1	test	99
+DLX6-AS1_2		DLX6-AS1_2	test	106
+DdR2		DdR2	test	4
+Dictyoglomi-1		Dictyoglomi-1	test	4
+EBER1		EBER1	test	5
+ES239		ES239	test	3
+Erse		Erse	test	24
+FAM13A-AS1_1		FAM13A-AS1_1	test	60
+Fluoride		Fluoride	test	1000
+G-CSF_SLDE		G-CSF_SLDE	test	97
+GABA3		GABA3	test	1000
+HAR1A		HAR1A	test	136
+HDV-F-prausnitzii		HDV-F-prausnitzii	test	985
+HIV-1_SL4		HIV-1_SL4	test	25
+HIV_FE		HIV_FE	test	151
+HOTAIR_1		HOTAIR_1	test	41
+HYMAI		HYMAI	test	99
+IMES-4		IMES-4	test	20
+IMPDH		IMPDH	test	5
+IS009		IS009	test	31
+IscS1_thermometer		IscS1_thermometer	test	29
+KCNQ1OT1_3		KCNQ1OT1_3	test	78
+K_chan_RES		K_chan_RES	test	1000
+MAT2A_D		MAT2A_D	test	202
+MESTIT1_3		MESTIT1_3	test	93
+MH_s36		MH_s36	test	8
+MIAT_exon5_1		MIAT_exon5_1	test	105
+MIR1031		MIR1031	test	2
+MIR1319		MIR1319	test	6
+MIR1446		MIR1446	test	29
+MIR2084		MIR2084	test	2
+MIR4240		MIR4240	test	2
+MIR4378		MIR4378	test	3
+MIR5062		MIR5062	test	7
+MIR5272		MIR5272	test	241
+MIR5298		MIR5298	test	237
+MIR533		MIR533	test	13
+MIR535		MIR535	test	425
+MIR6438		MIR6438	test	9
+MIR6457		MIR6457	test	26
+MIR7725		MIR7725	test	26
+MIR8008		MIR8008	test	212
+MIR820		MIR820	test	28
+MIR8742		MIR8742	test	6
+MIR9772		MIR9772	test	18
+MOSES4		MOSES4	test	2
+NCRUPAR_2		NCRUPAR_2	test	15
+P15		P15	test	75
+P37		P37	test	2
+P5		P5	test	2
+PAGEV		PAGEV	test	16
+PK1-TEV_CVMV		PK1-TEV_CVMV	test	2
+PVT1_2		PVT1_2	test	106
+Pab19		Pab19	test	4
+Pab91		Pab91	test	1
+Pedo-repair		Pedo-repair	test	6
+PhotoRC-I		PhotoRC-I	test	29
+Pinc		Pinc	test	117
+Plasmid_R1162		Plasmid_R1162	test	20
+Pseudomonadales-1		Pseudomonadales-1	test	9
+PyrR		PyrR	test	1000
+RAGATH-27		RAGATH-27	test	2
+RF_site2		RF_site2	test	3
+RT-12		RT-12	test	14
+RT-14		RT-14	test	43
+RT-18		RT-18	test	17
+RefA1		RefA1	test	5
+RefA5		RefA5	test	2
+RhlA_thermometer		RhlA_thermometer	test	1
+Rota_CRE		Rota_CRE	test	12
+Rubella_3		Rubella_3	test	37
+S808		S808	test	25
+SAH		SAH	test	1000
+SBWMV1_UPD-PKe		SBWMV1_UPD-PKe	test	3
+SCARNA18		SCARNA18	test	287
+SMAD5-AS1_4		SMAD5-AS1_4	test	109
+SMCR2_1		SMCR2_1	test	63
+SNORA33		SNORA33	test	1000
+SNORA68		SNORA68	test	840
+SNORA69		SNORA69	test	700
+SNORD107		SNORD107	test	84
+SNORD116		SNORD116	test	1000
+SNORD126		SNORD126	test	124
+SNORD14		SNORD14	test	1000
+SNORD22		SNORD22	test	899
+SNORD47		SNORD47	test	560
+SNORD86		SNORD86	test	168
+SNORD93		SNORD93	test	315
+SNORD95		SNORD95	test	117
+SR6_antitoxin		SR6_antitoxin	test	5
+SSRC34_1		SSRC34_1	test	9
+STnc100		STnc100	test	121
+STnc290		STnc290	test	4
+STnc300		STnc300	test	6
+Six3os1_3		Six3os1_3	test	78
+SpF25_sRNA		SpF25_sRNA	test	23
+SpR10_sRNA		SpR10_sRNA	test	1
+Spot_42		Spot_42	test	185
+SscA		SscA	test	7
+TB10Cs1H2		TB10Cs1H2	test	14
+TB10Cs5H3		TB10Cs5H3	test	19
+TB11Cs4H1		TB11Cs4H1	test	47
+TB6Cs1H4		TB6Cs1H4	test	27
+TB9Cs1H2		TB9Cs1H2	test	19
+TMV_UPD-PK1		TMV_UPD-PK1	test	2
+TUG1_2		TUG1_2	test	100
+TUG1_3		TUG1_3	test	141
+TeloSII_ncR40		TeloSII_ncR40	test	2
+Termite-leu		Termite-leu	test	18
+TtnuCD1		TtnuCD1	test	1
+TtnuCD13		TtnuCD13	test	1
+TtnuCD29		TtnuCD29	test	1
+TtnuCD7		TtnuCD7	test	1
+TtnuCD9		TtnuCD9	test	1
+TtnuHACA18		TtnuHACA18	test	1
+TtnuHACA21		TtnuHACA21	test	1
+U7		U7	test	1000
+UPD-PKib		UPD-PKib	test	4
+URE2_IRES		URE2_IRES	test	3
+V_AS7		V_AS7	test	85
+V_AS9		V_AS9	test	140
+V_IGR5		V_IGR5	test	2
+Virus_CITE_5		Virus_CITE_5	test	1
+Virus_CITE_8		Virus_CITE_8	test	1
+XIST_A_REPEAT		XIST_A_REPEAT	test	334
+XIST_intron		XIST_intron	test	54
+YenS		YenS	test	1
+Yfr19		Yfr19	test	1
+Ysr251		Ysr251	test	96
+ZEB2_AS1_3		ZEB2_AS1_3	test	135
+antisense_SR1		antisense_SR1	test	146
+babR_5UTR		babR_5UTR	test	1
+bxd_6		bxd_6	test	16
+ceN69		ceN69	test	11
+ceN72-3_ceN74-2		ceN72-3_ceN74-2	test	472
+dinG		dinG	test	21
+fiv_FSE		fiv_FSE	test	5
+g2		g2	test	1
+isrB		isrB	test	8
+lactis-plasmid		lactis-plasmid	test	19
+malK-II		malK-II	test	12
+manA		manA	test	182
+mir-1001		mir-1001	test	3
+mir-1175		mir-1175	test	131
+mir-1179		mir-1179	test	37
+mir-1181		mir-1181	test	4
+mir-1225		mir-1225	test	52
+mir-1237		mir-1237	test	13
+mir-1245		mir-1245	test	29
+mir-1250		mir-1250	test	9
+mir-1260b		mir-1260b	test	64
+mir-1278		mir-1278	test	29
+mir-128		mir-128	test	371
+mir-1282		mir-1282	test	27
+mir-1286		mir-1286	test	15
+mir-1307		mir-1307	test	24
+mir-135		mir-135	test	716
+mir-1419		mir-1419	test	20
+mir-143		mir-143	test	153
+mir-1540		mir-1540	test	1
+mir-155		mir-155	test	244
+mir-1759		mir-1759	test	262
+mir-1891		mir-1891	test	6
+mir-1913		mir-1913	test	3
+mir-1914		mir-1914	test	9
+mir-1949		mir-1949	test	3
+mir-1956		mir-1956	test	2
+mir-2004		mir-2004	test	1
+mir-2006		mir-2006	test	2
+mir-2024		mir-2024	test	11
+mir-2032		mir-2032	test	2
+mir-2162		mir-2162	test	6
+mir-223		mir-223	test	422
+mir-24		mir-24	test	555
+mir-249		mir-249	test	7
+mir-2542		mir-2542	test	7
+mir-2568		mir-2568	test	4
+mir-259		mir-259	test	8
+mir-278		mir-278	test	94
+mir-2788		mir-2788	test	76
+mir-2804		mir-2804	test	30
+mir-2813		mir-2813	test	2
+mir-2968		mir-2968	test	214
+mir-304		mir-304	test	9
+mir-3064		mir-3064	test	53
+mir-3126		mir-3126	test	12
+mir-3129		mir-3129	test	4
+mir-3192		mir-3192	test	12
+mir-3198		mir-3198	test	16
+mir-339		mir-339	test	80
+mir-345		mir-345	test	91
+mir-346		mir-346	test	57
+mir-360		mir-360	test	8
+mir-393		mir-393	test	870
+mir-3956		mir-3956	test	9
+mir-4081		mir-4081	test	2
+mir-433		mir-433	test	36
+mir-448		mir-448	test	82
+mir-450		mir-450	test	185
+mir-46		mir-46	test	262
+mir-4657		mir-4657	test	25
+mir-4672		mir-4672	test	8
+mir-4679		mir-4679	test	8
+mir-4773		mir-4773	test	4
+mir-486		mir-486	test	98
+mir-4867		mir-4867	test	2
+mir-4874		mir-4874	test	3
+mir-493		mir-493	test	39
+mir-542		mir-542	test	41
+mir-551		mir-551	test	612
+mir-58		mir-58	test	8
+mir-5879		mir-5879	test	4
+mir-588		mir-588	test	6
+mir-5892		mir-5892	test	1
+mir-590		mir-590	test	54
+mir-597		mir-597	test	13
+mir-601		mir-601	test	6
+mir-607		mir-607	test	11
+mir-621		mir-621	test	17
+mir-641		mir-641	test	14
+mir-653		mir-653	test	60
+mir-674		mir-674	test	5
+mir-7143		mir-7143	test	3
+mir-737		mir-737	test	152
+mir-7583		mir-7583	test	34
+mir-7594		mir-7594	test	5
+mir-767		mir-767	test	40
+mir-790		mir-790	test	10
+mir-8286		mir-8286	test	11
+mir-872		mir-872	test	28
+mir-90		mir-90	test	9
+mir-9214		mir-9214	test	155
+mir-9223		mir-9223	test	1000
+mir-9228		mir-9228	test	200
+mir-9236		mir-9236	test	243
+mir-924		mir-924	test	6
+mir-9243		mir-9243	test	31
+mir-934		mir-934	test	11
+mir-9418		mir-9418	test	4
+mir-9424		mir-9424	test	2
+mir-963		mir-963	test	3
+mir-974		mir-974	test	2
+mir-BART21		mir-BART21	test	4
+mir-BHRF1-1		mir-BHRF1-1	test	3
+mir-H2		mir-H2	test	2
+mraW		mraW	test	865
+ncS16		ncS16	test	57
+ncr1015		ncr1015	test	81
+nhaA-I		nhaA-I	test	293
+plasmodium_snoR14		plasmodium_snoR14	test	5
+psbNH		psbNH	test	28
+psm_mec_RNA		psm_mec_RNA	test	1
+radC		radC	test	472
+rli27		rli27	test	3
+rmf		rmf	test	74
+rncO		rncO	test	125
+rpsB		rpsB	test	244
+rteR		rteR	test	13
+sR10		sR10	test	4
+sR20		sR20	test	16
+sR4		sR4	test	4
+sR51		sR51	test	5
+sRNA-Xcc1		sRNA-Xcc1	test	394
+sau-5971		sau-5971	test	1
+snR52		snR52	test	31
+snoMe28S-U3344		snoMe28S-U3344	test	42
+snoR11		snoR11	test	612
+snoR130		snoR130	test	69
+snoR23		snoR23	test	15
+snoR99		snoR99	test	577
+snoRNA2		snoRNA2	test	3
+snoTBR7		snoTBR7	test	30
+snoZ163		snoZ163	test	35
+snoZ43		snoZ43	test	643
+sraL		sraL	test	34
+23S-methyl		23S-methyl	train	177
+30_255		30_255	train	1
+30_292		30_292	train	1
+6A		6A	train	28
+6C		6C	train	578
+6S		6S	train	1000
+6S-Flavo		6S-Flavo	train	328
+AAC_AAD_leader		AAC_AAD_leader	train	25
+ACA59		ACA59	train	45
+ACA64		ACA64	train	1000
+ALIL		ALIL	train	1000
+AMV_RNA1_SL		AMV_RNA1_SL	train	4
+AS-pc01		AS-pc01	train	5
+AS-pc02		AS-pc02	train	14
+AS-traG		AS-traG	train	8
+AS-traI		AS-traI	train	5
+AS1726		AS1726	train	2
+AS1890		AS1890	train	9
+ASdes		ASdes	train	1000
+ATPC		ATPC	train	99
+AaHKsRNA20		AaHKsRNA20	train	31
+AaHKsRNA22		AaHKsRNA22	train	96
+AaHKsRNA41		AaHKsRNA41	train	3
+AaHKsRNA54		AaHKsRNA54	train	28
+AaHKsRNA69		AaHKsRNA69	train	12
+AaHKsRNA82		AaHKsRNA82	train	6
+AaHKsRNA96		AaHKsRNA96	train	10
+Aar		Aar	train	14
+AbsR11		AbsR11	train	10
+AbsR25		AbsR25	train	3
+Acido-1		Acido-1	train	3
+Actino-pnp		Actino-pnp	train	1000
+Actino-ugpB		Actino-ugpB	train	1
+Actinomyces-1		Actinomyces-1	train	47
+Afu_182		Afu_182	train	566
+Afu_190		Afu_190	train	487
+Afu_198		Afu_198	train	236
+Afu_199		Afu_199	train	130
+Afu_254		Afu_254	train	178
+Afu_264		Afu_264	train	464
+Afu_294		Afu_294	train	363
+Afu_298		Afu_298	train	320
+Afu_300		Afu_300	train	504
+Afu_304		Afu_304	train	541
+Afu_335		Afu_335	train	524
+Afu_455		Afu_455	train	469
+Afu_514		Afu_514	train	545
+AgrB		AgrB	train	34
+Alpha_RBS		Alpha_RBS	train	665
+AniS		AniS	train	15
+Anti-Q_RNA		Anti-Q_RNA	train	7
+ApoB_5_CRE		ApoB_5_CRE	train	17
+ArcZ		ArcZ	train	49
+Arrc11		Arrc11	train	8
+Arrc14		Arrc14	train	7
+AsdA		AsdA	train	219
+AsxR		AsxR	train	2
+Atu_At1		Atu_At1	train	199
+Atu_C10		Atu_C10	train	2
+Atu_C6		Atu_C6	train	298
+Atu_C7		Atu_C7	train	56
+Atu_C8		Atu_C8	train	235
+Atu_C9		Atu_C9	train	82
+Atu_Ti3		Atu_Ti3	train	9
+Atu_Ti4		Atu_Ti4	train	2
+BASRCI153		BASRCI153	train	1
+BASRCI27		BASRCI27	train	50
+BLV_package		BLV_package	train	3
+BLi_r0872		BLi_r0872	train	1
+BM-sr0117		BM-sr0117	train	1
+BMV3_UPD-PK1		BMV3_UPD-PK1	train	1
+BMV3_UPD-PK3		BMV3_UPD-PK3	train	2
+BSR0602		BSR0602	train	1
+BSR0626		BSR0626	train	1
+BSR0739		BSR0739	train	1
+BSR1073		BSR1073	train	1
+BSR1350		BSR1350	train	1
+BSnc115		BSnc115	train	1
+BSnc119		BSnc119	train	1
+BSnc121		BSnc121	train	1
+BSnc140		BSnc140	train	1
+BSnc150		BSnc150	train	1
+BTE		BTE	train	29
+BTH_s1		BTH_s1	train	7
+BTH_s19		BTH_s19	train	6
+BTnc005		BTnc005	train	3
+BTnc049		BTnc049	train	27
+BTnc201		BTnc201	train	8
+BTnc231		BTnc231	train	19
+BYDV_5_UTR		BYDV_5_UTR	train	6
+B_rapa_snoR775		B_rapa_snoR775	train	22
+BaMV_CRE		BaMV_CRE	train	2
+Bacilli-1		Bacilli-1	train	12
+Bacillus-plasmid		Bacillus-plasmid	train	136
+Bacteroidales-1		Bacteroidales-1	train	205
+Bacteroides-1		Bacteroides-1	train	51
+Baculoviridae_NAE		Baculoviridae_NAE	train	48
+BcKCsr2		BcKCsr2	train	48
+BcKCsr7		BcKCsr7	train	59
+Bcj11		Bcj11	train	277
+Bcj14		Bcj14	train	98
+Betaproteobacteria-1		Betaproteobacteria-1	train	50
+Betaproteobacteria_toxic_sRNA		Betaproteobacteria_toxic_sRNA	train	849
+BjrC1505		BjrC1505	train	269
+BjrC68		BjrC68	train	42
+BjrC80		BjrC80	train	19
+Bp1_162		Bp1_162	train	57
+Bp1_684		Bp1_684	train	174
+Bp1_781		Bp1_781	train	62
+Bp2_287		Bp2_287	train	42
+BsrC		BsrC	train	577
+BsrF		BsrF	train	203
+BsrG		BsrG	train	326
+BtsR1		BtsR1	train	2
+Burkholderiales-2		Burkholderiales-2	train	11
+C0465		C0465	train	6
+CAESAR		CAESAR	train	268
+CC0196		CC0196	train	23
+CC0734		CC0734	train	6
+CC1840		CC1840	train	12
+CC2171		CC2171	train	113
+CC3513		CC3513	train	11
+CC3552		CC3552	train	32
+CC3664		CC3664	train	13
+CDKN2B-AS		CDKN2B-AS	train	111
+CDKN2B-AS_2		CDKN2B-AS_2	train	22
+CDKN2B-AS_3		CDKN2B-AS_3	train	96
+RNaseP-T	CL00002	CL00002	train	2
+Bacteria_small_SRP	CL00003	CL00003	train	1000
+Bacteroidales_small_SRP	CL00003	CL00003	train	924
+Metazoa_SRP	CL00003	CL00003	train	1000
+Protozoa_SRP	CL00003	CL00003	train	87
+Telomerase-cil	CL00004	CL00004	train	24
+Gl_U1	CL00005	CL00005	train	1
+U1	CL00005	CL00005	train	1000
+U11	CL00005	CL00005	train	1000
+U12	CL00006	CL00006	train	1000
+U2	CL00006	CL00006	train	1000
+U4	CL00007	CL00007	train	1000
+U4atac	CL00007	CL00007	train	1000
+U54	CL00008	CL00008	train	486
+snoU54	CL00008	CL00008	train	498
+U6	CL00009	CL00009	train	1000
+U6atac	CL00009	CL00009	train	1000
+SAM	CL00012	CL00012	train	1000
+SAM-I-IV	CL00012	CL00012	train	965
+SAM-IV	CL00012	CL00012	train	1000
+CRISPR-DR14	CL00014	CL00014	train	13
+CRISPR-DR17	CL00014	CL00014	train	3
+CRISPR-DR2	CL00014	CL00014	train	422
+CRISPR-DR25	CL00014	CL00014	train	17
+CRISPR-DR4	CL00014	CL00014	train	576
+CRISPR-DR43	CL00014	CL00014	train	54
+CRISPR-DR66	CL00014	CL00014	train	4
+CRISPR-DR5	CL00015	CL00015	train	371
+CRISPR-DR63	CL00015	CL00015	train	27
+CRISPR-DR64	CL00015	CL00015	train	2
+CRISPR-DR7	CL00015	CL00015	train	157
+FinP	CL00016	CL00016	train	15
+traJ_5	CL00016	CL00016	train	9
+SCARNA24	CL00018	CL00018	train	476
+SCARNA3	CL00018	CL00018	train	573
+SCARNA15	CL00019	CL00019	train	506
+SCARNA4	CL00019	CL00019	train	564
+SL1	CL00020	CL00020	train	244
+SL2	CL00020	CL00020	train	533
+SNORA16	CL00021	CL00021	train	1000
+SNORA2	CL00021	CL00021	train	1000
+S_pombe_snR46	CL00021	CL00021	train	2
+snR189	CL00021	CL00021	train	22
+snR46	CL00021	CL00021	train	67
+snopsi28S-3327	CL00021	CL00021	train	52
+SNORA3	CL00022	CL00022	train	1000
+snR11	CL00022	CL00022	train	20
+SNORA4	CL00023	CL00023	train	248
+SNORA5	CL00024	CL00024	train	1000
+snR85	CL00024	CL00024	train	33
+SNORA8	CL00026	CL00026	train	1000
+snR31	CL00026	CL00026	train	35
+SNORA9	CL00027	CL00027	train	1000
+S_pombe_snR33	CL00027	CL00027	train	3
+snR33	CL00027	CL00027	train	13
+snR43	CL00027	CL00027	train	87
+SNORA13	CL00028	CL00028	train	933
+S_pombe_snR35	CL00028	CL00028	train	75
+snR35	CL00028	CL00028	train	75
+SNORA17	CL00029	CL00029	train	1000
+SNORA43	CL00029	CL00029	train	424
+SNORA20	CL00030	CL00030	train	352
+SNORA29	CL00030	CL00030	train	821
+SNORA21	CL00031	CL00031	train	614
+S_pombe_snR10	CL00031	CL00031	train	3
+snR10	CL00031	CL00031	train	62
+SNORA28	CL00033	CL00033	train	741
+snR80	CL00033	CL00033	train	393
+snopsi18S-841	CL00033	CL00033	train	111
+SNORA35	CL00034	CL00034	train	755
+SNORA50	CL00034	CL00034	train	462
+SNORA54	CL00034	CL00034	train	1000
+SNORA76	CL00034	CL00034	train	729
+SNORA36	CL00035	CL00035	train	1000
+S_pombe_snR36	CL00035	CL00035	train	3
+snR36	CL00035	CL00035	train	599
+snR44	CL00035	CL00035	train	521
+SNORA44	CL00036	CL00036	train	923
+SNORA58	CL00036	CL00036	train	397
+snR161	CL00036	CL00036	train	31
+snR9	CL00036	CL00036	train	9
+SNORA48	CL00037	CL00037	train	1000
+SNORA18	CL00038	CL00038	train	1000
+SNORA52	CL00038	CL00038	train	546
+SNORA66	CL00038	CL00038	train	934
+S_pombe_snR5	CL00038	CL00038	train	4
+snR49	CL00038	CL00038	train	60
+snR5	CL00038	CL00038	train	79
+snoR80	CL00038	CL00038	train	597
+snoR98	CL00038	CL00038	train	187
+SNORA62	CL00040	CL00040	train	1000
+S_pombe_snR3	CL00040	CL00040	train	3
+snR3	CL00040	CL00040	train	62
+SNORA65	CL00042	CL00042	train	926
+snR34	CL00042	CL00042	train	42
+snoR2	CL00042	CL00042	train	771
+SNORA74	CL00043	CL00043	train	1000
+snR191	CL00043	CL00043	train	351
+SNORD12	CL00044	CL00044	train	1000
+snR190	CL00044	CL00044	train	40
+SNORD18	CL00047	CL00047	train	1000
+snoU18	CL00047	CL00047	train	94
+SNORD19	CL00048	CL00048	train	1000
+SNORD19B	CL00048	CL00048	train	100
+SNORD26	CL00050	CL00050	train	363
+SNORD81	CL00050	CL00050	train	232
+SNORD30	CL00052	CL00052	train	244
+snoU30	CL00052	CL00052	train	263
+SNORD31	CL00053	CL00053	train	976
+snR67	CL00053	CL00053	train	84
+snoR35	CL00053	CL00053	train	449
+snoZ17	CL00053	CL00053	train	506
+SNORD33	CL00054	CL00054	train	1000
+SNORD51	CL00054	CL00054	train	363
+snR39	CL00054	CL00054	train	63
+snR40	CL00054	CL00054	train	72
+snoMe18S-Um1356	CL00054	CL00054	train	95
+snoMe28S-Am982	CL00054	CL00054	train	90
+snoZ196	CL00054	CL00054	train	652
+snosnR55	CL00054	CL00054	train	76
+SNORD34	CL00055	CL00055	train	1000
+snR62	CL00055	CL00055	train	5
+SNORD35	CL00056	CL00056	train	1000
+snR73	CL00056	CL00056	train	391
+snoZ161_228	CL00056	CL00056	train	479
+SNORD39	CL00057	CL00057	train	503
+SNORD65	CL00057	CL00057	train	726
+snR77	CL00057	CL00057	train	91
+snoR77Y	CL00057	CL00057	train	458
+snoZ101	CL00057	CL00057	train	848
+snoZ7	CL00057	CL00057	train	43
+SNORD41	CL00058	CL00058	train	475
+SNORD57	CL00058	CL00058	train	505
+snR51	CL00058	CL00058	train	204
+SNORD43	CL00059	CL00059	train	177
+snR70	CL00059	CL00059	train	25
+SNORD44	CL00060	CL00060	train	150
+snoZ102_R77	CL00060	CL00060	train	1000
+SNORD46	CL00061	CL00061	train	561
+snR63	CL00061	CL00061	train	24
+SNORD49	CL00062	CL00062	train	713
+snoU49	CL00062	CL00062	train	255
+snoZ112	CL00062	CL00062	train	352
+SNORD52	CL00063	CL00063	train	233
+SNORD53_SNORD92	CL00063	CL00063	train	1000
+snR78	CL00063	CL00063	train	39
+snoZ157	CL00063	CL00063	train	645
+SNORD58	CL00064	CL00064	train	1000
+SNORD99	CL00064	CL00064	train	447
+SNORD59	CL00065	CL00065	train	881
+snoZ159	CL00065	CL00065	train	1000
+snosnR54	CL00065	CL00065	train	84
+SNORD125	CL00067	CL00067	train	394
+SNORD61	CL00067	CL00067	train	711
+snoU61	CL00067	CL00067	train	310
+SNORD62	CL00068	CL00068	train	527
+snR41	CL00068	CL00068	train	84
+snoR41	CL00068	CL00068	train	387
+SNORD109A	CL00069	CL00069	train	225
+SNORD112	CL00069	CL00069	train	114
+SNORD113	CL00069	CL00069	train	1000
+SNORD64	CL00069	CL00069	train	89
+SNORD74	CL00069	CL00069	train	637
+SNORD79	CL00069	CL00069	train	533
+snoMe28S-Cm2645	CL00069	CL00069	train	66
+snoR44_J54	CL00069	CL00069	train	921
+snosnR64	CL00069	CL00069	train	40
+Afu_263	CL00070	CL00070	train	122
+SNORD77	CL00070	CL00070	train	287
+snosnR60_Z15	CL00070	CL00070	train	1000
+SNORD88	CL00071	CL00071	train	872
+snR76	CL00071	CL00071	train	92
+snoR118	CL00071	CL00071	train	506
+SNORD105	CL00075	CL00075	train	107
+snoU105B	CL00075	CL00075	train	112
+SNORD110	CL00076	CL00076	train	85
+snoR14	CL00076	CL00076	train	494
+SNORA73	CL00078	CL00078	train	1000
+snoU13	CL00081	CL00081	train	1000
+snoZ279_R105_R108	CL00081	CL00081	train	746
+mir-11	CL00083	CL00083	train	121
+mir-6	CL00083	CL00083	train	67
+mir-3	CL00084	CL00084	train	49
+mir-318	CL00084	CL00084	train	18
+mir-15	CL00085	CL00085	train	787
+mir-16	CL00085	CL00085	train	1000
+mir-28	CL00086	CL00086	train	86
+mir-708	CL00086	CL00086	train	43
+mir-34	CL00087	CL00087	train	1000
+mir-449	CL00087	CL00087	train	217
+mir-35	CL00088	CL00088	train	5
+mir-35_2	CL00088	CL00088	train	24
+mir-36	CL00088	CL00088	train	182
+mir-36_2	CL00088	CL00088	train	16
+mir-39	CL00088	CL00088	train	6
+mir-42	CL00088	CL00088	train	8
+mir-190	CL00089	CL00089	train	579
+mir-50	CL00089	CL00089	train	49
+mir-73	CL00090	CL00090	train	10
+mir-74	CL00090	CL00090	train	14
+bantam	CL00091	CL00091	train	149
+mir-81	CL00091	CL00091	train	59
+mir-182	CL00093	CL00093	train	211
+mir-183	CL00093	CL00093	train	126
+mir-228	CL00093	CL00093	train	30
+mir-263	CL00093	CL00093	train	316
+mir-216	CL00094	CL00094	train	631
+mir-283	CL00094	CL00094	train	81
+mir-279	CL00095	CL00095	train	372
+mir-996	CL00095	CL00095	train	55
+mir-BART1	CL00097	CL00097	train	2
+mir-BART3	CL00097	CL00097	train	6
+MIR169_2	CL00098	CL00098	train	1000
+MIR169_3	CL00098	CL00098	train	11
+MIR169_5	CL00098	CL00098	train	1000
+MIR169_6	CL00098	CL00098	train	85
+MIR169_7	CL00098	CL00098	train	9
+MIR169_8	CL00098	CL00098	train	4
+ACEA_U3	CL00100	CL00100	train	1000
+Plant_U3	CL00100	CL00100	train	1000
+U3	CL00100	CL00100	train	1000
+group-II-D1D4-1	CL00102	CL00102	train	1000
+group-II-D1D4-2	CL00102	CL00102	train	1000
+group-II-D1D4-3	CL00102	CL00102	train	1000
+group-II-D1D4-4	CL00102	CL00102	train	753
+group-II-D1D4-5	CL00102	CL00102	train	702
+group-II-D1D4-6	CL00102	CL00102	train	1000
+group-II-D1D4-7	CL00102	CL00102	train	1000
+SNORD11	CL00103	CL00103	train	376
+SNORD11B	CL00103	CL00103	train	551
+AHBV_epsilon	CL00104	CL00104	train	25
+HBV_epsilon	CL00104	CL00104	train	20
+SdsR_RyeB	CL00105	CL00105	train	259
+SraC_RyeA	CL00105	CL00105	train	229
+CsrC	CL00106	CL00106	train	32
+McaS	CL00106	CL00106	train	17
+PrrB_RsmZ	CL00106	CL00106	train	162
+RsmW	CL00106	CL00106	train	2
+RsmY	CL00106	CL00106	train	80
+TwoAYGGAY	CL00106	CL00106	train	1000
+rsmX	CL00106	CL00106	train	68
+ar15	CL00108	CL00108	train	313
+suhB	CL00108	CL00108	train	1000
+5_8S_rRNA	CL00112	CL00112	train	1000
+5S_rRNA	CL00113	CL00113	train	1000
+mtPerm-5S	CL00113	CL00113	train	5
+LhrC	CL00114	CL00114	train	22
+rli22	CL00114	CL00114	train	5
+DUF805	CL00115	CL00115	train	281
+DUF805b	CL00115	CL00115	train	1000
+gCoV-5UTR	CL00116	CL00116	train	1
+Corona_pk3	CL00117	CL00117	train	68
+s2m	CL00117	CL00117	train	51
+L31-Actinobacteria	CL00118	CL00118	train	1000
+L31-Coriobacteria	CL00118	CL00118	train	82
+L31-Corynebacteriaceae	CL00118	CL00118	train	68
+L31-Firmicutes	CL00118	CL00118	train	297
+L31-Gammaproteobacteria	CL00118	CL00118	train	336
+S4-Bacteroidia	CL00119	CL00119	train	74
+S4-Clostridia	CL00119	CL00119	train	59
+S4-Flavobacteria	CL00119	CL00119	train	150
+S4-Fusobacteriales	CL00119	CL00119	train	22
+Twister-P5	CL00120	CL00120	train	13
+twister-P1	CL00120	CL00120	train	1000
+twister-P3	CL00120	CL00120	train	4
+NiCo	CL00122	CL00122	train	210
+NiCo-AnGGAG	CL00122	CL00122	train	3
+2dG-I	CL00123	CL00123	train	28
+2dG-II	CL00123	CL00123	train	10
+Purine	CL00123	CL00123	train	1000
+TD-1	CL00124	CL00124	train	142
+TD-2	CL00124	CL00124	train	305
+Glycine	CL00125	CL00125	train	1000
+glycine-GGAnGA	CL00125	CL00125	train	35
+c-di-GMP-II	CL00127	CL00127	train	582
+c-di-GMP-II-GAG	CL00127	CL00127	train	136
+c-di-GMP-II-GCG	CL00127	CL00127	train	6
+C4	CL00128	CL00128	train	1000
+c4-2	CL00128	CL00128	train	76
+c4-a1b1	CL00128	CL00128	train	280
+DENV_SLA	CL00129	CL00129	train	2
+cHP	CL00129	CL00129	train	58
+mir-31	CL00133	CL00133	train	384
+mir-72	CL00133	CL00133	train	50
+mir-251	CL00135	CL00135	train	14
+mir-252	CL00135	CL00135	train	346
+mir-465	CL00136	CL00136	train	13
+mir-507	CL00136	CL00136	train	149
+mir-509	CL00136	CL00136	train	245
+mir-513	CL00136	CL00136	train	201
+mir-743	CL00136	CL00136	train	37
+mir-890	CL00136	CL00136	train	278
+mir-8908	CL00136	CL00136	train	162
+mir-310	CL00137	CL00137	train	57
+mir-92	CL00137	CL00137	train	445
+mir-236	CL00138	CL00138	train	45
+mir-8	CL00138	CL00138	train	1000
+MIR2863	CL00139	CL00139	train	13
+MIR5070	CL00139	CL00139	train	245
+mir-506	CL00140	CL00140	train	22
+mir-511	CL00140	CL00140	train	36
+mir-H20	CL00141	CL00141	train	2
+mir-H7	CL00141	CL00141	train	2
+mir-2733	CL00142	CL00142	train	101
+mir-2851	CL00142	CL00142	train	16
+mir-64	CL00142	CL00142	train	55
+MIR4371	CL00144	CL00144	train	252
+MIR4387	CL00144	CL00144	train	17
+MIR1520	CL00145	CL00145	train	1000
+MIR4372	CL00145	CL00145	train	3
+mir-574	CL00147	CL00147	train	1000
+mir-1197	CL00149	CL00149	train	44
+mir-154	CL00149	CL00149	train	940
+mir-329	CL00149	CL00149	train	182
+mir-3578	CL00149	CL00149	train	54
+mir-368	CL00149	CL00149	train	173
+mir-379	CL00149	CL00149	train	161
+mir-485	CL00149	CL00149	train	25
+mir-889	CL00149	CL00149	train	35
+MIR162_1	CL00150	CL00150	train	225
+MIR162_2	CL00150	CL00150	train	31
+COG3610-DE		COG3610-DE	train	13
+COG3860		COG3860	train	238
+CPEB3_ribozyme		CPEB3_ribozyme	train	1000
+CRISPR-DR10		CRISPR-DR10	train	22
+CRISPR-DR12		CRISPR-DR12	train	79
+CRISPR-DR13		CRISPR-DR13	train	26
+CRISPR-DR15		CRISPR-DR15	train	61
+CRISPR-DR18		CRISPR-DR18	train	3
+CRISPR-DR19		CRISPR-DR19	train	9
+CRISPR-DR20		CRISPR-DR20	train	9
+CRISPR-DR21		CRISPR-DR21	train	5
+CRISPR-DR22		CRISPR-DR22	train	44
+CRISPR-DR23		CRISPR-DR23	train	27
+CRISPR-DR24		CRISPR-DR24	train	104
+CRISPR-DR26		CRISPR-DR26	train	5
+CRISPR-DR27		CRISPR-DR27	train	22
+CRISPR-DR28		CRISPR-DR28	train	38
+CRISPR-DR29		CRISPR-DR29	train	81
+CRISPR-DR3		CRISPR-DR3	train	145
+CRISPR-DR30		CRISPR-DR30	train	4
+CRISPR-DR31		CRISPR-DR31	train	15
+CRISPR-DR32		CRISPR-DR32	train	2
+CRISPR-DR33		CRISPR-DR33	train	81
+CRISPR-DR35		CRISPR-DR35	train	11
+CRISPR-DR36		CRISPR-DR36	train	9
+CRISPR-DR38		CRISPR-DR38	train	6
+CRISPR-DR39		CRISPR-DR39	train	18
+CRISPR-DR41		CRISPR-DR41	train	2
+CRISPR-DR42		CRISPR-DR42	train	4
+CRISPR-DR44		CRISPR-DR44	train	13
+CRISPR-DR45		CRISPR-DR45	train	5
+CRISPR-DR46		CRISPR-DR46	train	2
+CRISPR-DR47		CRISPR-DR47	train	4
+CRISPR-DR48		CRISPR-DR48	train	3
+CRISPR-DR49		CRISPR-DR49	train	53
+CRISPR-DR50		CRISPR-DR50	train	23
+CRISPR-DR51		CRISPR-DR51	train	2
+CRISPR-DR53		CRISPR-DR53	train	5
+CRISPR-DR54		CRISPR-DR54	train	7
+CRISPR-DR55		CRISPR-DR55	train	2
+CRISPR-DR56		CRISPR-DR56	train	10
+CRISPR-DR57		CRISPR-DR57	train	55
+CRISPR-DR58		CRISPR-DR58	train	11
+CRISPR-DR61		CRISPR-DR61	train	5
+CRISPR-DR62		CRISPR-DR62	train	2
+CRISPR-DR65		CRISPR-DR65	train	2
+CRISPR-DR8		CRISPR-DR8	train	12
+CRISPR-DR9		CRISPR-DR9	train	65
+Cardiovirus_CRE		Cardiovirus_CRE	train	5
+CbSR12		CbSR12	train	1
+CbSR14		CbSR14	train	1
+CbSR2		CbSR2	train	1
+CbSR3		CbSR3	train	19
+CbSR4		CbSR4	train	1
+CcsR1		CcsR1	train	20
+Chlorobi-1		Chlorobi-1	train	24
+Chlorobi-RRM		Chlorobi-RRM	train	24
+Chloroflexi-1		Chloroflexi-1	train	3
+Chloroflexus-1		Chloroflexus-1	train	1
+Cis2_sRNA		Cis2_sRNA	train	332
+Cis52_sRNA		Cis52_sRNA	train	277
+Cis8_sRNA		Cis8_sRNA	train	134
+Clostridiales-2		Clostridiales-2	train	266
+Clostridiales-3		Clostridiales-3	train	10
+Clostridium-PBP		Clostridium-PBP	train	1
+ClpQY_promoter		ClpQY_promoter	train	55
+CncR1		CncR1	train	1
+CnfY_thermometer		CnfY_thermometer	train	1
+CoTC_ribozyme		CoTC_ribozyme	train	73
+CopA		CopA	train	65
+Corio-PBP		Corio-PBP	train	17
+Corona_FSE		Corona_FSE	train	78
+Corona_package		Corona_package	train	7
+CrfA		CrfA	train	42
+CssrA		CssrA	train	7
+Cupriavidus-1		Cupriavidus-1	train	9
+CyVA-1		CyVA-1	train	106
+CyaR_RyeE		CyaR_RyeE	train	91
+Cyano-1		Cyano-1	train	498
+Cyano-2		Cyano-2	train	63
+DABA-DC-AT		DABA-DC-AT	train	48
+DGCR5		DGCR5	train	29
+DISC2		DISC2	train	35
+DLEU1_1		DLEU1_1	train	225
+DLEU2_1		DLEU2_1	train	144
+DLEU2_2		DLEU2_2	train	78
+DLEU2_3		DLEU2_3	train	93
+DLEU2_4		DLEU2_4	train	109
+DLEU2_5		DLEU2_5	train	308
+DLEU2_6		DLEU2_6	train	190
+DLG2-AS1_1		DLG2-AS1_1	train	127
+DLG2-AS1_2		DLG2-AS1_2	train	118
+DPB		DPB	train	137
+DUF2693-FD		DUF2693-FD	train	5
+DUF3085		DUF3085	train	15
+DUF3268		DUF3268	train	13
+DUF3577		DUF3577	train	5
+DUF3800-III		DUF3800-III	train	4
+DUF3800-IV		DUF3800-IV	train	8
+DUF3800-IX		DUF3800-IX	train	34
+DUF3800-V		DUF3800-V	train	15
+DUF3800-VI		DUF3800-VI	train	33
+DUF3800-VII		DUF3800-VII	train	36
+DUF3800-VIII		DUF3800-VIII	train	75
+DUF3800-X		DUF3800-X	train	10
+DUF3800-XI		DUF3800-XI	train	53
+DapZ		DapZ	train	40
+DdR1		DdR1	train	2
+DdR10		DdR10	train	7
+DdR11		DdR11	train	6
+DdR14		DdR14	train	1
+DdR15		DdR15	train	2
+DdR16		DdR16	train	5
+DdR17		DdR17	train	1
+DdR18		DdR18	train	3
+DdR4		DdR4	train	3
+DdR5		DdR5	train	2
+DdR6		DdR6	train	2
+DdR7		DdR7	train	2
+DdR8		DdR8	train	1
+Deinococcus_Y_RNA		Deinococcus_Y_RNA	train	2
+DicF		DicF	train	10
+Dicty_Class_I_RNA		Dicty_Class_I_RNA	train	131
+DnaX		DnaX	train	85
+DsrA		DsrA	train	24
+EAV_LTH		EAV_LTH	train	3
+EBER2		EBER2	train	2
+EBv-sisRNA-1		EBv-sisRNA-1	train	4
+EBv-sisRNA-2		EBv-sisRNA-2	train	74
+ES003		ES003	train	14
+ES036		ES036	train	89
+ES056		ES056	train	7
+ES173		ES173	train	1
+ES205		ES205	train	3
+ES222		ES222	train	19
+Entero_5_CRE		Entero_5_CRE	train	153
+Entero_CRE		Entero_CRE	train	57
+Entero_OriR		Entero_OriR	train	59
+Esr41		Esr41	train	3
+Evf-2_5p		Evf-2_5p	train	303
+F6		F6	train	286
+FAM13A-AS1_2		FAM13A-AS1_2	train	95
+FAS-AS1		FAS-AS1	train	110
+FIE3		FIE3	train	20
+FMR1-AS1_1		FMR1-AS1_1	train	71
+FMR1-AS1_2		FMR1-AS1_2	train	87
+FTHFS		FTHFS	train	2
+FTX_2		FTX_2	train	77
+FTX_3		FTX_3	train	88
+FTX_4		FTX_4	train	78
+FTX_5		FTX_5	train	109
+FasX		FasX	train	2
+FdoG1_thermometer		FdoG1_thermometer	train	9
+Fibro-purF		Fibro-purF	train	3
+Fibrobacter-1		Fibrobacter-1	train	1
+Flavi_CRE		Flavi_CRE	train	86
+Flavi_ISFV_CRE		Flavi_ISFV_CRE	train	13
+Flavi_NKV_CRE		Flavi_NKV_CRE	train	1
+Flavivirus_DB		Flavivirus_DB	train	119
+Flavivirus_SLIV		Flavivirus_SLIV	train	21
+Flavo-1		Flavo-1	train	1000
+FourU		FourU	train	8
+FsrA		FsrA	train	2
+FtrA		FtrA	train	1
+FtrB		FtrB	train	3
+FuFi-1		FuFi-1	train	13
+Fusobacteriales-1		Fusobacteriales-1	train	27
+Fwd6_3p_UTR		Fwd6_3p_UTR	train	5
+GAIT		GAIT	train	90
+GHRLOS		GHRLOS	train	64
+GIR1		GIR1	train	13
+GNAS-AS1_1		GNAS-AS1_1	train	108
+GNAS-AS1_2		GNAS-AS1_2	train	97
+GNAS-AS1_3		GNAS-AS1_3	train	40
+GNAS-AS1_4		GNAS-AS1_4	train	110
+GNAS-AS1_5		GNAS-AS1_5	train	104
+GP20-a		GP20-a	train	3
+GP20-b		GP20-b	train	63
+GP_knot2		GP_knot2	train	1
+GRIK4_3p_UTR		GRIK4_3p_UTR	train	66
+GadY		GadY	train	4
+Gammaretro_CES		Gammaretro_CES	train	49
+GcvB		GcvB	train	220
+GibS		GibS	train	18
+Gl_RNase_MRP		Gl_RNase_MRP	train	2
+Gl_U2		Gl_U2	train	1
+Gl_U4		Gl_U4	train	1
+GlsR10		GlsR10	train	1
+GlsR13		GlsR13	train	1
+GlsR14		GlsR14	train	1
+GlsR16_miR3		GlsR16_miR3	train	1
+GlsR18		GlsR18	train	1
+GlsR19		GlsR19	train	1
+GlsR1_miR6		GlsR1_miR6	train	1
+GlsR20		GlsR20	train	1
+GlsR21		GlsR21	train	1
+GlsR22		GlsR22	train	1
+GlsR24		GlsR24	train	1
+GlsR25		GlsR25	train	1
+GlsR26		GlsR26	train	1
+GlsR2_miR4		GlsR2_miR4	train	1
+GlsR4		GlsR4	train	1
+GlsR5		GlsR5	train	1
+GlsR6		GlsR6	train	1
+GlsR7		GlsR7	train	1
+GlsR8_miR10		GlsR8_miR10	train	1
+GlsR9		GlsR9	train	1
+Glutamine		Glutamine	train	926
+Glutamine-II		Glutamine-II	train	393
+GmglnB1_5p_UTR		GmglnB1_5p_UTR	train	2
+Guanidine-I		Guanidine-I	train	1000
+Guanidine-II		Guanidine-II	train	1000
+Guanidine-III		Guanidine-III	train	1000
+Gurken		Gurken	train	2
+Gut-1		Gut-1	train	77
+H19_1		H19_1	train	88
+H19_2		H19_2	train	74
+H19_3		H19_3	train	74
+HCV_5BSL1		HCV_5BSL1	train	1
+HCV_J750		HCV_J750	train	1
+HCV_J7880		HCV_J7880	train	1
+HCV_SL1412		HCV_SL1412	train	2
+HCV_SL2531-SL2549		HCV_SL2531-SL2549	train	1
+HCV_SL588		HCV_SL588	train	1
+HCV_SL669		HCV_SL669	train	1
+HCV_SL8001		HCV_SL8001	train	2
+HCV_SL8670		HCV_SL8670	train	1
+HCV_X3		HCV_X3	train	11
+HDV_ribozyme		HDV_ribozyme	train	40
+HEARO		HEARO	train	912
+HIV-1_DIS		HIV-1_DIS	train	78
+HIV-1_SD		HIV-1_SD	train	17
+HIV-1_SL3		HIV-1_SL3	train	20
+HIV_FS2		HIV_FS2	train	21
+HIV_GSL3		HIV_GSL3	train	110
+HIV_POL-1_SL		HIV_POL-1_SL	train	36
+HLE		HLE	train	13
+HOTAIRM1_1		HOTAIRM1_1	train	91
+HOTAIRM1_3		HOTAIRM1_3	train	68
+HOTAIRM1_4		HOTAIRM1_4	train	99
+HOTAIRM1_5		HOTAIRM1_5	train	95
+HOTAIR_2		HOTAIR_2	train	78
+HOTAIR_3		HOTAIR_3	train	90
+HOTTIP_1		HOTTIP_1	train	70
+HOTTIP_4		HOTTIP_4	train	110
+HOXA11-AS1_1		HOXA11-AS1_1	train	72
+HOXA11-AS1_2		HOXA11-AS1_2	train	365
+HOXA11-AS1_3		HOXA11-AS1_3	train	94
+HOXA11-AS1_4		HOXA11-AS1_4	train	374
+HOXA11-AS1_5		HOXA11-AS1_5	train	418
+HOXB13-AS1_1		HOXB13-AS1_1	train	90
+HOXB13-AS1_2		HOXB13-AS1_2	train	83
+HPnc0260		HPnc0260	train	197
+HPnc0580		HPnc0580	train	29
+HSR-omega_1		HSR-omega_1	train	15
+HSR-omega_2		HSR-omega_2	train	16
+HSUR		HSUR	train	6
+HTH-XRE		HTH-XRE	train	12
+HTT-AS1_1		HTT-AS1_1	train	15
+HTT-AS1_2		HTT-AS1_2	train	14
+HTT-AS1_3		HTT-AS1_3	train	14
+HULC		HULC	train	89
+Hairpin		Hairpin	train	3
+Hatchet		Hatchet	train	23
+HepC_CRE		HepC_CRE	train	52
+HgcC		HgcC	train	12
+HgcE		HgcE	train	5
+HgcF		HgcF	train	6
+His_leader		His_leader	train	312
+Histone3		Histone3	train	1000
+Hovlinc		Hovlinc	train	60
+HrrF		HrrF	train	9
+Hrs10		Hrs10	train	1
+Hrs12		Hrs12	train	1
+Hrs13		Hrs13	train	2
+Hrs21		Hrs21	train	1
+IFN_gamma		IFN_gamma	train	112
+IMES-1		IMES-1	train	176
+IMES-2		IMES-2	train	326
+IMES-3		IMES-3	train	29
+IRES_APC		IRES_APC	train	11
+IRES_Cripavirus		IRES_Cripavirus	train	17
+IRES_Cx32		IRES_Cx32	train	75
+IRES_Cx43		IRES_Cx43	train	533
+IRES_EBNA		IRES_EBNA	train	9
+IRES_FGF1		IRES_FGF1	train	105
+IRES_IGF2		IRES_IGF2	train	75
+IRES_KSHV		IRES_KSHV	train	4
+IRES_L-myc		IRES_L-myc	train	103
+IRES_Picorna		IRES_Picorna	train	89
+IRES_Tobamo		IRES_Tobamo	train	7
+IRES_mnt		IRES_mnt	train	90
+IRE_I		IRE_I	train	1000
+IRE_II		IRE_II	train	729
+IR_84		IR_84	train	11
+IS1222_FSE		IS1222_FSE	train	53
+IS128		IS128	train	6
+IS605-orfB-I		IS605-orfB-I	train	1
+Intron_gpII		Intron_gpII	train	1000
+InvR		InvR	train	5
+IsrR		IsrR	train	1000
+JA03		JA03	train	9
+JA04		JA04	train	6
+JPX_1		JPX_1	train	133
+JPX_2		JPX_2	train	61
+JUMPstart		JUMPstart	train	274
+K10_TLS		K10_TLS	train	17
+KCNQ1OT1_2		KCNQ1OT1_2	train	103
+KCNQ1OT1_5		KCNQ1OT1_5	train	101
+KDPG-aldolase		KDPG-aldolase	train	15
+KRAS_3UTR		KRAS_3UTR	train	55
+KatA_thermometer		KatA_thermometer	train	1
+L10_leader		L10_leader	train	1000
+L13-Bacteroidia		L13-Bacteroidia	train	61
+L13_leader		L13_leader	train	302
+L17-Actino-Proteobacteria		L17-Actino-Proteobacteria	train	486
+L17DE		L17DE	train	179
+L19-Flavobacteria		L19-Flavobacteria	train	235
+L19_leader		L19_leader	train	236
+L2-Alphaproteobacteria		L2-Alphaproteobacteria	train	311
+L20_leader		L20_leader	train	744
+L21_leader		L21_leader	train	952
+L25-Gammaproteobacteria		L25-Gammaproteobacteria	train	52
+L4-Archaeoglobi		L4-Archaeoglobi	train	139
+LAGLIDADG-2		LAGLIDADG-2	train	3
+LDH1_5p_UTR		LDH1_5p_UTR	train	1
+LINC00901		LINC00901	train	535
+LLnc147		LLnc147	train	2
+LOOT		LOOT	train	11
+LPR10		LPR10	train	8
+LPR69		LPR69	train	142
+Lacto-phage-1		Lacto-phage-1	train	1
+Lacto-rpoB		Lacto-rpoB	train	53
+Lacto-usp		Lacto-usp	train	17
+Lambda_thermo		Lambda_thermo	train	10
+Leu_leader		Leu_leader	train	114
+Lig_thermometer		Lig_thermometer	train	4
+Lysine		Lysine	train	1000
+M23		M23	train	4
+MALAT1		MALAT1	train	102
+MAT2A_A		MAT2A_A	train	230
+MAT2A_F		MAT2A_F	train	209
+MEG3_2		MEG3_2	train	93
+MEG8_1		MEG8_1	train	92
+MEG8_2		MEG8_2	train	87
+MEG8_3		MEG8_3	train	77
+MESTIT1_1		MESTIT1_1	train	104
+MESTIT1_2		MESTIT1_2	train	99
+MH_s10		MH_s10	train	6
+MH_s25		MH_s25	train	2
+MIAT_exon1		MIAT_exon1	train	86
+MIMT1_1		MIMT1_1	train	79
+MIR1023		MIR1023	train	8
+MIR1024		MIR1024	train	2
+MIR1027		MIR1027	train	2
+MIR1033		MIR1033	train	9
+MIR1094		MIR1094	train	6
+MIR1122		MIR1122	train	1000
+MIR1144		MIR1144	train	3
+MIR1151		MIR1151	train	7
+MIR1219		MIR1219	train	6
+MIR1222		MIR1222	train	5
+MIR1223		MIR1223	train	12
+MIR1428		MIR1428	train	68
+MIR1432		MIR1432	train	3
+MIR1435		MIR1435	train	1000
+MIR1437		MIR1437	train	6
+MIR1444		MIR1444	train	12
+MIR1507		MIR1507	train	23
+MIR1508		MIR1508	train	2
+MIR1509		MIR1509	train	38
+MIR1511		MIR1511	train	3
+MIR1512		MIR1512	train	7
+MIR1514		MIR1514	train	2
+MIR1515		MIR1515	train	3
+MIR1523		MIR1523	train	2
+MIR158		MIR158	train	25
+MIR159		MIR159	train	1000
+MIR161		MIR161	train	10
+MIR164		MIR164	train	150
+MIR167		MIR167	train	2
+MIR168		MIR168	train	426
+MIR169		MIR169	train	28
+MIR173		MIR173	train	5
+MIR1846		MIR1846	train	53
+MIR1858		MIR1858	train	22
+MIR1861		MIR1861	train	152
+MIR1862		MIR1862	train	40
+MIR1878		MIR1878	train	26
+MIR1882		MIR1882	train	82
+MIR1886		MIR1886	train	797
+MIR1887		MIR1887	train	2
+MIR1888		MIR1888	train	40
+MIR1919		MIR1919	train	14
+MIR2086		MIR2086	train	12
+MIR2109		MIR2109	train	1
+MIR2118		MIR2118	train	1000
+MIR2118_2		MIR2118_2	train	5
+MIR2119		MIR2119	train	15
+MIR2275		MIR2275	train	634
+MIR2587		MIR2587	train	231
+MIR2593		MIR2593	train	1000
+MIR2599		MIR2599	train	85
+MIR2600		MIR2600	train	46
+MIR2606		MIR2606	train	194
+MIR2617		MIR2617	train	1000
+MIR2619		MIR2619	train	1000
+MIR2629		MIR2629	train	562
+MIR2630		MIR2630	train	292
+MIR2655		MIR2655	train	586
+MIR2670		MIR2670	train	187
+MIR2679		MIR2679	train	14
+MIR2871		MIR2871	train	8
+MIR2907		MIR2907	train	98
+MIR2912		MIR2912	train	1000
+MIR2950		MIR2950	train	32
+MIR319		MIR319	train	141
+MIR3440		MIR3440	train	4
+MIR3454		MIR3454	train	29
+MIR3522		MIR3522	train	1
+MIR3704		MIR3704	train	1
+MIR390		MIR390	train	499
+MIR391		MIR391	train	16
+MIR3932		MIR3932	train	2
+MIR394		MIR394	train	551
+MIR396		MIR396	train	612
+MIR397		MIR397	train	410
+MIR398		MIR398	train	536
+MIR400		MIR400	train	6
+MIR403		MIR403	train	178
+MIR405		MIR405	train	5
+MIR408		MIR408	train	254
+MIR4208		MIR4208	train	7
+MIR4221		MIR4221	train	2
+MIR4227		MIR4227	train	2
+MIR4228		MIR4228	train	2
+MIR4239		MIR4239	train	2
+MIR4245		MIR4245	train	3
+MIR4359		MIR4359	train	94
+MIR4374		MIR4374	train	59
+MIR4376		MIR4376	train	10
+MIR439		MIR439	train	31
+MIR4414		MIR4414	train	9
+MIR4416		MIR4416	train	10
+MIR444		MIR444	train	19
+MIR447		MIR447	train	3
+MIR473		MIR473	train	157
+MIR474		MIR474	train	72
+MIR475		MIR475	train	30
+MIR476		MIR476	train	14
+MIR477		MIR477	train	45
+MIR478		MIR478	train	1000
+MIR480		MIR480	train	1000
+MIR5020		MIR5020	train	4
+MIR5038		MIR5038	train	5
+MIR5084		MIR5084	train	112
+MIR5148		MIR5148	train	144
+MIR5185		MIR5185	train	41
+MIR5200		MIR5200	train	29
+MIR5225		MIR5225	train	49
+MIR5229		MIR5229	train	2
+MIR5241		MIR5241	train	13
+MIR5267		MIR5267	train	162
+MIR5271		MIR5271	train	14
+MIR5274		MIR5274	train	2
+MIR528		MIR528	train	34
+MIR5284		MIR5284	train	138
+MIR5285		MIR5285	train	88
+MIR5286		MIR5286	train	175
+MIR5294		MIR5294	train	29
+MIR5304		MIR5304	train	3
+MIR531		MIR531	train	65
+MIR537		MIR537	train	3
+MIR538		MIR538	train	5
+MIR5380		MIR5380	train	2
+MIR5387		MIR5387	train	827
+MIR5512		MIR5512	train	8
+MIR5516		MIR5516	train	7
+MIR5534		MIR5534	train	113
+MIR5565		MIR5565	train	1000
+MIR5635		MIR5635	train	11
+MIR5649		MIR5649	train	2
+MIR5743		MIR5743	train	2
+MIR5998		MIR5998	train	2
+MIR6019		MIR6019	train	4
+MIR6024		MIR6024	train	5
+MIR6027		MIR6027	train	5
+MIR6032		MIR6032	train	3
+MIR6145		MIR6145	train	42
+MIR6146		MIR6146	train	11
+MIR6149		MIR6149	train	3
+MIR6151		MIR6151	train	587
+MIR6152		MIR6152	train	1000
+MIR6154		MIR6154	train	1
+MIR6201		MIR6201	train	7
+MIR6217		MIR6217	train	1000
+MIR6224		MIR6224	train	14
+MIR6234		MIR6234	train	127
+MIR6274		MIR6274	train	329
+MIR6297		MIR6297	train	50
+MIR6425		MIR6425	train	3
+MIR6426		MIR6426	train	6
+MIR6440		MIR6440	train	7
+MIR6445		MIR6445	train	5
+MIR6450		MIR6450	train	51
+MIR6459		MIR6459	train	2
+MIR6462		MIR6462	train	32
+MIR7125		MIR7125	train	7
+MIR7127		MIR7127	train	2
+MIR7486		MIR7486	train	1000
+MIR7502		MIR7502	train	1000
+MIR7504		MIR7504	train	1000
+MIR7696		MIR7696	train	2
+MIR7723		MIR7723	train	2
+MIR7724		MIR7724	train	2
+MIR7729		MIR7729	train	52
+MIR774		MIR774	train	4
+MIR7784		MIR7784	train	3
+MIR781		MIR781	train	4
+MIR7991		MIR7991	train	151
+MIR7993		MIR7993	train	59
+MIR7994		MIR7994	train	4
+MIR7996		MIR7996	train	380
+MIR8001		MIR8001	train	16
+MIR8024		MIR8024	train	640
+MIR8032		MIR8032	train	14
+MIR8041		MIR8041	train	184
+MIR807		MIR807	train	1000
+MIR810		MIR810	train	2
+MIR812		MIR812	train	1000
+MIR814		MIR814	train	30
+MIR815		MIR815	train	7
+MIR825		MIR825	train	2
+MIR828		MIR828	train	170
+MIR831		MIR831	train	2
+MIR834		MIR834	train	2
+MIR837		MIR837	train	2
+MIR838		MIR838	train	2
+MIR840		MIR840	train	2
+MIR841		MIR841	train	5
+MIR842		MIR842	train	2
+MIR844		MIR844	train	4
+MIR845_1		MIR845_1	train	7
+MIR845_2		MIR845_2	train	180
+MIR847		MIR847	train	2
+MIR848		MIR848	train	2
+MIR851		MIR851	train	2
+MIR854		MIR854	train	156
+MIR8562		MIR8562	train	36
+MIR8565		MIR8565	train	455
+MIR859		MIR859	train	2
+MIR860		MIR860	train	12
+MIR861		MIR861	train	2
+MIR862		MIR862	train	2
+MIR8622		MIR8622	train	90
+MIR862_2		MIR862_2	train	19
+MIR8643		MIR8643	train	444
+MIR8675		MIR8675	train	78
+MIR868		MIR868	train	2
+MIR8703		MIR8703	train	92
+MIR8706		MIR8706	train	19
+MIR8757		MIR8757	train	18
+MIR8788		MIR8788	train	11
+MIR898		MIR898	train	7
+MIR9408		MIR9408	train	3
+MIR9471		MIR9471	train	2
+MIR9481		MIR9481	train	2
+MIR9486		MIR9486	train	2
+MIR9555		MIR9555	train	38
+MIR9560		MIR9560	train	14
+MIR9563		MIR9563	train	1000
+MIR9657		MIR9657	train	25
+MIR9662		MIR9662	train	5
+MIR9666		MIR9666	train	218
+MIR9672		MIR9672	train	4
+MIR9677		MIR9677	train	4
+MIR9746		MIR9746	train	17
+MIR9776		MIR9776	train	2
+MIR9783		MIR9783	train	8
+MS2		MS2	train	3
+Magnesium		Magnesium	train	1000
+Magnesium-II		Magnesium-II	train	35
+ManX_thermometer		ManX_thermometer	train	2
+Manganese		Manganese	train	1000
+Methylophilales-1		Methylophilales-1	train	12
+Methylosinus-1		Methylosinus-1	train	8
+MicA		MicA	train	120
+MicC		MicC	train	21
+MicF		MicF	train	34
+MicX		MicX	train	32
+Mico1		Mico1	train	102
+Moco-II		Moco-II	train	18
+Molybdenum		Molybdenum	train	1000
+Ms_AS-1		Ms_AS-1	train	77
+Ms_AS-4		Ms_AS-4	train	163
+Ms_AS-5		Ms_AS-5	train	55
+Ms_AS-8		Ms_AS-8	train	56
+Ms_IGR-4		Ms_IGR-4	train	3
+Ms_IGR-5		Ms_IGR-5	train	1000
+Ms_IGR-7		Ms_IGR-7	train	296
+Ms_IGR-8		Ms_IGR-8	train	24
+MtlS		MtlS	train	15
+Mu-gpT-DE		Mu-gpT-DE	train	2
+NBR2		NBR2	train	329
+NCRUPAR_1		NCRUPAR_1	train	92
+NEAT1_1		NEAT1_1	train	177
+NEAT1_2		NEAT1_2	train	168
+NEAT1_3		NEAT1_3	train	179
+NLPC-P60		NLPC-P60	train	22
+NPPA-AS1_2		NPPA-AS1_2	train	68
+NRF2_IRES		NRF2_IRES	train	92
+Ncrwmel02		Ncrwmel02	train	5
+NmsRb		NmsRb	train	63
+Noro_CRE		Noro_CRE	train	3
+NrrF		NrrF	train	9
+NrsZ		NrsZ	train	21
+NsiR1		NsiR1	train	794
+NsiR4		NsiR4	train	30
+NsiR8		NsiR8	train	15
+NsiR9		NsiR9	train	23
+ODC_IRES		ODC_IRES	train	383
+Ocean-V		Ocean-V	train	3
+OmrA-B		OmrA-B	train	130
+OrzO-P		OrzO-P	train	10
+Oskar_OES		Oskar_OES	train	12
+OxyS		OxyS	train	11
+P1		P1	train	50
+P10		P10	train	69
+P11		P11	train	51
+P13		P13	train	2
+P14		P14	train	51
+P18		P18	train	22
+P2		P2	train	2
+P24		P24	train	50
+P26		P26	train	363
+P27		P27	train	84
+P31		P31	train	61
+P33		P33	train	1
+P35		P35	train	2
+P36		P36	train	43
+P4		P4	train	5
+P8		P8	train	2
+P9		P9	train	137
+PA5194_thermometer		PA5194_thermometer	train	1
+PART1_1		PART1_1	train	123
+PART1_3		PART1_3	train	74
+PCGEM1		PCGEM1	train	105
+PGK		PGK	train	1
+PISRT1		PISRT1	train	91
+PK-CuYV_BPYV		PK-CuYV_BPYV	train	2
+PK-HAV		PK-HAV	train	2
+PK-IAV		PK-IAV	train	47
+PK-PYVV		PK-PYVV	train	4
+PK-SPCSV		PK-SPCSV	train	8
+PK-repBA		PK-repBA	train	35
+PK-repZ		PK-repZ	train	7
+PLRV_xrRNA		PLRV_xrRNA	train	84
+PVT1_1		PVT1_1	train	109
+PVT1_3		PVT1_3	train	199
+PVT1_5		PVT1_5	train	114
+PVT1_6		PVT1_6	train	84
+PVT1_7		PVT1_7	train	35
+PVX_3		PVX_3	train	4
+PYLIS_1		PYLIS_1	train	33
+PYLIS_3		PYLIS_3	train	413
+PYLIS_4		PYLIS_4	train	1
+Pab160		Pab160	train	2
+Parabacteroides-1		Parabacteroides-1	train	1
+Parecho_CRE		Parecho_CRE	train	5
+PepN_thermometer		PepN_thermometer	train	2
+Peptidase-S11		Peptidase-S11	train	39
+Phage_pRNA		Phage_pRNA	train	4
+Phe_leader		Phe_leader	train	404
+PhotoRC-II		PhotoRC-II	train	393
+PhrS		PhrS	train	125
+PinT		PinT	train	2
+Pistol		Pistol	train	57
+Polynucleobacter-1		Polynucleobacter-1	train	21
+Pox_AX_element		Pox_AX_element	train	12
+PreQ1-III		PreQ1-III	train	10
+Prevotella-2		Prevotella-2	train	1
+PrfA		PrfA	train	5
+Prion_pknot		Prion_pknot	train	373
+PrrF		PrrF	train	122
+Pseudomon-1		Pseudomon-1	train	81
+Pseudomon-Rho		Pseudomon-Rho	train	64
+Pseudomon-groES		Pseudomon-groES	train	73
+PsiU1-6		PsiU1-6	train	18
+PsiU2-35.45		PsiU2-35.45	train	7
+PsiU2-38.40.42		PsiU2-38.40.42	train	15
+PsiU2-55		PsiU2-55	train	15
+PsiU6-40		PsiU6-40	train	14
+PsrR1		PsrR1	train	92
+PssrA		PssrA	train	29
+PtaRNA1		PtaRNA1	train	27
+PutA_thermometer		PutA_thermometer	train	1
+Pxr		Pxr	train	8
+PyrD_leader		PyrD_leader	train	56
+PyrG_leader		PyrG_leader	train	11
+PyrR201		PyrR201	train	1
+PyrR205		PyrR205	train	4
+PyrR209		PyrR209	train	1
+PyrR210		PyrR210	train	1
+Pyrobac-1		Pyrobac-1	train	8
+Qrr		Qrr	train	171
+R2_retro_el		R2_retro_el	train	1000
+RAGATH-1-hammerhead		RAGATH-1-hammerhead	train	4
+RAGATH-10		RAGATH-10	train	4
+RAGATH-11		RAGATH-11	train	76
+RAGATH-12		RAGATH-12	train	1
+RAGATH-13		RAGATH-13	train	43
+RAGATH-14		RAGATH-14	train	1
+RAGATH-18		RAGATH-18	train	427
+RAGATH-20		RAGATH-20	train	5
+RAGATH-22		RAGATH-22	train	4
+RAGATH-25		RAGATH-25	train	1
+RAGATH-28		RAGATH-28	train	12
+RAGATH-31		RAGATH-31	train	3
+RAGATH-32		RAGATH-32	train	32
+RAGATH-35		RAGATH-35	train	10
+RAGATH-5		RAGATH-5	train	6
+RAGATH-6		RAGATH-6	train	1
+RAGATH-7		RAGATH-7	train	6
+RAGATH-7-assoc		RAGATH-7-assoc	train	1
+RAGATH-9		RAGATH-9	train	13
+RCNMV_5UTR		RCNMV_5UTR	train	3
+RCNMV_TE_DR1		RCNMV_TE_DR1	train	3
+REN-SRE		REN-SRE	train	65
+RFPL3-AS1_1		RFPL3-AS1_1	train	15
+RFPL3-AS1_2		RFPL3-AS1_2	train	30
+RF_site1		RF_site1	train	20
+RF_site3		RF_site3	train	2
+RF_site4		RF_site4	train	34
+RF_site6		RF_site6	train	2
+RF_site8		RF_site8	train	1000
+RMST_1		RMST_1	train	84
+RMST_10		RMST_10	train	117
+RMST_2		RMST_2	train	126
+RMST_3		RMST_3	train	87
+RMST_4		RMST_4	train	103
+RMST_5		RMST_5	train	115
+RMST_6		RMST_6	train	462
+RMST_8		RMST_8	train	377
+RMST_9		RMST_9	train	466
+RNA-OUT		RNA-OUT	train	40
+RNAI		RNAI	train	70
+ROSE		ROSE	train	356
+ROSE_2		ROSE_2	train	32
+ROSE_3		ROSE_3	train	54
+RSV_PBS		RSV_PBS	train	75
+RT-1		RT-1	train	1
+RT-13		RT-13	train	11
+RT-15		RT-15	train	43
+RT-16		RT-16	train	1
+RT-17		RT-17	train	24
+RT-2		RT-2	train	22
+RT-3		RT-3	train	22
+RT-4		RT-4	train	4
+RT-5		RT-5	train	16
+RT-6		RT-6	train	12
+RT-7		RT-7	train	4
+RT-8		RT-8	train	1
+RT-9		RT-9	train	10
+RUF2		RUF2	train	12
+RUF3		RUF3	train	7
+RUF6-5		RUF6-5	train	80
+RalA		RalA	train	4
+RatA		RatA	train	190
+RcsR1		RcsR1	train	65
+Ref55		Ref55	train	3
+Ref64		Ref64	train	14
+Ref66		Ref66	train	2
+Ref68		Ref68	train	102
+Ref70		Ref70	train	3
+Ref84		Ref84	train	29
+RefA9		RefA9	train	6
+RefB11		RefB11	train	31
+Retro_dr1		Retro_dr1	train	106
+RgsA		RgsA	train	87
+Rhino_CRE		Rhino_CRE	train	9
+Rhizobiales-2		Rhizobiales-2	train	45
+Rhodo-rpoB		Rhodo-rpoB	train	417
+RnaG		RnaG	train	2
+Rothia-sucC		Rothia-sucC	train	3
+RprA		RprA	train	81
+RpsF_leader		RpsF_leader	train	204
+RsaB		RsaB	train	3
+RsaD		RsaD	train	14
+RsaE		RsaE	train	175
+RsaF		RsaF	train	4
+RsaOG		RsaOG	train	14
+RtT		RtT	train	606
+RybB		RybB	train	110
+RydC		RydC	train	11
+RyhB		RyhB	train	225
+S-element		S-element	train	242
+S10-Clostridia		S10-Clostridia	train	889
+S16-Flavobacteria		S16-Flavobacteria	train	178
+S35		S35	train	51
+S414		S414	train	58
+S6-S18-Chlorobi		S6-S18-Chlorobi	train	10
+S774		S774	train	19
+SAM-Chlorobi		SAM-Chlorobi	train	20
+SAM-II		SAM-II	train	712
+SAM-III		SAM-III	train	184
+SAM-SAH		SAM-SAH	train	401
+SAM_V		SAM_V	train	25
+SAR11_0636		SAR11_0636	train	27
+SBRMV1_UPD-PKd		SBRMV1_UPD-PKd	train	1
+SBWMV1_UPD-PKb		SBWMV1_UPD-PKb	train	2
+SBWMV1_UPD-PKh		SBWMV1_UPD-PKh	train	4
+SBWMV2_UPD-PKb		SBWMV2_UPD-PKb	train	4
+SBWMV2_UPD-PKk		SBWMV2_UPD-PKk	train	3
+SBWMV2_UPD-PKl		SBWMV2_UPD-PKl	train	1
+SCARNA1		SCARNA1	train	610
+SCARNA11		SCARNA11	train	726
+SCARNA14		SCARNA14	train	704
+SCARNA16		SCARNA16	train	682
+SCARNA17		SCARNA17	train	225
+SCARNA20		SCARNA20	train	647
+SCARNA21		SCARNA21	train	234
+SCARNA23		SCARNA23	train	358
+SCARNA8		SCARNA8	train	778
+SECIS_1		SECIS_1	train	1000
+SECIS_2		SECIS_2	train	26
+SECIS_3		SECIS_3	train	328
+SECIS_4		SECIS_4	train	321
+SECIS_5		SECIS_5	train	13
+SIB_RNA		SIB_RNA	train	72
+SMAD5-AS1_3		SMAD5-AS1_3	train	100
+SMCR2_2		SMCR2_2	train	67
+SNOR75		SNOR75	train	770
+SNORA1		SNORA1	train	1000
+SNORA11		SNORA11	train	1000
+SNORA12		SNORA12	train	492
+SNORA14		SNORA14	train	720
+SNORA15		SNORA15	train	875
+SNORA19		SNORA19	train	946
+SNORA22		SNORA22	train	691
+SNORA23		SNORA23	train	982
+SNORA24		SNORA24	train	650
+SNORA25		SNORA25	train	878
+SNORA30		SNORA30	train	331
+SNORA31		SNORA31	train	1000
+SNORA32		SNORA32	train	536
+SNORA38		SNORA38	train	535
+SNORA41		SNORA41	train	578
+SNORA42		SNORA42	train	1000
+SNORA47		SNORA47	train	627
+SNORA49		SNORA49	train	599
+SNORA51		SNORA51	train	1000
+SNORA53		SNORA53	train	975
+SNORA55		SNORA55	train	1000
+SNORA57		SNORA57	train	1000
+SNORA61		SNORA61	train	744
+SNORA63		SNORA63	train	947
+SNORA67		SNORA67	train	488
+SNORA70		SNORA70	train	1000
+SNORA71		SNORA71	train	1000
+SNORA72		SNORA72	train	1000
+SNORA75		SNORA75	train	353
+SNORA77		SNORA77	train	706
+SNORA79		SNORA79	train	773
+SNORA81		SNORA81	train	1000
+SNORD10		SNORD10	train	373
+SNORD102		SNORD102	train	260
+SNORD103		SNORD103	train	960
+SNORD108		SNORD108	train	43
+SNORD111		SNORD111	train	653
+SNORD115		SNORD115	train	1000
+SNORD121A		SNORD121A	train	682
+SNORD123		SNORD123	train	210
+SNORD124		SNORD124	train	143
+SNORD127		SNORD127	train	346
+SNORD17		SNORD17	train	878
+SNORD20		SNORD20	train	289
+SNORD21		SNORD21	train	415
+SNORD23		SNORD23	train	124
+SNORD24		SNORD24	train	1000
+SNORD27		SNORD27	train	163
+SNORD28		SNORD28	train	155
+SNORD37		SNORD37	train	397
+SNORD42		SNORD42	train	591
+SNORD45		SNORD45	train	1000
+SNORD48		SNORD48	train	114
+SNORD50		SNORD50	train	1000
+SNORD56		SNORD56	train	560
+SNORD63		SNORD63	train	561
+SNORD66		SNORD66	train	901
+SNORD67		SNORD67	train	556
+SNORD69		SNORD69	train	375
+SNORD70		SNORD70	train	736
+SNORD71		SNORD71	train	333
+SNORD72		SNORD72	train	578
+SNORD73		SNORD73	train	519
+SNORD82		SNORD82	train	464
+SNORD83		SNORD83	train	863
+SNORD87		SNORD87	train	360
+SNORD89		SNORD89	train	477
+SNORD91		SNORD91	train	675
+SNORD94		SNORD94	train	653
+SNORD97		SNORD97	train	557
+SNORD98		SNORD98	train	244
+SOX2OT_exon1		SOX2OT_exon1	train	424
+SOX2OT_exon2		SOX2OT_exon2	train	70
+SOX2OT_exon4		SOX2OT_exon4	train	273
+SPRY4-IT1_2		SPRY4-IT1_2	train	119
+SQ1002_RNA		SQ1002_RNA	train	1
+SQ2397		SQ2397	train	19
+SSRC10		SSRC10	train	34
+SSRC30		SSRC30	train	1
+SSRC34_2		SSRC34_2	train	3
+SSRC38		SSRC38	train	2
+SSRC41		SSRC41	train	2
+SSRC8_1		SSRC8_1	train	1
+ST7-AS1_1		ST7-AS1_1	train	99
+ST7-AS1_2		ST7-AS1_2	train	88
+ST7-AS2_1		ST7-AS2_1	train	17
+ST7-AS2_2		ST7-AS2_2	train	29
+ST7-OT3_1		ST7-OT3_1	train	84
+ST7-OT3_2		ST7-OT3_2	train	44
+ST7-OT3_3		ST7-OT3_3	train	102
+ST7-OT3_4		ST7-OT3_4	train	14
+ST7-OT4_1		ST7-OT4_1	train	107
+ST7-OT4_2		ST7-OT4_2	train	109
+ST7-OT4_4		ST7-OT4_4	train	97
+STAXI		STAXI	train	156
+STnc180		STnc180	train	27
+STnc210		STnc210	train	4
+STnc220		STnc220	train	6
+STnc230		STnc230	train	18
+STnc240		STnc240	train	67
+STnc250		STnc250	train	9
+STnc260		STnc260	train	3
+STnc280		STnc280	train	4
+STnc30		STnc30	train	3
+STnc310		STnc310	train	9
+STnc320		STnc320	train	5
+STnc340		STnc340	train	4
+STnc350		STnc350	train	3
+STnc361		STnc361	train	4
+STnc370		STnc370	train	19
+STnc380		STnc380	train	6
+STnc390		STnc390	train	4
+STnc40		STnc40	train	52
+STnc400		STnc400	train	4
+STnc410		STnc410	train	22
+STnc420		STnc420	train	4
+STnc430		STnc430	train	33
+STnc450		STnc450	train	29
+STnc460		STnc460	train	3
+STnc470		STnc470	train	3
+STnc480		STnc480	train	11
+STnc490		STnc490	train	134
+STnc540		STnc540	train	21
+STnc560		STnc560	train	20
+STnc590		STnc590	train	4
+STnc70		STnc70	train	26
+S_pombe_snR100		S_pombe_snR100	train	3
+S_pombe_snR90		S_pombe_snR90	train	3
+S_pombe_snR91		S_pombe_snR91	train	3
+S_pombe_snR93		S_pombe_snR93	train	2
+S_pombe_snR94		S_pombe_snR94	train	3
+S_pombe_snR97		S_pombe_snR97	train	2
+S_pombe_snR98		S_pombe_snR98	train	4
+S_pombe_snR99		S_pombe_snR99	train	5
+Scr1601		Scr1601	train	346
+Scr2736		Scr2736	train	213
+Scr5676		Scr5676	train	317
+Scr6106		Scr6106	train	134
+Scr6925		Scr6925	train	61
+SgrS		SgrS	train	41
+Six3os1_1		Six3os1_1	train	95
+Six3os1_2		Six3os1_2	train	105
+Six3os1_6		Six3os1_6	train	37
+Six3os1_7		Six3os1_7	train	269
+SmY		SmY	train	386
+SodB_thermometer		SodB_thermometer	train	1
+SodC_thermometer		SodC_thermometer	train	1
+Sodium		Sodium	train	155
+SorY		SorY	train	1
+SpF01_sRNA		SpF01_sRNA	train	9
+SpF03_sRNA		SpF03_sRNA	train	4
+SpF11_sRNA		SpF11_sRNA	train	3
+SpF14_sRNA		SpF14_sRNA	train	1
+SpF19_sRNA		SpF19_sRNA	train	5
+SpF22_sRNA		SpF22_sRNA	train	3
+SpF39_sRNA		SpF39_sRNA	train	5
+SpF41_sRNA		SpF41_sRNA	train	28
+SpF43_sRNA		SpF43_sRNA	train	6
+SpF44_sRNA		SpF44_sRNA	train	3
+SpF51_sRNA		SpF51_sRNA	train	2
+SpF56_sRNA		SpF56_sRNA	train	1
+SpF59_sRNA		SpF59_sRNA	train	230
+SpF61_sRNA		SpF61_sRNA	train	1
+SpF66_sRNA		SpF66_sRNA	train	43
+SpR08_sRNA		SpR08_sRNA	train	1
+SpR14_sRNA		SpR14_sRNA	train	2
+SpR18_sRNA		SpR18_sRNA	train	62
+SpR19_sRNA		SpR19_sRNA	train	16
+SpR20_sRNA		SpR20_sRNA	train	2
+Spd-sr07		Spd-sr07	train	2
+Sphinx_1		Sphinx_1	train	220
+Sphinx_2		Sphinx_2	train	258
+SprX		SprX	train	8
+Spy1186876		Spy1186876	train	1
+Spy1786666		Spy1786666	train	3
+Spy392987		Spy392987	train	23
+Spy490380c		Spy490380c	train	2
+Spy490483c		Spy490483c	train	2
+Spy491311c		Spy491311c	train	1
+Spy491738		Spy491738	train	1
+Spy779816		Spy779816	train	41
+SraB		SraB	train	10
+SraG		SraG	train	122
+Srn266		Srn266	train	124
+Sso133		Sso133	train	23
+Streptomyces-metH		Streptomyces-metH	train	399
+Streptomyces-metK		Streptomyces-metK	train	373
+StyR-3		StyR-3	train	3
+SurC		SurC	train	1
+T-box		T-box	train	1000
+TB10Cs1H1		TB10Cs1H1	train	38
+TB10Cs1H3		TB10Cs1H3	train	17
+TB10Cs2H2		TB10Cs2H2	train	1
+TB10Cs3H1		TB10Cs3H1	train	16
+TB10Cs3H2		TB10Cs3H2	train	18
+TB10Cs4H2		TB10Cs4H2	train	11
+TB10Cs4H3		TB10Cs4H3	train	14
+TB10Cs4H4		TB10Cs4H4	train	6
+TB11Cs2H1		TB11Cs2H1	train	18
+TB11Cs3H1		TB11Cs3H1	train	20
+TB11Cs4H2		TB11Cs4H2	train	26
+TB11Cs4H3		TB11Cs4H3	train	35
+TB11Cs5H1		TB11Cs5H1	train	13
+TB11Cs5H2		TB11Cs5H2	train	28
+TB11Cs5H3		TB11Cs5H3	train	12
+TB3Cs2H1		TB3Cs2H1	train	7
+TB6Cs1H1		TB6Cs1H1	train	39
+TB6Cs1H3		TB6Cs1H3	train	34
+TB8Cs2H1		TB8Cs2H1	train	22
+TB8Cs3H1		TB8Cs3H1	train	20
+TB8Cs4H2		TB8Cs4H2	train	6
+TB9Cs1H1		TB9Cs1H1	train	19
+TB9Cs1H3		TB9Cs1H3	train	15
+TB9Cs2H1		TB9Cs2H1	train	23
+TB9Cs3H1		TB9Cs3H1	train	17
+TB9Cs3H2		TB9Cs3H2	train	14
+TB9Cs4H1		TB9Cs4H1	train	14
+TCL6_1		TCL6_1	train	56
+TCL6_3		TCL6_3	train	108
+TCV_H4		TCV_H4	train	1
+TCV_H5		TCV_H5	train	3
+TCV_Pr		TCV_Pr	train	3
+TEG147		TEG147	train	1
+THF		THF	train	814
+THF-II		THF-II	train	59
+TLS-PK3		TLS-PK3	train	20
+TLS-PK4		TLS-PK4	train	2
+TLS-PK5		TLS-PK5	train	3
+TLS-PK6		TLS-PK6	train	3
+TMV_UPD-PK3		TMV_UPD-PK3	train	40
+TP53TG1_1		TP53TG1_1	train	109
+TP53TG1_2		TP53TG1_2	train	74
+TP73-AS1		TP73-AS1	train	23
+TPP		TPP	train	1000
+TTC28-AS1_1		TTC28-AS1_1	train	89
+TTC28-AS1_2		TTC28-AS1_2	train	88
+TTC28-AS1_4		TTC28-AS1_4	train	101
+TUG1_1		TUG1_1	train	132
+TUG1_4		TUG1_4	train	124
+TUSC7		TUSC7	train	117
+TarA		TarA	train	1
+TarB		TarB	train	1
+Teg49		Teg49	train	1
+TeloSII_ncR30		TeloSII_ncR30	train	18
+TeloSII_ncR49		TeloSII_ncR49	train	3
+Termite-flg		Termite-flg	train	17
+Tombus_3_III		Tombus_3_III	train	32
+Tombus_3_IV		Tombus_3_IV	train	24
+Tombus_5		Tombus_5	train	19
+Tombus_IRE		Tombus_IRE	train	26
+ToxI		ToxI	train	1
+ToxT_thermometer		ToxT_thermometer	train	1
+Transposase-2		Transposase-2	train	187
+Trp_leader		Trp_leader	train	176
+Trp_leader_2		Trp_leader_2	train	3
+TrxA_thermometer		TrxA_thermometer	train	54
+TtnuCD10		TtnuCD10	train	2
+TtnuCD11		TtnuCD11	train	2
+TtnuCD14		TtnuCD14	train	1
+TtnuCD15		TtnuCD15	train	2
+TtnuCD16		TtnuCD16	train	1
+TtnuCD17		TtnuCD17	train	1
+TtnuCD18		TtnuCD18	train	2
+TtnuCD19		TtnuCD19	train	2
+TtnuCD20		TtnuCD20	train	1
+TtnuCD21		TtnuCD21	train	2
+TtnuCD24		TtnuCD24	train	1
+TtnuCD26		TtnuCD26	train	2
+TtnuCD28		TtnuCD28	train	1
+TtnuCD3		TtnuCD3	train	1
+TtnuCD31		TtnuCD31	train	1
+TtnuCD32		TtnuCD32	train	1
+TtnuCD34		TtnuCD34	train	1
+TtnuCD4		TtnuCD4	train	2
+TtnuCD5		TtnuCD5	train	1
+TtnuCD6		TtnuCD6	train	3
+TtnuCD8		TtnuCD8	train	2
+TtnuHACA1		TtnuHACA1	train	1
+TtnuHACA12		TtnuHACA12	train	1
+TtnuHACA13		TtnuHACA13	train	1
+TtnuHACA14		TtnuHACA14	train	1
+TtnuHACA15		TtnuHACA15	train	1
+TtnuHACA17		TtnuHACA17	train	1
+TtnuHACA19		TtnuHACA19	train	1
+TtnuHACA2		TtnuHACA2	train	1
+TtnuHACA20		TtnuHACA20	train	1
+TtnuHACA22		TtnuHACA22	train	1
+TtnuHACA23		TtnuHACA23	train	2
+TtnuHACA24		TtnuHACA24	train	1
+TtnuHACA25		TtnuHACA25	train	1
+TtnuHACA27		TtnuHACA27	train	1
+TtnuHACA28		TtnuHACA28	train	1
+TtnuHACA3		TtnuHACA3	train	2
+TtnuHACA5		TtnuHACA5	train	1
+TtnuHACA6		TtnuHACA6	train	1
+TtnuHACA7		TtnuHACA7	train	2
+TtnuHACA8		TtnuHACA8	train	2
+TtnuHACA9		TtnuHACA9	train	2
+Twister-sister		Twister-sister	train	16
+Tymo_tRNA-like		Tymo_tRNA-like	train	60
+U1A_PIE		U1A_PIE	train	358
+U5		U5	train	1000
+UCA1		UCA1	train	9
+UPD-PK2		UPD-PK2	train	13
+UPD-PKc		UPD-PKc	train	2
+VA		VA	train	63
+V_AS5		V_AS5	train	42
+Vault		Vault	train	1000
+Vax2os1_1		Vax2os1_1	train	4
+Vax2os1_3		Vax2os1_3	train	96
+Vg1_ribozyme		Vg1_ribozyme	train	4
+Vimentin3		Vimentin3	train	375
+Virus-PTE		Virus-PTE	train	1
+Virus_CITE_2		Virus_CITE_2	train	3
+Virus_CITE_3		Virus_CITE_3	train	1
+Virus_CITE_4		Virus_CITE_4	train	7
+VqmR		VqmR	train	10
+VrrA		VrrA	train	30
+WLE3		WLE3	train	13
+WT1-AS_1		WT1-AS_1	train	93
+WT1-AS_2		WT1-AS_2	train	93
+WT1-AS_3		WT1-AS_3	train	117
+WT1-AS_4		WT1-AS_4	train	87
+WT1-AS_5		WT1-AS_5	train	16
+WT1-AS_6		WT1-AS_6	train	87
+WsnRNA46		WsnRNA46	train	147
+WsnRNA59		WsnRNA59	train	4
+Xanthine		Xanthine	train	274
+Xist_exon1		Xist_exon1	train	81
+Xist_exon4		Xist_exon4	train	84
+Xoo2		Xoo2	train	5
+Xoo5		Xoo5	train	39
+Y_RNA		Y_RNA	train	1000
+Yar_1		Yar_1	train	15
+Yar_2		Yar_2	train	12
+Yar_3		Yar_3	train	9
+Yfr1		Yfr1	train	200
+Yfr13		Yfr13	train	2
+Yfr17		Yfr17	train	2
+Yfr8		Yfr8	train	2
+YrlA		YrlA	train	124
+YrlB		YrlB	train	1
+Ysr100		Ysr100	train	1
+Ysr155_RyfD		Ysr155_RyfD	train	100
+Ysr190		Ysr190	train	9
+Ysr197		Ysr197	train	5
+Ysr201		Ysr201	train	1
+Ysr209		Ysr209	train	3
+Ysr224		Ysr224	train	98
+Ysr276		Ysr276	train	145
+Ysr283		Ysr283	train	6
+Ysr49		Ysr49	train	2
+ZEB2_AS1_1		ZEB2_AS1_1	train	346
+ZEB2_AS1_4		ZEB2_AS1_4	train	67
+ZFAT-AS1_1		ZFAT-AS1_1	train	15
+ZFAT-AS1_2		ZFAT-AS1_2	train	69
+ZFAT-AS1_3		ZFAT-AS1_3	train	23
+ZMP-ZTP		ZMP-ZTP	train	1000
+ZNFX1-AS1_1		ZNFX1-AS1_1	train	115
+ZNFX1-AS1_2		ZNFX1-AS1_2	train	186
+ZNFX1-AS1_3		ZNFX1-AS1_3	train	18
+ZNRD1-AS1_1		ZNRD1-AS1_1	train	46
+ZNRD1-AS1_2		ZNRD1-AS1_2	train	185
+ZNRD1-AS1_3		ZNRD1-AS1_3	train	23
+Zeta-pan		Zeta-pan	train	2
+abiF		abiF	train	200
+adapt33_1		adapt33_1	train	12
+adapt33_2		adapt33_2	train	6
+adapt33_3		adapt33_3	train	9
+adapt33_4		adapt33_4	train	7
+algC		algC	train	44
+anti-hemB		anti-hemB	train	455
+ar35		ar35	train	264
+ar45		ar45	train	333
+ar7		ar7	train	147
+ar9		ar9	train	187
+asX1		asX1	train	74
+asd		asd	train	58
+astro_FSE		astro_FSE	train	5
+atoC		atoC	train	21
+atpB		atpB	train	129
+azaaromatic		azaaromatic	train	476
+b55		b55	train	1
+bablM		bablM	train	32
+bglG-cis-reg		bglG-cis-reg	train	1
+blv_FSE		blv_FSE	train	7
+bpcv-mir-B1		bpcv-mir-B1	train	1
+bxd_1		bxd_1	train	12
+bxd_2		bxd_2	train	11
+bxd_3		bxd_3	train	18
+bxd_5		bxd_5	train	13
+bxd_7		bxd_7	train	5
+c-di-AMP		c-di-AMP	train	1000
+caiA		caiA	train	3
+carA		carA	train	3
+ceN100		ceN100	train	20
+ceN101		ceN101	train	19
+ceN102		ceN102	train	11
+ceN103		ceN103	train	10
+ceN104		ceN104	train	21
+ceN105		ceN105	train	12
+ceN106		ceN106	train	11
+ceN108		ceN108	train	21
+ceN109		ceN109	train	24
+ceN110		ceN110	train	11
+ceN111		ceN111	train	50
+ceN113		ceN113	train	13
+ceN114		ceN114	train	19
+ceN125		ceN125	train	20
+ceN126		ceN126	train	8
+ceN22		ceN22	train	20
+ceN23-1		ceN23-1	train	21
+ceN27		ceN27	train	11
+ceN28		ceN28	train	12
+ceN30		ceN30	train	10
+ceN33		ceN33	train	10
+ceN36-1		ceN36-1	train	28
+ceN38		ceN38	train	8
+ceN40		ceN40	train	37
+ceN41		ceN41	train	13
+ceN42		ceN42	train	9
+ceN43		ceN43	train	13
+ceN44		ceN44	train	11
+ceN45		ceN45	train	13
+ceN47		ceN47	train	61
+ceN48		ceN48	train	13
+ceN49		ceN49	train	11
+ceN51		ceN51	train	11
+ceN53		ceN53	train	10
+ceN54		ceN54	train	12
+ceN56		ceN56	train	11
+ceN58		ceN58	train	22
+ceN59		ceN59	train	13
+ceN61		ceN61	train	10
+ceN63		ceN63	train	9
+ceN65		ceN65	train	10
+ceN67		ceN67	train	9
+ceN68		ceN68	train	1
+ceN70		ceN70	train	21
+ceN81		ceN81	train	13
+ceN82		ceN82	train	21
+ceN84		ceN84	train	23
+ceN86		ceN86	train	9
+ceN88		ceN88	train	96
+ceN89		ceN89	train	10
+ceN92		ceN92	train	21
+ceN93		ceN93	train	9
+che1		che1	train	357
+chrB-a		chrB-a	train	340
+chrB-b		chrB-b	train	171
+ciona-mir-92		ciona-mir-92	train	5
+csRNA		csRNA	train	38
+ctRNA_p42d		ctRNA_p42d	train	184
+ctRNA_pND324		ctRNA_pND324	train	56
+ctRNA_pT181		ctRNA_pT181	train	25
+cyano_het_sRNA		cyano_het_sRNA	train	34
+dfrA-dnaX		dfrA-dnaX	train	19
+drum		drum	train	78
+drz-agam-1		drz-agam-1	train	1000
+drz-agam-2-2		drz-agam-2-2	train	461
+eL15-Euryarchaeota		eL15-Euryarchaeota	train	126
+eeev_FSE		eeev_FSE	train	5
+eiav_FSE		eiav_FSE	train	5
+engA		engA	train	25
+epsC		epsC	train	472
+ffh		ffh	train	916
+flg-Rhizobiales		flg-Rhizobiales	train	42
+folP		folP	train	5
+frnS		frnS	train	114
+fstAT		fstAT	train	42
+ftsZ-DE		ftsZ-DE	train	3
+gabT		gabT	train	43
+glmS		glmS	train	1000
+gltS		gltS	train	34
+gntR-DTE		gntR-DTE	train	39
+greA		greA	train	113
+gut-2		gut-2	train	11
+gyrA		gyrA	train	63
+h2cR		h2cR	train	5
+hsp17		hsp17	train	1
+htlv_FSE		htlv_FSE	train	8
+hvt-mir-H		hvt-mir-H	train	2
+hvt-mir-H16		hvt-mir-H16	train	2
+hya		hya	train	50
+icaR_5p_UTR		icaR_5p_UTR	train	1
+icd-II		icd-II	train	1
+ilvB-OMG		ilvB-OMG	train	16
+ilvH		ilvH	train	142
+int-alpA		int-alpA	train	556
+iscRS		iscRS	train	33
+isrA		isrA	train	37
+isrC		isrC	train	27
+isrD		isrD	train	5
+isrI		isrI	train	23
+isrJ		isrJ	train	20
+isrK		isrK	train	527
+isrN		isrN	train	130
+isrO		isrO	train	13
+isrP		isrP	train	8
+isrQ		isrQ	train	9
+istR		istR	train	26
+ivy-DE		ivy-DE	train	39
+leu-phe_leader		leu-phe_leader	train	12
+leuA-Halobacteria		leuA-Halobacteria	train	93
+lin-4		lin-4	train	30
+lincRNA-p21_1		lincRNA-p21_1	train	9
+lincRNA-p21_2		lincRNA-p21_2	train	2
+livK		livK	train	9
+lsy-6		lsy-6	train	4
+lysM-Actino		lysM-Actino	train	3
+lysM-Prevotella		lysM-Prevotella	train	2
+lysM-TM7		lysM-TM7	train	13
+malK-I		malK-I	train	39
+mascRNA-menRNA		mascRNA-menRNA	train	1000
+mcrA		mcrA	train	6
+mir-1		mir-1	train	1000
+mir-10		mir-10	train	1000
+mir-1000		mir-1000	train	116
+mir-1002		mir-1002	train	8
+mir-1003		mir-1003	train	1
+mir-1005		mir-1005	train	3
+mir-1006		mir-1006	train	11
+mir-1010		mir-1010	train	13
+mir-1011		mir-1011	train	6
+mir-1012		mir-1012	train	2
+mir-1013		mir-1013	train	4
+mir-1017		mir-1017	train	13
+mir-103		mir-103	train	518
+mir-105		mir-105	train	93
+mir-1178		mir-1178	train	21
+mir-1180		mir-1180	train	27
+mir-1182		mir-1182	train	15
+mir-1184		mir-1184	train	104
+mir-1188		mir-1188	train	5
+mir-1193		mir-1193	train	73
+mir-1199		mir-1199	train	61
+mir-12		mir-12	train	83
+mir-1200		mir-1200	train	17
+mir-1202		mir-1202	train	7
+mir-1203		mir-1203	train	11
+mir-1204		mir-1204	train	15
+mir-1205		mir-1205	train	9
+mir-1206		mir-1206	train	9
+mir-1207		mir-1207	train	16
+mir-1208		mir-1208	train	10
+mir-122		mir-122	train	224
+mir-1224		mir-1224	train	26
+mir-1226		mir-1226	train	3
+mir-1227		mir-1227	train	15
+mir-1228		mir-1228	train	11
+mir-1231		mir-1231	train	14
+mir-1233		mir-1233	train	163
+mir-1234		mir-1234	train	11
+mir-1236		mir-1236	train	5
+mir-1238		mir-1238	train	14
+mir-124		mir-124	train	547
+mir-1244		mir-1244	train	113
+mir-1246		mir-1246	train	9
+mir-1247		mir-1247	train	29
+mir-1249		mir-1249	train	31
+mir-125		mir-125	train	4
+mir-1251		mir-1251	train	20
+mir-1252		mir-1252	train	14
+mir-1253		mir-1253	train	7
+mir-1255		mir-1255	train	40
+mir-1256		mir-1256	train	9
+mir-1257		mir-1257	train	18
+mir-1258		mir-1258	train	19
+mir-126		mir-126	train	341
+mir-1261		mir-1261	train	3
+mir-1262		mir-1262	train	11
+mir-1264		mir-1264	train	42
+mir-1266		mir-1266	train	18
+mir-1267		mir-1267	train	18
+mir-1268		mir-1268	train	3
+mir-1269		mir-1269	train	4
+mir-127		mir-127	train	22
+mir-1270		mir-1270	train	36
+mir-1271		mir-1271	train	61
+mir-1272		mir-1272	train	14
+mir-1275		mir-1275	train	13
+mir-1276		mir-1276	train	5
+mir-1277		mir-1277	train	28
+mir-1281		mir-1281	train	29
+mir-1284		mir-1284	train	65
+mir-1285		mir-1285	train	137
+mir-1287		mir-1287	train	18
+mir-1288		mir-1288	train	10
+mir-1289		mir-1289	train	17
+mir-129		mir-129	train	531
+mir-1290		mir-1290	train	49
+mir-1292		mir-1292	train	3
+mir-1294		mir-1294	train	19
+mir-1297		mir-1297	train	41
+mir-1298		mir-1298	train	74
+mir-1299		mir-1299	train	85
+mir-130		mir-130	train	1000
+mir-1301		mir-1301	train	48
+mir-1302		mir-1302	train	1000
+mir-1303		mir-1303	train	3
+mir-1304		mir-1304	train	8
+mir-1305		mir-1305	train	34
+mir-1306		mir-1306	train	59
+mir-1322		mir-1322	train	13
+mir-1323		mir-1323	train	2
+mir-1324		mir-1324	train	54
+mir-1329		mir-1329	train	70
+mir-133		mir-133	train	586
+mir-134		mir-134	train	41
+mir-1343		mir-1343	train	127
+mir-136		mir-136	train	18
+mir-138		mir-138	train	373
+mir-1388		mir-1388	train	382
+mir-139		mir-139	train	197
+mir-1397		mir-1397	train	66
+mir-140		mir-140	train	98
+mir-142		mir-142	train	262
+mir-1420		mir-1420	train	9
+mir-1421		mir-1421	train	99
+mir-1422		mir-1422	train	22
+mir-1426		mir-1426	train	246
+mir-144		mir-144	train	286
+mir-145		mir-145	train	257
+mir-1451		mir-1451	train	249
+mir-1460		mir-1460	train	200
+mir-1467		mir-1467	train	149
+mir-1468		mir-1468	train	53
+mir-147		mir-147	train	331
+mir-1471		mir-1471	train	11
+mir-1473		mir-1473	train	2
+mir-148		mir-148	train	425
+mir-149		mir-149	train	74
+mir-1497		mir-1497	train	2
+mir-150		mir-150	train	111
+mir-153		mir-153	train	270
+mir-1537		mir-1537	train	11
+mir-1538		mir-1538	train	10
+mir-1542		mir-1542	train	5
+mir-1544		mir-1544	train	14
+mir-1545		mir-1545	train	4
+mir-1549		mir-1549	train	2
+mir-156		mir-156	train	1000
+mir-1597		mir-1597	train	38
+mir-15_2		mir-15_2	train	2
+mir-160		mir-160	train	1000
+mir-1641		mir-1641	train	51
+mir-166		mir-166	train	1000
+mir-1662		mir-1662	train	33
+mir-1677		mir-1677	train	53
+mir-172		mir-172	train	1000
+mir-1729		mir-1729	train	73
+mir-1743		mir-1743	train	44
+mir-1744		mir-1744	train	158
+mir-1756		mir-1756	train	5
+mir-1784		mir-1784	train	168
+mir-1788		mir-1788	train	276
+mir-1789		mir-1789	train	64
+mir-1791		mir-1791	train	242
+mir-1805		mir-1805	train	72
+mir-181		mir-181	train	1000
+mir-1814		mir-1814	train	6
+mir-1822		mir-1822	train	5
+mir-1824		mir-1824	train	2
+mir-1825		mir-1825	train	9
+mir-1827		mir-1827	train	15
+mir-184		mir-184	train	585
+mir-1842		mir-1842	train	22
+mir-185		mir-185	train	46
+mir-186		mir-186	train	51
+mir-187		mir-187	train	186
+mir-188		mir-188	train	43
+mir-1889		mir-1889	train	3
+mir-1890		mir-1890	train	5
+mir-1892		mir-1892	train	7
+mir-1893		mir-1893	train	17
+mir-1898		mir-1898	train	25
+mir-1902		mir-1902	train	643
+mir-1905		mir-1905	train	339
+mir-1908		mir-1908	train	11
+mir-190_2		mir-190_2	train	5
+mir-191		mir-191	train	289
+mir-1910		mir-1910	train	15
+mir-1911		mir-1911	train	10
+mir-1915		mir-1915	train	3
+mir-1923		mir-1923	train	156
+mir-193		mir-193	train	321
+mir-194		mir-194	train	524
+mir-1954		mir-1954	train	2
+mir-196		mir-196	train	539
+mir-197		mir-197	train	25
+mir-1972		mir-1972	train	7
+mir-1976		mir-1976	train	8
+mir-198		mir-198	train	12
+mir-1986		mir-1986	train	6
+mir-199		mir-199	train	434
+mir-1990		mir-1990	train	7
+mir-1992		mir-1992	train	2
+mir-1993		mir-1993	train	2
+mir-1994		mir-1994	train	23
+mir-2		mir-2	train	715
+mir-200		mir-200	train	1
+mir-2001		mir-2001	train	3
+mir-2002		mir-2002	train	1
+mir-2003		mir-2003	train	1
+mir-2005		mir-2005	train	6
+mir-2007		mir-2007	train	1
+mir-2008		mir-2008	train	2
+mir-2009		mir-2009	train	2
+mir-2010		mir-2010	train	2
+mir-2011		mir-2011	train	3
+mir-2012		mir-2012	train	1
+mir-2013		mir-2013	train	2
+mir-202		mir-202	train	310
+mir-203		mir-203	train	369
+mir-204		mir-204	train	619
+mir-2040		mir-2040	train	9
+mir-2041		mir-2041	train	27
+mir-205		mir-205	train	569
+mir-2056		mir-2056	train	3
+mir-2057		mir-2057	train	2
+mir-2058		mir-2058	train	3
+mir-2059		mir-2059	train	2
+mir-2060		mir-2060	train	1000
+mir-2061		mir-2061	train	2
+mir-2062		mir-2062	train	3
+mir-2063		mir-2063	train	2
+mir-2064		mir-2064	train	3
+mir-2066		mir-2066	train	2
+mir-2068		mir-2068	train	2
+mir-207		mir-207	train	8
+mir-2070		mir-2070	train	1
+mir-2072		mir-2072	train	2
+mir-2076		mir-2076	train	2
+mir-208		mir-208	train	221
+mir-21		mir-21	train	169
+mir-210		mir-210	train	398
+mir-2110		mir-2110	train	3
+mir-2114		mir-2114	train	18
+mir-2131		mir-2131	train	129
+mir-214		mir-214	train	261
+mir-217		mir-217	train	311
+mir-218		mir-218	train	280
+mir-2187		mir-2187	train	70
+mir-2188		mir-2188	train	120
+mir-219		mir-219	train	636
+mir-2208		mir-2208	train	2
+mir-2209		mir-2209	train	2
+mir-221		mir-221	train	765
+mir-2229		mir-2229	train	7
+mir-2232		mir-2232	train	2
+mir-2235		mir-2235	train	18
+mir-2237		mir-2237	train	4
+mir-2238		mir-2238	train	25
+mir-224		mir-224	train	56
+mir-2241		mir-2241	train	10
+mir-2242		mir-2242	train	2
+mir-2253		mir-2253	train	6
+mir-2290		mir-2290	train	22
+mir-23		mir-23	train	542
+mir-230		mir-230	train	5
+mir-2300		mir-2300	train	2
+mir-231		mir-231	train	14
+mir-2318		mir-2318	train	5
+mir-2319		mir-2319	train	10
+mir-232		mir-232	train	9
+mir-2320		mir-2320	train	7
+mir-2329		mir-2329	train	4
+mir-233		mir-233	train	7
+mir-2335		mir-2335	train	4
+mir-235		mir-235	train	7
+mir-2355		mir-2355	train	49
+mir-2363		mir-2363	train	4
+mir-2366		mir-2366	train	9
+mir-237		mir-237	train	5
+mir-238		mir-238	train	5
+mir-239		mir-239	train	50
+mir-2392		mir-2392	train	13
+mir-23c		mir-23c	train	12
+mir-240		mir-240	train	6
+mir-242		mir-242	train	10
+mir-242_2		mir-242_2	train	15
+mir-244		mir-244	train	10
+mir-246		mir-246	train	9
+mir-247		mir-247	train	3
+mir-248		mir-248	train	6
+mir-2483		mir-2483	train	30
+mir-2489		mir-2489	train	2
+mir-2494		mir-2494	train	1
+mir-25		mir-25	train	122
+mir-250		mir-250	train	19
+mir-2511		mir-2511	train	4
+mir-2513		mir-2513	train	37
+mir-2518		mir-2518	train	39
+mir-2528		mir-2528	train	94
+mir-253		mir-253	train	8
+mir-254		mir-254	train	7
+mir-2543		mir-2543	train	7
+mir-2545		mir-2545	train	6
+mir-255		mir-255	train	26
+mir-2558		mir-2558	train	7
+mir-2566		mir-2566	train	10
+mir-2574		mir-2574	train	6
+mir-2576		mir-2576	train	42
+mir-2582		mir-2582	train	4
+mir-26		mir-26	train	1000
+mir-266		mir-266	train	31
+mir-268		mir-268	train	12
+mir-2686		mir-2686	train	2
+mir-27		mir-27	train	719
+mir-2731		mir-2731	train	7
+mir-274		mir-274	train	51
+mir-275		mir-275	train	117
+mir-2755		mir-2755	train	23
+mir-2756		mir-2756	train	30
+mir-276		mir-276	train	164
+mir-2763		mir-2763	train	45
+mir-2765		mir-2765	train	86
+mir-2766		mir-2766	train	14
+mir-2767		mir-2767	train	17
+mir-277		mir-277	train	128
+mir-2774		mir-2774	train	1000
+mir-2778		mir-2778	train	40
+mir-2780		mir-2780	train	878
+mir-278_2		mir-278_2	train	1
+mir-2796		mir-2796	train	91
+mir-2797		mir-2797	train	5
+mir-280		mir-280	train	20
+mir-281		mir-281	train	3
+mir-2814		mir-2814	train	13
+mir-2816		mir-2816	train	46
+mir-2818		mir-2818	train	22
+mir-282		mir-282	train	122
+mir-2820		mir-2820	train	24
+mir-2822		mir-2822	train	62
+mir-2830		mir-2830	train	17
+mir-2831		mir-2831	train	2
+mir-2833		mir-2833	train	6
+mir-2834		mir-2834	train	153
+mir-284		mir-284	train	19
+mir-2843		mir-2843	train	19
+mir-2849		mir-2849	train	3
+mir-2856		mir-2856	train	17
+mir-286		mir-286	train	37
+mir-2861		mir-2861	train	45
+mir-287		mir-287	train	24
+mir-288		mir-288	train	22
+mir-289		mir-289	train	9
+mir-29		mir-29	train	982
+mir-2941		mir-2941	train	4
+mir-2943		mir-2943	train	6
+mir-2944		mir-2944	train	58
+mir-2954		mir-2954	train	2
+mir-296		mir-296	train	67
+mir-297		mir-297	train	5
+mir-2970		mir-2970	train	123
+mir-298		mir-298	train	22
+mir-2985		mir-2985	train	287
+mir-299		mir-299	train	51
+mir-2996		mir-2996	train	3
+mir-2_2		mir-2_2	train	4
+mir-30		mir-30	train	1000
+mir-3003		mir-3003	train	4
+mir-301		mir-301	train	391
+mir-3012		mir-3012	train	2
+mir-3015		mir-3015	train	75
+mir-3017		mir-3017	train	51
+mir-302_2		mir-302_2	train	8
+mir-303		mir-303	train	3
+mir-3036		mir-3036	train	5
+mir-3045		mir-3045	train	3
+mir-3047		mir-3047	train	10
+mir-305		mir-305	train	95
+mir-3051		mir-3051	train	2
+mir-3059		mir-3059	train	5
+mir-306		mir-306	train	57
+mir-3072		mir-3072	train	6
+mir-3075		mir-3075	train	3
+mir-3085		mir-3085	train	66
+mir-3099		mir-3099	train	5
+mir-3102		mir-3102	train	9
+mir-3116		mir-3116	train	35
+mir-3118		mir-3118	train	24
+mir-312		mir-312	train	4
+mir-3121		mir-3121	train	1
+mir-3122		mir-3122	train	13
+mir-3127		mir-3127	train	12
+mir-3130		mir-3130	train	6
+mir-3132		mir-3132	train	7
+mir-3135		mir-3135	train	11
+mir-3136		mir-3136	train	6
+mir-3138		mir-3138	train	3
+mir-314		mir-314	train	17
+mir-3140		mir-3140	train	12
+mir-3145		mir-3145	train	8
+mir-3146		mir-3146	train	10
+mir-3149		mir-3149	train	2
+mir-315		mir-315	train	107
+mir-3150		mir-3150	train	4
+mir-3151		mir-3151	train	11
+mir-3154		mir-3154	train	74
+mir-3155		mir-3155	train	5
+mir-3156		mir-3156	train	38
+mir-3158		mir-3158	train	9
+mir-316		mir-316	train	33
+mir-3160		mir-3160	train	19
+mir-3165		mir-3165	train	12
+mir-3167		mir-3167	train	8
+mir-317		mir-317	train	123
+mir-3173		mir-3173	train	11
+mir-3174		mir-3174	train	11
+mir-3179		mir-3179	train	4
+mir-3180		mir-3180	train	6
+mir-3188		mir-3188	train	9
+mir-3190		mir-3190	train	23
+mir-3193		mir-3193	train	12
+mir-3199		mir-3199	train	7
+mir-31_2		mir-31_2	train	5
+mir-320		mir-320	train	495
+mir-3200		mir-3200	train	33
+mir-3204		mir-3204	train	11
+mir-322		mir-322	train	72
+mir-324		mir-324	train	27
+mir-325		mir-325	train	40
+mir-327		mir-327	train	5
+mir-328		mir-328	train	63
+mir-33		mir-33	train	645
+mir-330		mir-330	train	44
+mir-331		mir-331	train	28
+mir-3347		mir-3347	train	3
+mir-335		mir-335	train	66
+mir-337		mir-337	train	45
+mir-338		mir-338	train	418
+mir-3389		mir-3389	train	202
+mir-340		mir-340	train	62
+mir-341		mir-341	train	7
+mir-342		mir-342	train	74
+mir-343		mir-343	train	3
+mir-3431		mir-3431	train	4
+mir-3432		mir-3432	train	9
+mir-344		mir-344	train	296
+mir-3473		mir-3473	train	1000
+mir-3477		mir-3477	train	7
+mir-3478		mir-3478	train	14
+mir-3479		mir-3479	train	6
+mir-3492		mir-3492	train	1000
+mir-350		mir-350	train	73
+mir-351		mir-351	train	3
+mir-3524		mir-3524	train	1
+mir-3533		mir-3533	train	110
+mir-354		mir-354	train	7
+mir-355		mir-355	train	7
+mir-3552		mir-3552	train	5
+mir-3569		mir-3569	train	3
+mir-357		mir-357	train	9
+mir-3572		mir-3572	train	3
+mir-358		mir-358	train	5
+mir-3617		mir-3617	train	3
+mir-3618		mir-3618	train	67
+mir-362		mir-362	train	44
+mir-3622		mir-3622	train	22
+mir-365		mir-365	train	192
+mir-3660		mir-3660	train	66
+mir-3661		mir-3661	train	85
+mir-367		mir-367	train	239
+mir-3688		mir-3688	train	30
+mir-3689		mir-3689	train	112
+mir-370		mir-370	train	40
+mir-3718		mir-3718	train	8
+mir-373		mir-373	train	14
+mir-374		mir-374	train	69
+mir-3747		mir-3747	train	6
+mir-375		mir-375	train	235
+mir-378		mir-378	train	14
+mir-3817		mir-3817	train	2
+mir-383		mir-383	train	103
+mir-3836		mir-3836	train	4
+mir-384		mir-384	train	48
+mir-3851		mir-3851	train	6
+mir-3912		mir-3912	train	6
+mir-3913		mir-3913	train	2
+mir-3914		mir-3914	train	10
+mir-392		mir-392	train	4
+mir-3923		mir-3923	train	7
+mir-3926		mir-3926	train	14
+mir-3927		mir-3927	train	14
+mir-3931		mir-3931	train	14
+mir-3938		mir-3938	train	5
+mir-3940		mir-3940	train	12
+mir-3943		mir-3943	train	11
+mir-395		mir-395	train	1000
+mir-3957		mir-3957	train	14
+mir-3960		mir-3960	train	13
+mir-399		mir-399	train	1000
+mir-4		mir-4	train	8
+mir-4000		mir-4000	train	5
+mir-4005		mir-4005	train	2
+mir-4012		mir-4012	train	2
+mir-4018		mir-4018	train	2
+mir-4041		mir-4041	train	2
+mir-4077		mir-4077	train	3
+mir-4079		mir-4079	train	2
+mir-412		mir-412	train	61
+mir-4178		mir-4178	train	2
+mir-422		mir-422	train	10
+mir-425		mir-425	train	193
+mir-427		mir-427	train	25
+mir-43		mir-43	train	9
+mir-431		mir-431	train	24
+mir-432		mir-432	train	44
+mir-434		mir-434	train	2
+mir-43_2		mir-43_2	train	1
+mir-44		mir-44	train	62
+mir-4423		mir-4423	train	14
+mir-4427		mir-4427	train	4
+mir-4428		mir-4428	train	8
+mir-4429		mir-4429	train	11
+mir-4433		mir-4433	train	26
+mir-4446		mir-4446	train	11
+mir-4449		mir-4449	train	17
+mir-4451		mir-4451	train	1
+mir-4477		mir-4477	train	117
+mir-4484		mir-4484	train	10
+mir-4488		mir-4488	train	7
+mir-4504		mir-4504	train	9
+mir-451		mir-451	train	354
+mir-4510		mir-4510	train	13
+mir-4515		mir-4515	train	4
+mir-452		mir-452	train	63
+mir-4520		mir-4520	train	3
+mir-4523		mir-4523	train	7
+mir-4524		mir-4524	train	24
+mir-4526		mir-4526	train	3
+mir-4529		mir-4529	train	10
+mir-4536		mir-4536	train	22
+mir-454		mir-454	train	284
+mir-456		mir-456	train	106
+mir-458		mir-458	train	360
+mir-460		mir-460	train	455
+mir-462		mir-462	train	1
+mir-463		mir-463	train	2
+mir-4637		mir-4637	train	12
+mir-4650		mir-4650	train	9
+mir-466		mir-466	train	8
+mir-4660		mir-4660	train	17
+mir-4662		mir-4662	train	2
+mir-4677		mir-4677	train	15
+mir-4680		mir-4680	train	65
+mir-4703		mir-4703	train	7
+mir-471		mir-471	train	2
+mir-4738		mir-4738	train	13
+mir-4766		mir-4766	train	10
+mir-4774		mir-4774	train	10
+mir-4776		mir-4776	train	8
+mir-4782		mir-4782	train	1
+mir-4788		mir-4788	train	8
+mir-4791		mir-4791	train	9
+mir-4796		mir-4796	train	9
+mir-4798		mir-4798	train	24
+mir-48		mir-48	train	7
+mir-4803		mir-4803	train	11
+mir-483		mir-483	train	58
+mir-4847		mir-4847	train	1
+mir-4850		mir-4850	train	7
+mir-4854		mir-4854	train	1
+mir-4856		mir-4856	train	3
+mir-4857		mir-4857	train	3
+mir-4859		mir-4859	train	2
+mir-4860		mir-4860	train	2
+mir-4861		mir-4861	train	3
+mir-4864		mir-4864	train	2
+mir-4865		mir-4865	train	3
+mir-4866		mir-4866	train	3
+mir-4869		mir-4869	train	3
+mir-4872		mir-4872	train	63
+mir-4873		mir-4873	train	3
+mir-4875		mir-4875	train	2
+mir-4876		mir-4876	train	3
+mir-4877		mir-4877	train	3
+mir-4878		mir-4878	train	3
+mir-4879		mir-4879	train	2
+mir-488		mir-488	train	42
+mir-4887		mir-4887	train	3
+mir-4888		mir-4888	train	1
+mir-4889		mir-4889	train	5
+mir-489		mir-489	train	163
+mir-4890		mir-4890	train	3
+mir-4891		mir-4891	train	2
+mir-4899		mir-4899	train	7
+mir-49		mir-49	train	8
+mir-490		mir-490	train	188
+mir-4900		mir-4900	train	17
+mir-491		mir-491	train	40
+mir-492		mir-492	train	107
+mir-4922		mir-4922	train	2
+mir-4928		mir-4928	train	3
+mir-497		mir-497	train	56
+mir-498		mir-498	train	9
+mir-4989		mir-4989	train	6
+mir-499		mir-499	train	230
+mir-5		mir-5	train	23
+mir-500		mir-500	train	235
+mir-5014		mir-5014	train	17
+mir-503		mir-503	train	65
+mir-504		mir-504	train	50
+mir-5045		mir-5045	train	1
+mir-505		mir-505	train	38
+mir-512		mir-512	train	15
+mir-5132		mir-5132	train	2
+mir-52		mir-52	train	8
+mir-5316		mir-5316	train	48
+mir-5360		mir-5360	train	16
+mir-5365		mir-5365	train	1
+mir-5366		mir-5366	train	15
+mir-54		mir-54	train	13
+mir-540		mir-540	train	4
+mir-5408		mir-5408	train	2
+mir-541		mir-541	train	82
+mir-5429		mir-5429	train	2
+mir-544		mir-544	train	1000
+mir-5444		mir-5444	train	2
+mir-547		mir-547	train	2
+mir-5470		mir-5470	train	5
+mir-549		mir-549	train	4
+mir-550		mir-550	train	32
+mir-552		mir-552	train	8
+mir-553		mir-553	train	8
+mir-554		mir-554	train	12
+mir-555		mir-555	train	12
+mir-556		mir-556	train	12
+mir-557		mir-557	train	7
+mir-558		mir-558	train	9
+mir-5583		mir-5583	train	5
+mir-5592		mir-5592	train	2
+mir-5595		mir-5595	train	2
+mir-561		mir-561	train	5
+mir-5615		mir-5615	train	2
+mir-562		mir-562	train	11
+mir-563		mir-563	train	10
+mir-564		mir-564	train	9
+mir-567		mir-567	train	7
+mir-568		mir-568	train	68
+mir-5681		mir-5681	train	7
+mir-569		mir-569	train	10
+mir-5697		mir-5697	train	19
+mir-57		mir-57	train	34
+mir-572		mir-572	train	21
+mir-5727		mir-5727	train	2
+mir-5728		mir-5728	train	3
+mir-5729		mir-5729	train	8
+mir-573		mir-573	train	12
+mir-5736		mir-5736	train	2
+mir-576		mir-576	train	11
+mir-577		mir-577	train	9
+mir-578		mir-578	train	9
+mir-580		mir-580	train	12
+mir-581		mir-581	train	14
+mir-582		mir-582	train	58
+mir-583		mir-583	train	8
+mir-584		mir-584	train	30
+mir-5856		mir-5856	train	4
+mir-586		mir-586	train	12
+mir-5881		mir-5881	train	2
+mir-5882		mir-5882	train	2
+mir-5885		mir-5885	train	21
+mir-5886		mir-5886	train	14
+mir-589		mir-589	train	38
+mir-5890		mir-5890	train	35
+mir-5897		mir-5897	train	1
+mir-59		mir-59	train	5
+mir-5904		mir-5904	train	12
+mir-5911		mir-5911	train	2
+mir-5912		mir-5912	train	1
+mir-5918		mir-5918	train	5
+mir-592		mir-592	train	36
+mir-593		mir-593	train	9
+mir-596		mir-596	train	4
+mir-598		mir-598	train	46
+mir-599		mir-599	train	72
+mir-60		mir-60	train	12
+mir-600		mir-600	train	9
+mir-6012		mir-6012	train	33
+mir-602		mir-602	train	8
+mir-604		mir-604	train	21
+mir-605		mir-605	train	10
+mir-606		mir-606	train	4
+mir-608		mir-608	train	9
+mir-609		mir-609	train	13
+mir-6095		mir-6095	train	3
+mir-61		mir-61	train	7
+mir-610		mir-610	train	8
+mir-611		mir-611	train	7
+mir-612		mir-612	train	7
+mir-6128		mir-6128	train	4
+mir-6129		mir-6129	train	4
+mir-613		mir-613	train	5
+mir-6130		mir-6130	train	13
+mir-6131		mir-6131	train	20
+mir-6132		mir-6132	train	13
+mir-6133		mir-6133	train	13
+mir-6134		mir-6134	train	7
+mir-614		mir-614	train	4
+mir-615		mir-615	train	45
+mir-616		mir-616	train	13
+mir-617		mir-617	train	7
+mir-618		mir-618	train	12
+mir-619		mir-619	train	10
+mir-62		mir-62	train	8
+mir-622		mir-622	train	245
+mir-623		mir-623	train	15
+mir-624		mir-624	train	10
+mir-626		mir-626	train	16
+mir-627		mir-627	train	22
+mir-628		mir-628	train	29
+mir-63		mir-63	train	25
+mir-630		mir-630	train	10
+mir-6301		mir-6301	train	2
+mir-6302		mir-6302	train	1
+mir-631		mir-631	train	60
+mir-632		mir-632	train	86
+mir-633		mir-633	train	14
+mir-634		mir-634	train	3
+mir-635		mir-635	train	2
+mir-636		mir-636	train	8
+mir-637		mir-637	train	5
+mir-638		mir-638	train	15
+mir-639		mir-639	train	13
+mir-640		mir-640	train	10
+mir-642		mir-642	train	10
+mir-643		mir-643	train	14
+mir-644		mir-644	train	3
+mir-645		mir-645	train	3
+mir-646		mir-646	train	4
+mir-647		mir-647	train	9
+mir-648		mir-648	train	18
+mir-649		mir-649	train	12
+mir-650		mir-650	train	91
+mir-6505		mir-6505	train	6
+mir-651		mir-651	train	7
+mir-6511		mir-6511	train	7
+mir-652		mir-652	train	42
+mir-6526		mir-6526	train	89
+mir-6529		mir-6529	train	41
+mir-6536		mir-6536	train	2
+mir-654		mir-654	train	64
+mir-657		mir-657	train	15
+mir-6579		mir-6579	train	4
+mir-658		mir-658	train	39
+mir-660		mir-660	train	56
+mir-661		mir-661	train	12
+mir-663		mir-663	train	52
+mir-6644		mir-6644	train	1
+mir-665		mir-665	train	68
+mir-666		mir-666	train	6
+mir-667		mir-667	train	3
+mir-668		mir-668	train	18
+mir-67		mir-67	train	166
+mir-670		mir-670	train	61
+mir-671		mir-671	train	23
+mir-6715		mir-6715	train	9
+mir-672		mir-672	train	23
+mir-675		mir-675	train	35
+mir-676		mir-676	train	68
+mir-678		mir-678	train	2
+mir-679		mir-679	train	2
+mir-6790		mir-6790	train	6
+mir-6794		mir-6794	train	12
+mir-680		mir-680	train	242
+mir-6827		mir-6827	train	12
+mir-692		mir-692	train	24
+mir-70		mir-70	train	3
+mir-702		mir-702	train	6
+mir-703		mir-703	train	5
+mir-7094		mir-7094	train	2
+mir-71		mir-71	train	299
+mir-711		mir-711	train	77
+mir-7131		mir-7131	train	18
+mir-7132		mir-7132	train	17
+mir-7147		mir-7147	train	1
+mir-7177		mir-7177	train	36
+mir-718		mir-718	train	41
+mir-7180		mir-7180	train	20
+mir-722		mir-722	train	71
+mir-724		mir-724	train	55
+mir-725		mir-725	train	10
+mir-726		mir-726	train	95
+mir-727		mir-727	train	43
+mir-728		mir-728	train	117
+mir-729		mir-729	train	35
+mir-731		mir-731	train	75
+mir-7331		mir-7331	train	3
+mir-734		mir-734	train	8
+mir-7359		mir-7359	train	2
+mir-7360		mir-7360	train	11
+mir-7371		mir-7371	train	10
+mir-7383		mir-7383	train	4
+mir-7385		mir-7385	train	10
+mir-7386		mir-7386	train	100
+mir-7398		mir-7398	train	121
+mir-744		mir-744	train	43
+mir-7445		mir-7445	train	2
+mir-745		mir-745	train	24
+mir-75		mir-75	train	9
+mir-750		mir-750	train	28
+mir-753		mir-753	train	1
+mir-7552		mir-7552	train	138
+mir-7563		mir-7563	train	352
+mir-7578		mir-7578	train	8
+mir-759		mir-759	train	49
+mir-76		mir-76	train	6
+mir-760		mir-760	train	24
+mir-761		mir-761	train	26
+mir-7615		mir-7615	train	2
+mir-7616		mir-7616	train	2
+mir-762		mir-762	train	45
+mir-763		mir-763	train	66
+mir-7637		mir-7637	train	2
+mir-764		mir-764	train	69
+mir-7640		mir-7640	train	2
+mir-765		mir-765	train	15
+mir-766		mir-766	train	8
+mir-769		mir-769	train	69
+mir-77		mir-77	train	7
+mir-784		mir-784	train	2
+mir-785		mir-785	train	6
+mir-786		mir-786	train	3
+mir-788		mir-788	train	3
+mir-7883		mir-7883	train	7
+mir-789		mir-789	train	3
+mir-7910		mir-7910	train	2
+mir-7911		mir-7911	train	6
+mir-7918		mir-7918	train	14
+mir-7939		mir-7939	train	16
+mir-7940		mir-7940	train	2
+mir-7948		mir-7948	train	4
+mir-7950		mir-7950	train	2
+mir-7957		mir-7957	train	8
+mir-7961		mir-7961	train	2
+mir-7964		mir-7964	train	2
+mir-7973		mir-7973	train	8
+mir-80		mir-80	train	8
+mir-802		mir-802	train	86
+mir-8196		mir-8196	train	6
+mir-8229		mir-8229	train	10
+mir-8250		mir-8250	train	4
+mir-83		mir-83	train	43
+mir-8303		mir-8303	train	2
+mir-8315		mir-8315	train	2
+mir-8338		mir-8338	train	2
+mir-8356		mir-8356	train	2
+mir-8364		mir-8364	train	1000
+mir-84		mir-84	train	27
+mir-85		mir-85	train	9
+mir-8510		mir-8510	train	4
+mir-8515		mir-8515	train	4
+mir-8517		mir-8517	train	1000
+mir-8521		mir-8521	train	17
+mir-8536		mir-8536	train	2
+mir-86		mir-86	train	46
+mir-87		mir-87	train	339
+mir-873		mir-873	train	33
+mir-874		mir-874	train	19
+mir-875		mir-875	train	105
+mir-876		mir-876	train	28
+mir-877		mir-877	train	128
+mir-878		mir-878	train	5
+mir-879		mir-879	train	5
+mir-880		mir-880	train	3
+mir-881		mir-881	train	4
+mir-8813		mir-8813	train	209
+mir-883		mir-883	train	9
+mir-8830		mir-8830	train	17
+mir-8834		mir-8834	train	1000
+mir-885		mir-885	train	42
+mir-8864		mir-8864	train	6
+mir-887		mir-887	train	5
+mir-8904		mir-8904	train	169
+mir-891		mir-891	train	18
+mir-8927		mir-8927	train	3
+mir-8932		mir-8932	train	7
+mir-8934		mir-8934	train	2
+mir-8941		mir-8941	train	31
+mir-8993		mir-8993	train	6
+mir-9		mir-9	train	1000
+mir-9014		mir-9014	train	442
+mir-9033		mir-9033	train	2
+mir-9058		mir-9058	train	1000
+mir-9128		mir-9128	train	12
+mir-9168		mir-9168	train	4
+mir-9186		mir-9186	train	111
+mir-9191		mir-9191	train	20
+mir-9195		mir-9195	train	432
+mir-9198		mir-9198	train	64
+mir-920		mir-920	train	18
+mir-9209		mir-9209	train	185
+mir-9215		mir-9215	train	471
+mir-922		mir-922	train	13
+mir-9229		mir-9229	train	1000
+mir-9230		mir-9230	train	782
+mir-9242		mir-9242	train	879
+mir-9250		mir-9250	train	3
+mir-9256		mir-9256	train	1000
+mir-9261		mir-9261	train	196
+mir-927		mir-927	train	143
+mir-9279		mir-9279	train	178
+mir-928		mir-928	train	10
+mir-929		mir-929	train	92
+mir-92_2		mir-92_2	train	3
+mir-9318		mir-9318	train	1
+mir-932		mir-932	train	111
+mir-933		mir-933	train	8
+mir-9338		mir-9338	train	4
+mir-935		mir-935	train	11
+mir-936		mir-936	train	9
+mir-937		mir-937	train	14
+mir-938		mir-938	train	20
+mir-939		mir-939	train	12
+mir-940		mir-940	train	10
+mir-941		mir-941	train	5
+mir-9412		mir-9412	train	133
+mir-9413		mir-9413	train	2
+mir-9416		mir-9416	train	2
+mir-942		mir-942	train	10
+mir-9428		mir-9428	train	30
+mir-943		mir-943	train	5
+mir-9436		mir-9436	train	23
+mir-9437		mir-9437	train	160
+mir-944		mir-944	train	15
+mir-9440		mir-9440	train	154
+mir-9441		mir-9441	train	7
+mir-9447		mir-9447	train	5
+mir-9449		mir-9449	train	2
+mir-9456		mir-9456	train	8
+mir-9457		mir-9457	train	2
+mir-9460		mir-9460	train	15
+mir-9461		mir-9461	train	3
+mir-9465		mir-9465	train	7
+mir-95		mir-95	train	90
+mir-955		mir-955	train	12
+mir-957		mir-957	train	22
+mir-9571		mir-9571	train	2
+mir-958		mir-958	train	15
+mir-959		mir-959	train	11
+mir-96		mir-96	train	284
+mir-960		mir-960	train	3
+mir-961		mir-961	train	2
+mir-962		mir-962	train	3
+mir-964		mir-964	train	2
+mir-965		mir-965	train	180
+mir-967		mir-967	train	2
+mir-968		mir-968	train	5
+mir-969		mir-969	train	14
+mir-970		mir-970	train	61
+mir-973		mir-973	train	13
+mir-975		mir-975	train	3
+mir-976		mir-976	train	3
+mir-977		mir-977	train	3
+mir-978		mir-978	train	3
+mir-9791		mir-9791	train	2
+mir-980		mir-980	train	99
+mir-981		mir-981	train	151
+mir-982		mir-982	train	7
+mir-983		mir-983	train	3
+mir-986		mir-986	train	6
+mir-987		mir-987	train	14
+mir-988		mir-988	train	21
+mir-989		mir-989	train	51
+mir-991		mir-991	train	3
+mir-992		mir-992	train	3
+mir-994		mir-994	train	16
+mir-995		mir-995	train	11
+mir-999		mir-999	train	36
+mir-B6		mir-B6	train	2
+mir-B8		mir-B8	train	1
+mir-BART10		mir-BART10	train	2
+mir-BART12		mir-BART12	train	3
+mir-BART13		mir-BART13	train	2
+mir-BART14		mir-BART14	train	2
+mir-BART15		mir-BART15	train	4
+mir-BART17		mir-BART17	train	3
+mir-BART18		mir-BART18	train	2
+mir-BART19		mir-BART19	train	2
+mir-BART2		mir-BART2	train	8
+mir-BART20		mir-BART20	train	2
+mir-BART5		mir-BART5	train	4
+mir-BART7		mir-BART7	train	3
+mir-BART9		mir-BART9	train	4
+mir-BHRF1-2		mir-BHRF1-2	train	4
+mir-BHRF1-3		mir-BHRF1-3	train	1
+mir-H1		mir-H1	train	2
+mir-H11		mir-H11	train	25
+mir-H3		mir-H3	train	2
+mir-H4		mir-H4	train	2
+mir-H5		mir-H5	train	2
+mir-K12-10		mir-K12-10	train	1
+mir-M7		mir-M7	train	2
+mir-Ro6-3		mir-Ro6-3	train	4
+mir-TAR		mir-TAR	train	71
+mir-iab-4		mir-iab-4	train	66
+mir-m21-1		mir-m21-1	train	2
+mir-m22-1		mir-m22-1	train	2
+mir-rL1-14		mir-rL1-14	train	4
+msiK		msiK	train	1000
+msr		msr	train	21
+mtDNA_ssA		mtDNA_ssA	train	597
+mycoplasma_FSE		mycoplasma_FSE	train	15
+n00280		n00280	train	52
+naRNA4		naRNA4	train	369
+nadA		nadA	train	48
+narK		narK	train	78
+ncS01		ncS01	train	52
+ncS011		ncS011	train	60
+ncS025		ncS025	train	50
+ncS035		ncS035	train	8
+ncS037		ncS037	train	3
+ncS54		ncS54	train	74
+ncr1241		ncr1241	train	12
+ncr1575		ncr1575	train	127
+ncr982		ncr982	train	2
+ncrMT1302		ncrMT1302	train	36
+neisseria_FSE		neisseria_FSE	train	3
+nhaA-II		nhaA-II	train	11
+nos_TCE		nos_TCE	train	13
+npcTB_6715		npcTB_6715	train	24
+nqrA-II		nqrA-II	train	14
+nqrA-Marinomonas		nqrA-Marinomonas	train	7
+nrdJ		nrdJ	train	308
+nse_sRNA		nse_sRNA	train	3
+nuoG		nuoG	train	93
+ohsC_RNA		ohsC_RNA	train	5
+osmY		osmY	train	23
+ovine_lenti_FSE		ovine_lenti_FSE	train	16
+p27_CRE		p27_CRE	train	55
+pRNA		pRNA	train	207
+pan		pan	train	737
+patAB		patAB	train	1
+pemK		pemK	train	769
+plasmodium_snoR16		plasmodium_snoR16	train	14
+plasmodium_snoR20		plasmodium_snoR20	train	19
+plasmodium_snoR21		plasmodium_snoR21	train	11
+plasmodium_snoR24		plasmodium_snoR24	train	11
+plasmodium_snoR26		plasmodium_snoR26	train	15
+plasmodium_snoR27		plasmodium_snoR27	train	14
+plasmodium_snoR28		plasmodium_snoR28	train	11
+plasmodium_snoR30		plasmodium_snoR30	train	12
+plasmodium_snoR31		plasmodium_snoR31	train	9
+poplar-1		poplar-1	train	2
+porB		porB	train	20
+potC		potC	train	88
+preQ1-II		preQ1-II	train	54
+proV		proV	train	13
+psRNA2		psRNA2	train	120
+psRNA6		psRNA6	train	3
+psaA		psaA	train	44
+purD		purD	train	95
+queA		queA	train	2
+raiA		raiA	train	352
+raiA-hairpin		raiA-hairpin	train	279
+rdlD		rdlD	train	66
+rhtB		rhtB	train	27
+rimP		rimP	train	300
+rivX		rivX	train	1
+rli117		rli117	train	7
+rli23		rli23	train	33
+rli24		rli24	train	6
+rli26		rli26	train	5
+rli28		rli28	train	333
+rli30		rli30	train	33
+rli31		rli31	train	3
+rli32		rli32	train	5
+rli34		rli34	train	7
+rli36		rli36	train	3
+rli37		rli37	train	4
+rli38		rli38	train	94
+rli42		rli42	train	4
+rli43		rli43	train	4
+rli45		rli45	train	5
+rli51		rli51	train	10
+rli52		rli52	train	4
+rli53		rli53	train	6
+rli56		rli56	train	4
+rli59		rli59	train	4
+rli61		rli61	train	21
+rliA		rliA	train	17
+rliE		rliE	train	4
+rliF		rliF	train	6
+rliI		rliI	train	11
+rnk_pseudo		rnk_pseudo	train	29
+rox1		rox1	train	6
+rox2		rox2	train	10
+rpfG		rpfG	train	2
+rpsL_pseudo		rpsL_pseudo	train	70
+rpsL_ricks		rpsL_ricks	train	9
+rseX		rseX	train	17
+rspL		rspL	train	50
+rydB		rydB	train	36
+sR035		sR035	train	1
+sR084		sR084	train	1
+sR1		sR1	train	20
+sR11		sR11	train	11
+sR12		sR12	train	6
+sR14		sR14	train	19
+sR15		sR15	train	2
+sR16		sR16	train	1
+sR18		sR18	train	5
+sR19		sR19	train	4
+sR2		sR2	train	19
+sR21		sR21	train	2
+sR22		sR22	train	7
+sR23		sR23	train	8
+sR24		sR24	train	13
+sR28		sR28	train	9
+sR3		sR3	train	59
+sR30		sR30	train	11
+sR32		sR32	train	4
+sR33		sR33	train	14
+sR34		sR34	train	6
+sR36		sR36	train	6
+sR38		sR38	train	4
+sR39		sR39	train	7
+sR40		sR40	train	2
+sR41		sR41	train	19
+sR42		sR42	train	4
+sR43		sR43	train	7
+sR44		sR44	train	3
+sR45		sR45	train	9
+sR46		sR46	train	8
+sR48		sR48	train	3
+sR49		sR49	train	3
+sR5		sR5	train	24
+sR52		sR52	train	2
+sR55		sR55	train	10
+sR58		sR58	train	7
+sR6		sR6	train	1
+sR7		sR7	train	6
+sR9		sR9	train	7
+sRNA154		sRNA154	train	1
+sRNA71		sRNA71	train	3
+sRNA_0030		sRNA_0030	train	10
+sRNA_1300		sRNA_1300	train	80
+sRNA_2410		sRNA_2410	train	74
+sX11		sX11	train	10
+sX13		sX13	train	88
+sX15		sX15	train	25
+sX2		sX2	train	3
+sX4		sX4	train	43
+sX5		sX5	train	15
+sX7		sX7	train	6
+sX8		sX8	train	31
+sX9		sX9	train	301
+sagA		sagA	train	2
+salivarius-1		salivarius-1	train	5
+sar		sar	train	17
+satBaMV_CRE		satBaMV_CRE	train	42
+sau-13		sau-13	train	8
+sau-19		sau-19	train	1
+sau-27		sau-27	train	1
+sau-30		sau-30	train	1
+sau-31		sau-31	train	1
+sau-41		sau-41	train	1
+sau-53		sau-53	train	1
+sau-59		sau-59	train	5
+sau-5949		sau-5949	train	12
+sau-6072		sau-6072	train	1
+sau-63		sau-63	train	1
+sau-66		sau-66	train	1
+sbcD		sbcD	train	26
+sbrA		sbrA	train	56
+scaDm46E3		scaDm46E3	train	5
+sca_ncR21		sca_ncR21	train	1
+sca_ncR26		sca_ncR26	train	16
+sca_ncR27		sca_ncR27	train	2
+scr4677		scr4677	train	474
+scr5239		scr5239	train	358
+serC		serC	train	959
+shuA_thermo		shuA_thermo	train	1
+skipping-rope		skipping-rope	train	270
+sn1185		sn1185	train	9
+sn1502		sn1502	train	9
+sn2317		sn2317	train	9
+sn2343		sn2343	train	9
+sn2417		sn2417	train	8
+sn2429		sn2429	train	10
+sn2524		sn2524	train	62
+sn2841		sn2841	train	20
+sn2991		sn2991	train	13
+sn3071		sn3071	train	27
+sn668		sn668	train	22
+snR4		snR4	train	33
+snR45		snR45	train	27
+snR50		snR50	train	7
+snR65		snR65	train	29
+snR79		snR79	train	74
+snaR-A		snaR-A	train	23
+snoCD11		snoCD11	train	60
+snoF1_F2		snoF1_F2	train	273
+snoJ26		snoJ26	train	25
+snoJ33		snoJ33	train	570
+snoM1		snoM1	train	9
+snoMBII-202		snoMBII-202	train	635
+snoMe18S-Gm1358		snoMe18S-Gm1358	train	40
+snoMe28S-Am2589		snoMe28S-Am2589	train	81
+snoMe28S-Am2634		snoMe28S-Am2634	train	49
+snoMe28S-Cm3227		snoMe28S-Cm3227	train	44
+snoMe28S-Cm788		snoMe28S-Cm788	train	23
+snoMe28S-Gm1083		snoMe28S-Gm1083	train	92
+snoMe28S-Gm3113		snoMe28S-Gm3113	train	36
+snoR01		snoR01	train	11
+snoR03		snoR03	train	5
+snoR07		snoR07	train	15
+snoR09		snoR09	train	12
+snoR10		snoR10	train	11
+snoR100		snoR100	train	1000
+snoR101		snoR101	train	362
+snoR103		snoR103	train	656
+snoR104		snoR104	train	467
+snoR109		snoR109	train	541
+snoR114		snoR114	train	1000
+snoR116		snoR116	train	270
+snoR117		snoR117	train	318
+snoR12		snoR12	train	727
+snoR120		snoR120	train	26
+snoR121		snoR121	train	15
+snoR124		snoR124	train	20
+snoR125		snoR125	train	14
+snoR126		snoR126	train	324
+snoR128		snoR128	train	533
+snoR13		snoR13	train	32
+snoR134		snoR134	train	668
+snoR136		snoR136	train	400
+snoR137		snoR137	train	699
+snoR138		snoR138	train	269
+snoR143		snoR143	train	572
+snoR144		snoR144	train	24
+snoR145		snoR145	train	247
+snoR15		snoR15	train	13
+snoR160		snoR160	train	613
+snoR17		snoR17	train	22
+snoR18		snoR18	train	14
+snoR19		snoR19	train	13
+snoR20		snoR20	train	67
+snoR20a		snoR20a	train	363
+snoR21		snoR21	train	348
+snoR22		snoR22	train	17
+snoR24		snoR24	train	1000
+snoR25		snoR25	train	16
+snoR28		snoR28	train	224
+snoR29		snoR29	train	10
+snoR31		snoR31	train	393
+snoR31_Z110_Z27		snoR31_Z110_Z27	train	429
+snoR32_R81		snoR32_R81	train	186
+snoR38		snoR38	train	1000
+snoR4		snoR4	train	3
+snoR43		snoR43	train	15
+snoR4a		snoR4a	train	42
+snoR639		snoR639	train	68
+snoR64		snoR64	train	595
+snoR64a		snoR64a	train	229
+snoR71		snoR71	train	1000
+snoR72		snoR72	train	38
+snoR74		snoR74	train	1000
+snoR77		snoR77	train	557
+snoR79		snoR79	train	4
+snoR83		snoR83	train	847
+snoR86		snoR86	train	779
+snoR8a		snoR8a	train	798
+snoR97		snoR97	train	722
+snoR9_plant		snoR9_plant	train	94
+snoTBR12		snoTBR12	train	10
+snoTBR17		snoTBR17	train	24
+snoTBR2		snoTBR2	train	8
+snoTBR4		snoTBR4	train	6
+snoTBR5		snoTBR5	train	29
+snoTBR6		snoTBR6	train	24
+snoU109		snoU109	train	1000
+snoU19		snoU19	train	359
+snoU2-30		snoU2-30	train	392
+snoU25		snoU25	train	8
+snoU31b		snoU31b	train	1000
+snoU43		snoU43	train	110
+snoU6-47		snoU6-47	train	19
+snoU6-53		snoU6-53	train	645
+snoU82P		snoU82P	train	96
+snoU83		snoU83	train	231
+snoU83D		snoU83D	train	16
+snoZ107_R87		snoZ107_R87	train	587
+snoZ118		snoZ118	train	320
+snoZ119		snoZ119	train	65
+snoZ122		snoZ122	train	678
+snoZ152		snoZ152	train	500
+snoZ162		snoZ162	train	109
+snoZ168		snoZ168	train	43
+snoZ173		snoZ173	train	17
+snoZ175		snoZ175	train	8
+snoZ178		snoZ178	train	4
+snoZ182		snoZ182	train	14
+snoZ185		snoZ185	train	12
+snoZ188		snoZ188	train	77
+snoZ194		snoZ194	train	46
+snoZ199		snoZ199	train	655
+snoZ206		snoZ206	train	45
+snoZ221_snoR21b		snoZ221_snoR21b	train	454
+snoZ242		snoZ242	train	17
+snoZ247		snoZ247	train	1000
+snoZ248		snoZ248	train	18
+snoZ256		snoZ256	train	55
+snoZ267		snoZ267	train	405
+snoZ278		snoZ278	train	918
+snoZ30		snoZ30	train	576
+snoZ30a		snoZ30a	train	18
+snoZ39		snoZ39	train	518
+snoZ40		snoZ40	train	324
+sno_ZL1		sno_ZL1	train	281
+sno_ZL116		sno_ZL116	train	12
+sno_ZL2		sno_ZL2	train	79
+sno_ZL63		sno_ZL63	train	5
+sno_ZL8		sno_ZL8	train	89
+sno_ncR1		sno_ncR1	train	7
+sno_ncR4		sno_ncR4	train	1
+snopsi18S-1377		snopsi18S-1377	train	111
+snopsi18S-1854		snopsi18S-1854	train	66
+snopsi28S-1192		snopsi28S-1192	train	81
+snopsi28S-3316		snopsi28S-3316	train	87
+snopsi28S-3378		snopsi28S-3378	train	13
+snosnR66		snosnR66	train	26
+sobemo_FSE		sobemo_FSE	train	4
+sodF_sRNA		sodF_sRNA	train	329
+sok		sok	train	313
+sot0042		sot0042	train	190
+sot2652		sot2652	train	36
+speF		speF	train	367
+sraA		sraA	train	109
+sroB		sroB	train	73
+sroC		sroC	train	60
+sroD		sroD	train	28
+sroE		sroE	train	32
+sroH		sroH	train	6
+ssNA-helicase		ssNA-helicase	train	21
+sucA		sucA	train	381
+sucC		sucC	train	56
+sul1		sul1	train	459
+sxy		sxy	train	2
+symR		symR	train	31
+t44		t44	train	942
+terC		terC	train	1000
+tfoR		tfoR	train	35
+toga_FSE		toga_FSE	train	4
+tpke11		tpke11	train	137
+traJ-II		traJ-II	train	188
+tracrRNA		tracrRNA	train	49
+tsr24		tsr24	train	76
+tsr25		tsr25	train	8
+tsr31		tsr31	train	12
+uc_338		uc_338	train	1000
+uxuA		uxuA	train	2
+v-snoRNA-1		v-snoRNA-1	train	2
+veev_FSE		veev_FSE	train	9
+weev_FSE		weev_FSE	train	7
+whalefall-1		whalefall-1	train	123
+xerDC		xerDC	train	2
+ybhL		ybhL	train	123
+ylbH		ylbH	train	478
+Acido-Lenti-1		Acido-Lenti-1	val	1000
+Afu_191		Afu_191	val	130
+Afu_328		Afu_328	val	19
+Afu_513		Afu_513	val	534
+AilA_thermometer		AilA_thermometer	val	1
+Alfamo_CPB		Alfamo_CPB	val	19
+Antizyme_FSE		Antizyme_FSE	val	300
+BSnc120		BSnc120	val	1
+BTH_s39		BTH_s39	val	58
+BTnc060		BTnc060	val	8
+Bacillaceae-1		Bacillaceae-1	val	1000
+Bacteroid-trp		Bacteroid-trp	val	323
+BjrC174		BjrC174	val	67
+C0299		C0299	val	9
+C0719		C0719	val	10
+mt-tmRNA	CL00001	CL00001	val	32
+tRNA	CL00001	CL00001	val	945
+tRNA-Sec	CL00001	CL00001	val	1000
+SNORA26	CL00032	CL00032	val	1000
+SNORA27	CL00032	CL00032	val	639
+S_pombe_snR42	CL00032	CL00032	val	3
+snR42	CL00032	CL00032	val	24
+SNORA64	CL00041	CL00041	val	601
+SNORD16	CL00046	CL00046	val	1000
+snR87	CL00046	CL00046	val	45
+SNORD25	CL00049	CL00049	val	724
+snR56	CL00049	CL00049	val	167
+SNORD2	CL00072	CL00072	val	660
+SNORD96	CL00072	CL00072	val	918
+SNORD100	CL00073	CL00073	val	565
+snoR30	CL00073	CL00073	val	468
+snR68	CL00079	CL00079	val	5
+snoR27	CL00079	CL00079	val	533
+snoR53	CL00080	CL00080	val	5
+snoR53Y	CL00080	CL00080	val	380
+mir-137	CL00092	CL00092	val	229
+mir-234	CL00092	CL00092	val	43
+miR-430	CL00096	CL00096	val	1000
+mir-290	CL00096	CL00096	val	385
+mir-302	CL00096	CL00096	val	799
+mir-515	CL00096	CL00096	val	718
+AdoCbl	CL00101	CL00101	val	321
+AdoCbl-II	CL00101	CL00101	val	308
+Cobalamin	CL00101	CL00101	val	1000
+S15	CL00121	CL00121	val	750
+S15-Flavobacteria	CL00121	CL00121	val	373
+S15-Halobacteria	CL00121	CL00121	val	116
+S15-Methanomicrobia	CL00121	CL00121	val	14
+CLRN1-AS1		CLRN1-AS1	val	82
+COG2827		COG2827	val	21
+CRISPR-DR11		CRISPR-DR11	val	9
+CRISPR-DR16		CRISPR-DR16	val	140
+CRISPR-DR34		CRISPR-DR34	val	39
+CRISPR-DR52		CRISPR-DR52	val	1
+Cis90_sRNA		Cis90_sRNA	val	29
+DUF2800		DUF2800	val	20
+DUF3800-I		DUF3800-I	val	50
+DdR12		DdR12	val	1
+DdR13		DdR13	val	3
+EFASI		EFASI	val	112
+EGFOA		EGFOA	val	40
+FMN		FMN	val	1000
+FTX_1		FTX_1	val	74
+GA-cis		GA-cis	val	159
+GP_knot1		GP_knot1	val	1000
+Gl_U6		Gl_U6	val	1
+GlsR17_miR2		GlsR17_miR2	val	1
+GlsR23		GlsR23	val	1
+GlsR27		GlsR27	val	1
+HCV_ARF_SL		HCV_ARF_SL	val	51
+HCV_SLVII		HCV_SLVII	val	52
+HIV_PBS		HIV_PBS	val	139
+HOTAIRM1_2		HOTAIRM1_2	val	457
+HOXA11-AS1_6		HOXA11-AS1_6	val	99
+HepE_CRE		HepE_CRE	val	45
+Hrs1		Hrs1	val	22
+Hsp90_CRE		Hsp90_CRE	val	12
+HtrA_thermometer		HtrA_thermometer	val	9
+IBV_D-RNA		IBV_D-RNA	val	19
+IRES_Hsp70		IRES_Hsp70	val	65
+IS102		IS102	val	15
+L20-Deltaproteobacteria		L20-Deltaproteobacteria	val	32
+Lnt		Lnt	val	12
+MAT2A_B		MAT2A_B	val	113
+MAT2A_C		MAT2A_C	val	106
+MAT2A_E		MAT2A_E	val	159
+MDR-NUDIX		MDR-NUDIX	val	3
+MIAT_exon5_2		MIAT_exon5_2	val	70
+MIR1513		MIR1513	val	2
+MIR1883		MIR1883	val	2
+MIR2646		MIR2646	val	6
+MIR2680		MIR2680	val	179
+MIR2933		MIR2933	val	15
+MIR2934		MIR2934	val	2
+MIR3444		MIR3444	val	4
+MIR3627		MIR3627	val	20
+MIR4380		MIR4380	val	7
+MIR5269		MIR5269	val	374
+MIR529		MIR529	val	46
+MIR5291		MIR5291	val	140
+MIR5292		MIR5292	val	86
+MIR530		MIR530	val	96
+MIR5643		MIR5643	val	33
+MIR6020		MIR6020	val	2
+MIR6288		MIR6288	val	282
+MIR7510		MIR7510	val	12
+MIR8007		MIR8007	val	104
+MIR8670		MIR8670	val	2
+MIR904		MIR904	val	4
+Mahella-1		Mahella-1	val	7
+Methylobacterium-1		Methylobacterium-1	val	46
+Ms_IGR-2		Ms_IGR-2	val	26
+NPPA-AS1_1		NPPA-AS1_1	val	91
+NPPA-AS1_3		NPPA-AS1_3	val	99
+PK-BYV		PK-BYV	val	2
+PVT1_4		PVT1_4	val	87
+PYLIS_2		PYLIS_2	val	58
+Plasmid_RNAIII		Plasmid_RNAIII	val	5
+Pospi_RY		Pospi_RY	val	17
+PreQ1		PreQ1	val	836
+Proteo-phage-1		Proteo-phage-1	val	54
+PyrC_leader		PyrC_leader	val	5
+RF_site5		RF_site5	val	291
+RF_site9		RF_site9	val	5
+RT-10		RT-10	val	3
+RsaA		RsaA	val	12
+RsaH		RsaH	val	11
+SAM_VI		SAM_VI	val	12
+SAM_alpha		SAM_alpha	val	1000
+SBRMV1_UPD-PKf		SBRMV1_UPD-PKf	val	1
+SMAD5-AS1_2		SMAD5-AS1_2	val	94
+SNORA40		SNORA40	val	1000
+SNORA46		SNORA46	val	505
+SNORA84		SNORA84	val	657
+SNORD5		SNORD5	val	309
+SNORD75		SNORD75	val	481
+SNORD90		SNORD90	val	424
+SPRY4-IT1_1		SPRY4-IT1_1	val	102
+STnc130		STnc130	val	24
+STnc50		STnc50	val	4
+STnc630		STnc630	val	17
+S_pombe_snR92		S_pombe_snR92	val	3
+S_pombe_snR95		S_pombe_snR95	val	2
+S_pombe_snR96		S_pombe_snR96	val	2
+Scr3202		Scr3202	val	147
+Scr3920		Scr3920	val	269
+Scr4115		Scr4115	val	332
+SorX		SorX	val	475
+SpF10_sRNA		SpF10_sRNA	val	1
+SpF36_sRNA		SpF36_sRNA	val	3
+Spd-sr37		Spd-sr37	val	29
+Spi-1		Spi-1	val	98
+SprD		SprD	val	3
+SrbA		SrbA	val	59
+StyR-44		StyR-44	val	245
+TB10Cs2H1		TB10Cs2H1	val	22
+TB10Cs5H2		TB10Cs5H2	val	13
+TB9Cs4H2		TB9Cs4H2	val	18
+TCL6_2		TCL6_2	val	84
+TLS-PK1		TLS-PK1	val	2
+TLS-PK2		TLS-PK2	val	4
+TTC28-AS1_3		TTC28-AS1_3	val	66
+Thermales-rpoB		Thermales-rpoB	val	1
+Thr_leader		Thr_leader	val	184
+Transposase-1		Transposase-1	val	50
+TtnuCD22		TtnuCD22	val	1
+TtnuCD23		TtnuCD23	val	1
+TtnuCD25		TtnuCD25	val	2
+TtnuCD33		TtnuCD33	val	1
+TtnuHACA10		TtnuHACA10	val	1
+TtnuHACA11a		TtnuHACA11a	val	1
+TtnuHACA16		TtnuHACA16	val	1
+U8		U8	val	1000
+UPSK		UPSK	val	2
+UnaL2		UnaL2	val	843
+VIS1		VIS1	val	113
+Yfr10		Yfr10	val	1
+ZEB2_AS1_2		ZEB2_AS1_2	val	65
+ar14		ar14	val	776
+asX3		asX3	val	2
+aspS		aspS	val	31
+bZIP		bZIP	val	587
+bxd_4		bxd_4	val	16
+ceN115		ceN115	val	8
+ceN39		ceN39	val	86
+ceN46		ceN46	val	9
+ceN80		ceN80	val	19
+cow-rumen-2		cow-rumen-2	val	1
+ctRNA_pGA1		ctRNA_pGA1	val	28
+cyano-S1		cyano-S1	val	18
+emrB-Lactobacillus		emrB-Lactobacillus	val	6
+enod40		enod40	val	247
+flavi_FSE		flavi_FSE	val	6
+flpD		flpD	val	9
+mgtC_leader		mgtC_leader	val	14
+mir-101		mir-101	val	238
+mir-1183		mir-1183	val	11
+mir-1263		mir-1263	val	7
+mir-1265		mir-1265	val	19
+mir-1295		mir-1295	val	7
+mir-1296		mir-1296	val	30
+mir-132		mir-132	val	404
+mir-14		mir-14	val	101
+mir-146		mir-146	val	795
+mir-1490		mir-1490	val	3
+mir-1502		mir-1502	val	2
+mir-1684		mir-1684	val	90
+mir-17		mir-17	val	1000
+mir-1781		mir-1781	val	257
+mir-1803		mir-1803	val	2
+mir-1829		mir-1829	val	6
+mir-1896		mir-1896	val	2
+mir-1909		mir-1909	val	10
+mir-1912		mir-1912	val	56
+mir-192		mir-192	val	418
+mir-1991		mir-1991	val	8
+mir-2067		mir-2067	val	2
+mir-2071		mir-2071	val	1
+mir-22		mir-22	val	313
+mir-2217		mir-2217	val	9
+mir-2240		mir-2240	val	7
+mir-2278		mir-2278	val	13
+mir-2331		mir-2331	val	3
+mir-2387		mir-2387	val	21
+mir-241		mir-241	val	9
+mir-2432		mir-2432	val	1
+mir-245		mir-245	val	7
+mir-2450		mir-2450	val	38
+mir-2567		mir-2567	val	6
+mir-2772		mir-2772	val	3
+mir-2807		mir-2807	val	1000
+mir-3070		mir-3070	val	12
+mir-308		mir-308	val	32
+mir-3117		mir-3117	val	5
+mir-3119		mir-3119	val	24
+mir-3170		mir-3170	val	2
+mir-32		mir-32	val	71
+mir-3202		mir-3202	val	12
+mir-326		mir-326	val	68
+mir-3327		mir-3327	val	18
+mir-3338		mir-3338	val	15
+mir-3547		mir-3547	val	7
+mir-359		mir-359	val	5
+mir-361		mir-361	val	46
+mir-3613		mir-3613	val	33
+mir-3804		mir-3804	val	2
+mir-3910		mir-3910	val	11
+mir-3934		mir-3934	val	9
+mir-3937		mir-3937	val	14
+mir-4003		mir-4003	val	6
+mir-423		mir-423	val	11
+mir-4435		mir-4435	val	15
+mir-4436		mir-4436	val	42
+mir-455		mir-455	val	88
+mir-459		mir-459	val	85
+mir-4654		mir-4654	val	10
+mir-4659		mir-4659	val	22
+mir-4667		mir-4667	val	49
+mir-4716		mir-4716	val	30
+mir-4742		mir-4742	val	14
+mir-4743		mir-4743	val	16
+mir-484		mir-484	val	81
+mir-4863		mir-4863	val	3
+mir-4868		mir-4868	val	9
+mir-4880		mir-4880	val	1
+mir-4904		mir-4904	val	3
+mir-51		mir-51	val	2
+mir-532		mir-532	val	48
+mir-5391		mir-5391	val	3
+mir-548		mir-548	val	1000
+mir-55		mir-55	val	10
+mir-559		mir-559	val	8
+mir-56		mir-56	val	3
+mir-571		mir-571	val	122
+mir-575		mir-575	val	5
+mir-587		mir-587	val	10
+mir-5880		mir-5880	val	2
+mir-591		mir-591	val	12
+mir-5928		mir-5928	val	1000
+mir-595		mir-595	val	11
+mir-6096		mir-6096	val	2
+mir-629		mir-629	val	12
+mir-662		mir-662	val	13
+mir-673		mir-673	val	8
+mir-684		mir-684	val	33
+mir-7		mir-7	val	1000
+mir-723		mir-723	val	78
+mir-770		mir-770	val	14
+mir-787		mir-787	val	4
+mir-791		mir-791	val	6
+mir-7927		mir-7927	val	6
+mir-8186		mir-8186	val	2
+mir-9080		mir-9080	val	3
+mir-9193		mir-9193	val	1000
+mir-921		mir-921	val	8
+mir-9235		mir-9235	val	1
+mir-971		mir-971	val	88
+mir-9847		mir-9847	val	3
+mir-998		mir-998	val	72
+mir-BART16		mir-BART16	val	2
+mir-m107-1		mir-m107-1	val	2
+ncRv12659		ncRv12659	val	1
+plasmodium_snoR11		plasmodium_snoR11	val	2
+plasmodium_snoR17		plasmodium_snoR17	val	16
+pntA		pntA	val	25
+rli48		rli48	val	7
+rli49		rli49	val	6
+rli60		rli60	val	13
+rli62		rli62	val	6
+rnk_leader		rnk_leader	val	34
+sR-tMet		sR-tMet	val	111
+sR17		sR17	val	16
+sR35		sR35	val	3
+sR53		sR53	val	4
+sRNA41		sRNA41	val	10
+sca_ncR14		sca_ncR14	val	13
+sn3060		sn3060	val	14
+snR32		snR32	val	154
+snoR110		snoR110	val	36
+snoR111		snoR111	val	426
+snoR113		snoR113	val	354
+snoR122		snoR122	val	207
+snoR127		snoR127	val	230
+snoR135		snoR135	val	693
+snoR16		snoR16	val	646
+snoR26		snoR26	val	466
+snoR442		snoR442	val	20
+snoR66		snoR66	val	404
+snoU2_19		snoU2_19	val	772
+snoU83B		snoU83B	val	685
+snoZ103		snoZ103	val	1000
+snoZ105		snoZ105	val	456
+snoZ13_snr52		snoZ13_snr52	val	1000
+snoZ155		snoZ155	val	326
+snoZ165		snoZ165	val	12
+snoZ169		snoZ169	val	9
+snoZ266		snoZ266	val	610
+snoZ6		snoZ6	val	174
+sno_ncR3		sno_ncR3	val	1
+snopsi28S-2876		snopsi28S-2876	val	16
+snosnR57		snosnR57	val	66
+ssnA		ssnA	val	36
+sucA-II		sucA-II	val	72
+tp2		tp2	val	117
+tsr32		tsr32	val	1
+tsr33		tsr33	val	1
+uup		uup	val	103
+wcaG		wcaG	val	156

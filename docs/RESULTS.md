@@ -714,6 +714,32 @@ improvements would be reported as "not detectable with 5 seeds", with
 their effect sizes and intervals. Informational: this does not change the
 frozen protocol, and a Mamba backbone's own seed spread may differ.
 
+### The replication split (split seed 1)
+
+Built 2026-09-25 04:46–11:33 (≈ 1 h 50 min of process time; the laptop slept
+in between): `python scripts/prepare_data.py --split-seed 1` at commit
+`7df3d40` → `data/processed_split1/`, `splits/rfam_split_seed1.tsv`. Only
+`stable_hash`'s prefix changes, so the cleaned corpus is identical (567,579
+sequences after the per-family cap, the same number as split 0) and only the
+held-out groups differ. Verified before launching: `--split-seed 0`
+reproduces the three frozen files byte for byte.
+
+| | train | val | test |
+|---|---|---|---|
+| sequences | 452,177 (79.7 %) | 57,116 (10.1 %) | 57,836 (10.2 %) |
+| families | 3,141 | 348 | 348 |
+| median length | 95 | 87 | 88 |
+
+Step 10 removed 449 letter-level near-twins of train (402 val, 47 test; led
+by UnaL2 157, mir-1803 58, tRNA 55); step 11 removed 1 structural member
+(snosnR61 → TtnuCD8). The same assertions as split 0 passed, so no clan,
+family or identical sequence occurs in two splits.
+
+**How independent is it?** Only **29 of 348** validation families and **30 of
+348** test families are also held out in split 0 (8–9 %), and **95,104 of its
+114,952 held-out sequences were in split 0's training set**. So a result that
+repeats on this split is not repeating on nearly the same test families.
+
 ### Does Mamba run here, and how fast? (single-block micro-benchmark)
 
 Run 2026-09-25 05:00 in the scratchpad (throwaway code, not part of the
