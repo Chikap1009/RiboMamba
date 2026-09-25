@@ -740,6 +740,28 @@ family or identical sequence occurs in two splits.
 114,952 held-out sequences were in split 0's training set**. So a result that
 repeats on this split is not repeating on nearly the same test families.
 
+### The Transformer on the replication split (P4, validation only)
+
+`python scripts/replication_run.py --prefix tf_M` at commit `e2809f8`
+(clean), 2026-09-25 14:38 → 18:41 (1 h 31 min of process time; the laptop
+slept ≈ 2.5 h in between). It copies `tf_M_do0`'s recipe from its
+config.json (lr 3×10⁻⁴, dropout 0, 30,000 steps, warmup 1,000, 16,384-token
+batches, EMA 0.9999, eval every 2,500) and changes only `--data-dir
+data/processed_split1`; seed 0. Run `tf_M_do0_split1`. Validation =
+split 1's own validation set (348 families), EMA weights, fixed noise
+(seed 1234):
+
+| step | 2.5k | 5k | 7.5k | 10k | **12.5k** | 15k | 20k | 25k | 30k |
+|---|---|---|---|---|---|---|---|---|---|
+| split-1 val bits/nt (EMA) | 1.9407 | 1.9239 | 1.9181 | 1.9152 | **1.9141** | 1.9151 | 1.9198 | 1.9235 | 1.9261 |
+
+Best **1.9141** at step 12,500 (`best.pt`); split 0's baseline reached
+1.9040 at step 10,000 on its own validation families. Same shape on both
+splits: best after ≈ 4 epochs, then overfitting. The two numbers are on
+different validation families, so their difference says nothing about the
+model; split 1's test set is evaluated with the frozen protocol once every
+model's replication run exists.
+
 ### Does Mamba run here, and how fast? (single-block micro-benchmark)
 
 Run 2026-09-25 05:00 in the scratchpad (throwaway code, not part of the
@@ -774,6 +796,53 @@ steps after 2 warm-up steps, batch 16.
   match parameters by depth or by width is a Phase 4 design decision, taught
   before it is made. The honest number for the protocol's compute-matching
   comes from the full models.
+
+### Memory and speed of the full Phase 4 models
+
+`python scripts/measure_memory.py --group phase4` at commit `9a2fee4`,
+2026-09-25 18:44–18:56, idle GPU (7.44 GB free of 8.59), bf16 autocast,
+forward + backward + AdamW on random framed sequences, 10 timed steps after
+3 warm-up steps; raw output `checkpoints/measure_memory_phase4.log`. The
+training setting is the 16,384-token batch:
+
+| model | parameters | L = 256: peak GB | ms/step | k nt/s | L = 64: peak GB | ms/step | k nt/s |
+|---|---|---|---|---|---|---|---|
+| Transformer M (baseline) | 14,174,976 | 2.38 | 161.6 | 101 | 2.44 | 153.4 | 107 |
+| **BiMamba, depth-matched** (14 × d 384) | 14,010,608 | 4.39 | 465.4 | 35 | 4.60 | 645.8 | 25 |
+| **AR Mamba, depth-matched** (14 × d 384) | 13,927,672 | 2.40 | 238.5 | 69 | 2.71 | 329.5 | 50 |
+| BiMamba, width-matched (8 × d 512, head 32) | 13,900,288 | 3.61 | 353.4 | 46 | 3.87 | 551.8 | 30 |
+| AR Mamba, width-matched (8 × d 528, head 32, state 64) | 14,136,248 | 2.17 | 219.8 | 75 | 2.30 | 310.2 | 53 |
+
+At 32,768 tokens (headroom only, not a training setting) the Transformer
+needs 4.5–4.6 GB and the AR models 3.8–5.2 GB, but both BiMamba sizes
+exceed the free memory at L = 64 (7.51 and 8.96 GB) and depth-matched
+BiMamba at L = 256 too (8.27 GB): WSL then spills into system RAM with no
+error, and a step takes 4–15 s instead of < 1 s.
+
+**Reading it.**
+- Every Phase 4 model fits the 16,384-token batch with ≥ 2.8 GB to spare, so
+  the protocol's batch size needs no change (no gradient accumulation).
+- Per step, depth-matched BiMamba costs ≈ 2.9× (L 256) to 4.2× (L 64) the
+  Transformer; AR Mamba ≈ 1.5–2.2×. Width matching would be ≈ 15–25 %
+  faster for BiMamba, ≈ 6–8 % for AR Mamba.
+- **Mamba gets slower per token as sequences get shorter**, the opposite of
+  intuition: at a fixed token budget, 256 sequences of 64 letters carry 256
+  full-size states (98,304 numbers per layer each), 64 sequences of 256
+  carry 64. A state-space model pays per sequence as well as per letter.
+- **Chunk size checked and left at the default.** Mamba-2 computes its scan in
+  chunks (default 256 positions). Scratchpad `chunk_test.py`: chunk sizes
+  128, 64, 32 give the same outputs as 256 to ≤ 3.3 × 10⁻⁵ (float32, 2-layer
+  BiMamba, lengths 40–258), as the algorithm is exact for any chunking.
+  Speed at 16,384 tokens, BiMamba full size, ms/step for chunks
+  256 / 128 / 64 / 32: L 64: 635 / 501 / 623 / 752; L 96: 526 / 427 / 506 /
+  688; L 128: 466 / 508 / 537 / 667; L 256: 462 / 438 / 472 / 600 (8 timed
+  steps each). At most ≈ 20 % and not consistent, so the library default is
+  kept.
+- Estimated GPU time for the protocol with depth matching (30,000-step runs
+  at ≈ 0.5 s/step for BiMamba and ≈ 0.3 s for AR Mamba at typical lengths,
+  plus validation passes): BiMamba ≈ 42–47 h (LR sweep, dropout sweep, 4
+  seeds, replication run), AR Mamba ≈ 25 h; **≈ 70 GPU-hours** in all, before
+  test-set sampling and evaluation.
 
 ---
 

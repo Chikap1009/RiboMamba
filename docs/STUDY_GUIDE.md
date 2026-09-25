@@ -1740,6 +1740,193 @@ same result, so the change cannot have been made to flatter or hurt it.
 
 ## Part 6 — What Mamba is, and why we chose it  *(Phase 4)*
 
+*(Drafted during the Phase 4 build, 2026-09-25, from the three concept
+instalments. The results sections are added when the results exist; the
+part is revised after the Phase 4 gate.)*
+
+### 6.1 What this phase is for
+
+Phase 3 ended with a precise worry: our Transformer generates RNA that looks
+right letter by letter but holds its shape no better than random letters
+do, and no sampling setting fixes that. Phase 4 asks whether a different
+**backbone**, the network inside the denoiser, does better. Everything else
+stays fixed: the data, the split, the diffusion process, the tuning rules,
+the number of parameters, the number of training steps, and the evaluation,
+which was frozen before any Mamba model existed. If the numbers move, only
+the backbone can have moved them.
+
+### 6.2 Two ways to let letters talk to each other
+
+To predict a hidden letter, the denoiser has to collect evidence from the
+other positions: a hidden letter opposite three C's is probably a G. There
+are two basic ways to move that evidence around.
+
+**Attention** (the Transformer) lets every position look at every other
+position directly. Each position asks a question (its query), every position
+offers a label (its key), and the match between them decides how much each
+position listens to each other one. That is an L × L grid of scores, and it
+has exactly the shape of a base-pairing table: position 7 can look straight
+at its partner at position 3.
+
+A **state-space model** reads the sequence once, from one end to the other,
+carrying a small fixed-size summary called the **state**, which it updates
+at every letter. The picture to keep is a bank balance: one number that
+sums up every transaction ever made, updated with each one, never growing,
+but unable to tell you what you spent on a particular day. Attention keeps
+the whole statement and searches it.
+
+### 6.3 The update rule, and why its cost grows only linearly
+
+The simplest state-space model keeps one number and does two things per
+letter: new state = a × old state + b × input, and output = c × state. The
+**keep factor** a (between 0 and 1) decides how much of the past survives
+each step; a state remembers roughly the last 1/(1 − a) letters. You have
+met one before: the moving average of the weights during training is this
+rule with a = 0.9999.
+
+On the hairpin `GGGAAACCC`, feed in "1 for a G, 0 otherwise". With a = 0.5
+the state reaches 1.75 after the three G's and has leaked down to 0.11 by
+the C at position 7, the letter that should pair with the last G. With
+a = 0.9 it still holds 1.78, but a single number can no longer say how many
+G's there were or how long ago. Real layers therefore run many states side
+by side with different keep factors: one Mamba-2 layer of our size holds
+98,304 of them.
+
+This is, exactly, the state-space model of a Control Systems course,
+h′ = Ah + Bx and y = Ch + Dx, with two notational traps (textbooks call the
+state x and the input u). Mamba keeps A negative, so the system can never
+blow up, and turns the continuous equation into steps with a step size Δ.
+
+Because each letter costs a fixed amount of work, reading L letters costs
+proportional to L. Attention compares every pair, proportional to L²: 65,536
+pairs at 256 letters. But Big-O describes how cost grows, not what it costs
+at a given size. We measured one block of each: at 256 letters, Mamba-2 took
+6.0 ms against attention's 3.8 ms; only at 1,024 letters did Mamba win (11.7
+against 21.7). So at our length cap linear time buys no speed, every model
+trains for the same number of steps anyway, and Phase 4 is a question about
+quality alone. Linear time would matter for the long ribosomal RNAs our
+256-letter cap leaves out.
+
+### 6.4 The echo problem, and what "selective" means
+
+Unroll the fixed rule and every output becomes a weighted sum of past
+inputs with weights 1, a, a², …: an echo that fades at the same rate for
+every letter (in signals language, an impulse response; the whole model is
+one convolution, which is how the earlier state-space models trained fast).
+The weakness is that the echo cannot tell letters apart. For RNA you would
+like to **pause the forgetting** during a loop, so that the stem's first
+half is still sharp when the second half arrives. A fixed echo cannot.
+
+Mamba's idea is to let every letter set its own step size Δ, and with it
+the keep factor a = e^{ΔA} and the write strength b ≈ Δ·B. A small Δ is a
+glance: the memory stays, the letter barely registers. A large Δ is a long
+look: the old memory fades and this letter is written in strongly. One dial
+controls both. Δ, B (what to write) and C (what to read) are all computed
+from the current letter: that is what **selective** means.
+
+The numbers make the case. Give the model the rule "long look at a G,
+glance at everything else", and ask how much of the G's memory is left at
+the first C. With a three-letter loop: fixed a = 0.5 keeps 6 %, fixed
+a = 0.9 keeps 66 %, the selective rule 96 %. With a twelve-letter loop: 0 %,
+25 % and 88 %.
+
+### 6.5 Running in parallel: the scan
+
+Selection has a price: every letter now has its own echo, so the
+convolution shortcut is gone, and stepping through 256 letters one at a
+time wastes a GPU. The rescue is an observation about the update: each step
+is "multiply by a, add u", and two such steps combine into one step of the
+same form, (a₂a₁, a₂u₁ + u₂). The combination doesn't care how you group
+it, so the GPU can combine neighbours in pairs, then pairs of pairs, like a
+team totalling a long receipt: 256 letters in 8 rounds. That is the
+**parallel scan**. Mamba's other trick is to keep all the intermediate
+states in the GPU's small fast memory and recompute them for the backward
+pass rather than store them.
+
+### 6.6 Inside a Mamba-2 layer, and the grid it hides
+
+A real layer wraps the scan in four other parts: an input projection that
+makes, for every position, the signal, the gate, B, C and Δ; a short
+convolution that lets each position see its three previous neighbours; the
+selective scan itself (12 heads of 64 channels, each channel with a
+128-number state); and a gate followed by a normalisation and an output
+projection. There is no separate MLP: the gate does that job. At width 384 a
+layer holds **993,572** parameters, 56 % of a Transformer block's 1,771,008.
+
+Mamba-2 (2024) made one simplification, a single keep factor per head, and
+got a remarkable result for it: the whole layer can be written as a grid,
+like attention's. The output at position t is a sum over earlier positions
+s of (C_t · B_s) × (the product of all keep factors between s and t) ×
+Δ_s x_s. C·B plays query·key. Mamba-2 computes this grid in chunks with fast
+matrix multiplications and never stores it. But it is a constrained grid:
+it looks one way only; it has no softmax, so positions don't compete for
+attention and one partner can't be singled out sharply; the weight between
+two letters is multiplied by every keep factor in between; and the whole
+grid is built from 128-number vectors, so it can't hold arbitrary patterns.
+
+### 6.7 Two directions: BiMamba, and the padding trap
+
+A diffusion denoiser needs both sides of a hidden letter. Hide the first G
+of `GGGAAACCC` and its best evidence, its partner, is the last C, eight
+letters to the right; a left-to-right reader at position 1 has seen nothing
+yet. So each BiMamba layer runs two scans, one each way, and adds them. Our
+two directions share the big input and output projections (almost 99 % of
+the parameters) and each has its own short convolution, step-size bias,
+keep factors and skip, because RNA is directional: a GC stack is worth −3.40
+kcal/mol and a CG stack, the same letters reversed, −2.40 (D-016).
+
+One implementation detail is worth telling. Batches are padded at the right
+end. Flip a whole padded row and the padding comes first in the backward
+scan, which has no mask to skip it, so padding would be written into every
+real letter's state. BiMamba reverses each sequence **within its own
+length** instead, and a test shows that padding cannot change any real
+output. Another test compares the fast GPU code with a step-by-step loop of
+the textbook equations, each sequence processed alone; and to check that
+the tests can fail at all, the code was broken on purpose twice, and both
+bugs were caught.
+
+### 6.8 The left-to-right Mamba, and why three models
+
+The third model is Mamba used as it was designed: a left-to-right model
+that predicts each next letter, trained with ordinary cross-entropy, whose
+likelihood is exact rather than a bound. It samples one letter at a time,
+and to receive the same lengths as the diffusion models it is forbidden to
+stop early and forced to stop on time.
+
+The three models form two controlled comparisons. Transformer against
+BiMamba, both diffusion models, changes only the backbone. BiMamba against
+the left-to-right Mamba, same kind of layers, changes only the order of
+generation, which tests Phase 2's claim that left to right is awkward for
+RNA.
+
+### 6.9 The scientific question, stated precisely
+
+Attention can look a partner up directly, in one hop, with a softmax that
+can pick one position out of 256, and distance costs it nothing. BiMamba
+gives each position a summary of its left and one of its right, in which
+everything decays through whatever lies between.
+
+The twist is that at our lengths the summary isn't small. A typical RNA of
+about 95 letters makes attention store about 73,000 numbers per layer (keys
+and values); one Mamba-2 direction stores 98,304 regardless of length. So
+the question is not how much memory, but how it is used: attention looks
+things up by content after it knows what it needs; Mamba decides what to
+write when a letter is read, before it knows which later letter will ask.
+
+RNA sharpens this. Base pairs nest like brackets, and checking brackets from
+left to right needs a stack: every open bracket must be carried until its
+partner comes. Published work shows state-space models are weaker than
+attention at exact recall. Against that, Mamba's sense of order suits local
+structure, bidirectional Mamba models are competitive on DNA, and our
+Transformer has not used its grid for pairing anyway. The honest prior is
+uncertainty. My written expectation before any run: no detectable
+difference, attention slightly ahead if anything.
+
+### 6.10 Matching size fairly
+
+*(Completed when D-015 is decided: matching parameters by depth, 14 Mamba
+layers at the Transformer's width, or by width, 8 wider layers.)*
+
 ## Part 7 — Steering the model toward a target shape  *(Phase 5)*
 
 ## Part 8 — Results, and what they mean  *(Phases 4–5)*
