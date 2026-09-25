@@ -1968,4 +1968,152 @@ script refuses to start a model outside the ±2 % window.
 
 ## Part 9 — Limitations, and what we'd do with more compute
 
+*(Drafted 2026-09-25 from what is already known; the result-dependent
+limitations of Phases 4–5 are added when the results exist.)*
+
+Being able to list your own project's weaknesses before anyone asks is one
+of the strongest things you can do in a research interview. Here they are,
+grouped by where they come from.
+
+**What we can measure at all.**
+- Everything is judged by folding programs, not by experiments. "Designed"
+  means "ViennaRNA predicts it folds into the target"; no molecule was ever
+  made.
+- Only nested secondary structure: no pseudoknots, no 3D shape, no
+  interactions with proteins or other RNAs. RNAs whose function depends on
+  those are outside our claims.
+- The two oracles disagree often: even for real RNA they predict the
+  identical structure only 13 % of the time. Agreement between them is
+  evidence, not truth.
+
+**What the data covers.**
+- Only RNAs up to 256 letters from families whose typical member is that
+  short: ribosomal RNAs and 184 other long families are out of scope, which
+  is also where Mamba's speed advantage would matter.
+- Rfam members are found by a model, so a few family labels are wrong, and
+  families are capped at 1,000 members, so the model learns what families
+  look like, not how common each is.
+- One frozen split plus one replication split. More splits would say how much
+  the conclusions depend on which families land in the test set.
+
+**What our models can learn.**
+- Every model overfits after three to four passes over the data, with a
+  floor near 1.90 bits per letter on unseen families. The limit is the
+  number of distinct families (about 3,000), not the number of sequences.
+- The Transformer baseline learned how RNA letters look far better than how
+  RNA folds: its samples hold their shape no better than random letters.
+
+**What our statistics can detect.**
+- Five trained models per architecture can only detect differences of about
+  three seed standard deviations (≈ 0.008 bits per letter, ≈ 0.04 in
+  "beats its shuffles"). Smaller real differences would come back as "not
+  detectable", which is not the same as "equal".
+- The family-bootstrap interval for likelihood differences does not include
+  training-seed variation; only the seed-level test supports claims.
+
+**What compute allowed.**
+- One model size (14 M parameters) on one 8 GB laptop GPU; no scaling study.
+  With more compute: several sizes per architecture, to see whether the
+  comparison changes with scale.
+- The Mamba comparison runs at lengths (≤ 256) where Mamba has no speed
+  advantage; a long-RNA study would test the regime Mamba was designed for.
 ## Part 10 — Every design decision, with its alternatives
+
+*(Drafted 2026-09-25 from DECISIONS.md D-001 to D-016; extended as new
+decisions are made. Each entry: the question, what we chose, the strongest
+alternative and why we didn't take it, and the price we accepted. The full
+records, with every alternative, are in DECISIONS.md.)*
+
+Interviewers rarely ask what a line of code does. They ask "why this and not
+that?". Here are the answers, in the order the project met the questions.
+
+**What counts as "structure"? (D-001)** We work with secondary structure:
+which letters pair, written in dot-bracket, without pseudoknots (crossing
+pairs). The tempting alternative is 3D structure, which is what the molecule
+really does, but 3D prediction for RNA is slow and unreliable, and our
+question compares generators under one fixed evaluation, which doesn't need
+3D. Pseudoknots were dropped because forbidding crossing pairs is what makes
+exact folding fast (the problem splits into independent pieces). The price:
+any RNA whose job depends on a pseudoknot is outside what we can design or
+judge, and "success" always means "the folding program predicts the target",
+never a lab result.
+
+**Where does the code live? (D-002, D-003)** Inside Linux's own disk under
+WSL2, backed up to GitHub, with software from conda-forge/bioconda pinned in
+`environment.yml`. The alternative, a OneDrive folder on Windows, would make
+every file access cross a slow bridge and let two sync systems fight over
+Git's files. The price: everything lives in one virtual disk, so pushing to
+GitHub after every session is not optional (a Linux reinstall deleted it
+once).
+
+**Which PyTorch? (D-004)** Version 2.10 with CUDA 12.8, four versions behind
+the newest, chosen in Phase 1 for Phase 4's sake: the prebuilt Mamba kernels
+exist only up to 2.10, and all three models must train on the same software.
+Upgrading later would have put the baseline and the Mamba models on
+different stacks. It paid off: the kernels installed from the authors'
+wheels (building them ourselves is impossible here: no CUDA compiler).
+
+**Which data? (D-005)** Rfam, because it labels every sequence with its
+family, and an honest test set must contain families the model never saw.
+bpRNA has structures but no family labels, so it can't be split honestly
+(published models look good on its identity-filtered test set and drop on
+new families). Downloads are pinned to exact versions and checksummed, so
+the numbers stay reproducible.
+
+**How to turn letters into numbers? (D-006)** One token per nucleotide, eight
+tokens in all. Three-letter tokens would make sequences shorter, but pairing
+and masking both act on single letters, and a three-letter token can
+straddle a stem and a loop.
+
+**How to clean? (D-007)** Drop Rfam's duplicate copy (every row appears twice;
+the copy's family label would have leaked every family into every split),
+keep A/C/G/U only, cap length at 256, drop families whose typical member is
+longer than 256 **before** filtering single sequences (otherwise 83,525
+fragments of long RNAs survive the cap), and keep at most 1,000 members per
+family. The price: 185 long families, all ribosomal RNAs among them, are out
+of scope.
+
+**How to split? (D-008, D-009)** By clan (a group of related families), else
+by family, then remove held-out sequences that still look like a training
+relative, first by letters (MMseqs2), then by Rfam's own structure-aware
+family models (Infernal). A random split would put a close relative of 89.6 %
+of test sequences into training. An identity-only split misses relatives
+that kept the shape but changed letters. Result: 99 % of test sequences have
+no detectable training relative.
+
+**Which denoiser, and why markers? (D-010)** A standard pre-norm Transformer
+with rotary positions and no time input, framed with start and end markers.
+Without markers, an all-masked input gives every position the same output
+(measured: 2.11 bits without them, 1.58 with them on a memorisation test),
+so the model can't tell where the molecule begins or ends, exactly where
+generation starts.
+
+**How to size and tune fairly? (D-011, D-012, amendment A1)** One size (14.2 M
+parameters) that fits the 8 GB card with headroom; batches counted in
+letters, not sequences; learning rate and dropout chosen by sweeps whose
+rules were written before any result, with a boundary rule (extend the grid
+while the winner sits on its edge) and a divergence rule (a run whose loss
+blows up ranks last). The alternative, tuning by eye, would give whichever
+model we tune longer an unfair edge. The same rules apply to every backbone.
+
+**How to judge a model's RNA? (D-013, D-014)** Graded ensemble measures (the
+ensemble defect) rather than the pass/fail "predicted shape equals target";
+structure beyond chance by comparison with shuffles of the same letters (so
+GC-rich junk can't win); every number next to real, shuffled and random
+references of the same lengths; a second, independent folding program; five
+trained models per architecture compared with an exact seed-level test,
+because more samples from one model say nothing about the architecture;
+T = 1.0 and 256 steps for everyone. All of it frozen, in writing and in
+code, before any Mamba model existed.
+
+**How to match size? (D-015)** By depth: the Transformer's width, 14 Mamba
+layers. Matching by width (keep 8 layers, widen them) can't land inside the
+2 % window at standard settings and would change two things at once. The
+price is time: BiMamba takes 2.9× longer per step.
+
+**How to make Mamba see both ways? (D-016)** Two scans per layer, sharing the
+big projections, each direction with its own convolution and scan settings,
+outputs added; each sequence reversed within its own length so padding
+never leaks. Two complete mixers per layer would halve the depth; one mixer
+for both directions ignores that RNA is directional (a GC stack is worth
+−3.4, a CG stack −2.4 kcal/mol).
