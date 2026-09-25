@@ -810,6 +810,50 @@ architecture says nothing about the architecture.
 
 ---
 
+## D-015 — Match the Mamba models' parameters to the Transformer by depth, not by width
+**Date:** 2026-09-25   **Phase:** 4   **Logbook:** logbook/2026-09-25-session-05.md (14:40, 19:18)
+**Status:** accepted (Chirag's decision, after concept instalment 3 and the measurements)
+
+**Context.** The frozen protocol (P4) requires every compared model to hold
+14,174,976 ± 2 % parameters. A Mamba-2 layer at the Transformer's width (384)
+holds 993,572 parameters, 56 % of a Transformer block (1,771,008), so the
+Mamba models must be deeper or wider than the Transformer.
+
+**Decision.** Match by depth: width 384 as the Transformer, 14 Mamba layers
+for both Mamba models, library-default Mamba-2 settings (head size 64, state
+128, expansion 2, convolution width 4). BiMamba 14,010,608 parameters
+(−1.16 %), AR Mamba 13,927,672 (−1.74 %). Enforced in code: `train.py`
+refuses any run outside ±2 % (`check_parameter_budget`).
+
+**Alternatives rejected.**
+- *Match by width* (keep 8 layers, widen each). No standard setting lands
+  inside ±2 %: widths move in steps of about 5.8 % of the target when heads
+  must stay whole. BiMamba fits only at d 512 with head size 32 (−1.94 %);
+  the AR model only at d 528 with head size 32 **and** state 64 (−0.27 %). The
+  two Mamba models would end up with different state sizes, and both would
+  differ from the Transformer in width as well as in mixing: two changes at
+  once. Measured advantage: 15–25 % faster for BiMamba, 6–8 % for AR Mamba.
+- *Exact matching by fractional tricks* (e.g. a non-integer expansion or an
+  extra partial layer): non-standard architectures no one else uses, for a
+  gain inside the tolerance the protocol already allows.
+
+**Why depth** (the reasons given with the recommendation, which Chirag chose over width). It fits the ±2 % window
+at standard settings for both Mamba models; it changes one thing only (same
+width, embedding, head and per-position vector as the Transformer); it
+follows the Mamba papers' own convention (two Mamba layers per Transformer
+block at equal width), so our numbers compare with published ones.
+
+**Consequences / trade-offs accepted.** Slower training per step:
+depth-matched BiMamba 465 ms vs the Transformer's 162 ms at L 256 (646 vs
+153 at L 64), AR Mamba 239 ms (RESULTS.md, "Memory and speed of the full
+Phase 4 models"). The protocol matches steps and tokens, not wall-clock, so
+this costs time, not fairness: ≈ 70 GPU-hours for the Mamba models' part
+of P4. Fourteen layers mean fourteen chances for information to cross the
+sequence, against the Transformer's eight; that difference is part of what
+"a Mamba backbone at matched size" means, and is reported as such.
+
+---
+
 ## D-016 — How the Mamba models are built: shared projections, per-direction scans, everything else as the Transformer
 **Date:** 2026-09-25   **Phase:** 4   **Logbook:** logbook/2026-09-25-session-05.md (14:40, 14:50–15:32)
 **Status:** accepted (my choice within the build, explained to Chirag in concept instalment 3; open to his veto)

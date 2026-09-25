@@ -1924,8 +1924,43 @@ difference, attention slightly ahead if anything.
 
 ### 6.10 Matching size fairly
 
-*(Completed when D-015 is decided: matching parameters by depth, 14 Mamba
-layers at the Transformer's width, or by width, 8 wider layers.)*
+The protocol says every model must have the Transformer's 14,174,976
+parameters, give or take 2 %. A Mamba-2 layer of the same width has only
+56 % of a Transformer block's parameters, so the Mamba models must be either
+deeper or wider. Think of a fixed budget for a kitchen: more cooks of the
+same kind (depth), or the same number of cooks at bigger stations (width).
+
+We chose **depth** (D-015): the Transformer's width of 384, and 14 Mamba
+layers for both Mamba models, which gives 14,010,608 parameters for BiMamba
+(−1.16 %) and 13,927,672 for the left-to-right model (−1.74 %), at the
+library's standard settings. Width could not do that: no standard setting
+lands inside the window (widths move in steps of about 6 % of the budget),
+and the two Mamba models would each have needed a different non-standard
+tweak, one of them a halved state. Depth also changes only one thing (the
+mixing layers; embedding, output and vector width stay the Transformer's),
+and it is the convention the Mamba papers themselves use: two Mamba layers
+per Transformer block, at the same width.
+
+The price is time, not fairness. Measured per training step at our batch,
+BiMamba takes 465 ms against the Transformer's 162 (at 256 letters), the
+left-to-right Mamba 239. Every model trains for the same number of steps on
+the same batches, so the comparison stays fair; the Mamba part of the
+protocol costs about 70 GPU-hours. A surprise from the same measurement:
+Mamba gets *slower* per letter on short sequences, because every sequence
+carries a full-size state however short it is. A state-space model pays per
+sequence as well as per letter.
+
+### 6.11 How we know the implementation is right
+
+Fast GPU code is easy to get subtly wrong, so three checks stand behind it.
+A test runs the fused kernels and, separately, a plain step-by-step loop of
+the textbook equations, on each sequence alone, and requires the same
+answer. A second test requires that padding cannot change any real output,
+and a third that the left-to-right model's output at a position cannot
+depend on later letters. Then the code was broken on purpose (reversing
+whole padded rows; normalising before the gate), and the tests caught every
+bug. Finally, the protocol's size rule is enforced in code: the training
+script refuses to start a model outside the ±2 % window.
 
 ## Part 7 — Steering the model toward a target shape  *(Phase 5)*
 
