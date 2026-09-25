@@ -255,7 +255,24 @@ sequences.
 **Likely follow-up:** "Why so close to 2?" → Different RNA families share
 almost no sequence, and the information is mostly in which positions pair,
 not in which letters appear. A model has to learn "grammar", not vocabulary.
-**Source:** RESULTS.md, Phase 2 reference points.
+**Say it on the right scale** *(added session 05, after Chirag asked whether
+1.9 "seems shit")*: read the gaps, not the value. Bits add up along the
+sequence: 0.094 bits/nt below "know nothing" is 9.4 bits over a 100-letter
+RNA, so the model finds a real, never-seen RNA about **2⁹·⁴ ≈ 670× more
+probable than random letters**; the best counting model manages 2³·⁴ ≈ 10×.
+That's **2.8× the information** of the k-mer model. The capacity is there:
+on its own training families the same model reaches 1.615 bits (1.41 when
+trained longer), so the limit is generalising to new families, not the
+network. And a leaky random split would flatter a trivial 8-mer memoriser
+to 1.817.
+**Likely follow-up:** "Both of your architectures got about 1.9. So what?"
+→ Then the backbone doesn't change how well letter statistics transfer to
+new families, reported as "no detectable difference with 5 seeds". Likelihood
+is one of three primary endpoints; the question that matters for design is
+whether the RNA holds a shape (E2, E3), where the baseline is at
+random-letter level. The honest limitation: ≈ 3,000 families is little
+data; more families would likely lower the number.
+**Source:** RESULTS.md, Phase 2 reference points; logbook 2026-09-25 session 05.
 
 ### Q: Does your baseline actually generate RNA-like molecules?
 **Draft answer:** Partly, and I measured exactly which part. The samples are
