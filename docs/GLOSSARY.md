@@ -790,7 +790,7 @@ Sections: Biology · Machine learning · Maths · Software.
 - **First explained:** session 05, instalment 3.
 
 ### Associative recall
-- **Definition:** Finding the item that was stored together with a cue seen earlier ("which letter sat opposite this one?"). Published tests show state-space models are weaker at exact recall and copying than attention (Arora et al. 2023; Jelassi et al. 2024).
+- **Definition:** Finding the item that was stored together with a cue seen earlier ("which letter sat opposite this one?"). Models with a fixed-size state are provably limited at copying from context, and Mamba is measurably weaker at it than attention (Jelassi et al. 2024); attention-free gated-convolution models lose to attention mostly on this kind of recall (Arora et al. 2023, "Zoology"). References: docs/REFERENCES.md.
 - **Analogy:** Remembering which coat belongs to which cloakroom ticket.
 - **Where it appears:** Why Phase 4's question is open: base pairing looks like recall.
 - **First explained:** session 05, instalment 3.

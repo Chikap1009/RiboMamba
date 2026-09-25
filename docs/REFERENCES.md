@@ -106,3 +106,18 @@ publishing**, as §3.3 requires: preprints move fast.
 | Huang, K., Yang, Y., Fu, K., Chu, Y., Cong, L., Wang, M. (2024). Latent Diffusion Models for Controllable RNA Sequence Generation. arXiv:2409.09828 | continuous latent diffusion for RNA (a different family) | 2026-09-25, arXiv abstract page |
 | Gautam, M., Dai, N., Zhou, T., Xie, B., Mathews, D., Huang, L. (2026). Designing RNAs with Language Models. arXiv:2602.12470 | structure-to-sequence design by an autoregressive model + reinforcement learning: a Phase 5 baseline class | 2026-09-25, arXiv abstract page |
 | Cazenave, T. (2026). The Montparnasse Algorithm for RNA Design. arXiv:2606.07562 | Monte Carlo search design (Eterna100): a Phase 5 baseline class | 2026-09-25, arXiv abstract page |
+
+## Phase 5 — guidance and steering (candidates, not decisions)
+
+Found 2026-09-25 while preparing Phase 5; the methods compared in Phase 5 are
+fixed by a dated protocol amendment after the Phase 5 concept block.
+
+| reference | relevance | verified |
+|---|---|---|
+| Ho, J., Salimans, T. (2022). Classifier-Free Diffusion Guidance. arXiv:2207.12598 | classifier-free guidance: train with the condition sometimes dropped, mix conditional and unconditional predictions at sampling | 2026-09-25, search result → arXiv |
+| Schiff, Y., et al. (2025). Simple Guidance Mechanisms for Discrete Diffusion Models. *ICLR 2025*. arXiv:2412.10193 | classifier-free and classifier-based guidance derived for discrete (incl. masked) diffusion | 2026-09-25, search result → ICLR proceedings page |
+| Nisonoff, H., Xiong, J., Allenspach, S., Listgarten, J. (2024). Unlocking Guidance for Discrete State-Space Diffusion and Flow Models. arXiv:2406.01572 | principled guidance for discrete state spaces (continuous-time Markov chains); DNA and protein examples | 2026-09-25, search result → arXiv |
+| Li, X., et al. (2024). Derivative-Free Guidance in Continuous and Discrete Diffusion Models with Soft Value-Based Decoding (SVDD). arXiv:2408.08252 | steering a pretrained diffusion model with a non-differentiable reward, no fine-tuning; demonstrated on DNA/RNA | 2026-09-25, search result → arXiv |
+| Reward-Guided Discrete Diffusion via Clean-Sample Markov Chain for Molecule and Biological Sequence Design (2026). arXiv:2602.09424 | Metropolis–Hastings over clean samples; masked diffusion; needs only rewards of complete sequences | 2026-09-25, search result → arXiv; authors to add |
+| Self-Rewarding Sequential Monte Carlo for Masked Diffusion Language Models (2026). arXiv:2602.01849 | particle filtering (SMC) for masked diffusion | 2026-09-25, search result → arXiv; authors to add |
+| Commitment Before Realization: When Classifier-Free Guidance Becomes Unnecessary in Masked Diffusion Language Models (2026). arXiv:2608.08082 | a caution about classifier-free guidance in masked diffusion, to read before choosing it | 2026-09-25, title from a search result only; to read |
