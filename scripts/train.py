@@ -51,6 +51,8 @@ def parse_args() -> argparse.Namespace:
     p.add_argument("--grad-clip", type=float, default=1.0)
     p.add_argument("--ema-decay", type=float, default=0.9999)
     # data
+    p.add_argument("--data-dir", default="data/processed",
+                   help="split to train on, relative to the repo root (data/processed_split1 = replication split, P4)")
     p.add_argument("--max-tokens", type=int, default=16384, help="padded token slots per batch")
     p.add_argument("--num-workers", type=int, default=2)
     # bookkeeping
@@ -163,10 +165,11 @@ def main() -> None:
         (run_dir / "config.json").write_text(json.dumps(cfg, indent=2))
     print(json.dumps(cfg, indent=2))
 
+    data_dir = REPO_ROOT / cfg.get("data_dir", "data/processed")          # runs before Phase 4 had no choice
     train_loader = make_dataloader("train", max_tokens=cfg["max_tokens"], shuffle=True, add_bos=True,
-                                   add_eos=True, num_workers=cfg["num_workers"], seed=cfg["seed"])
+                                   add_eos=True, num_workers=cfg["num_workers"], seed=cfg["seed"], data_dir=data_dir)
     val_loader = make_dataloader("val", max_tokens=cfg["max_tokens"], shuffle=False, add_bos=True,
-                                 add_eos=True, num_workers=cfg["num_workers"], seed=cfg["seed"])
+                                 add_eos=True, num_workers=cfg["num_workers"], seed=cfg["seed"], data_dir=data_dir)
     g = torch.Generator(device=device).manual_seed(cfg["seed"] + step)   # masks and t during training
 
     log_file = open(run_dir / "log.csv", "a", newline="")

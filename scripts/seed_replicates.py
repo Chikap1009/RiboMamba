@@ -19,7 +19,7 @@ import argparse
 import json
 
 from ribomamba.paths import REPO_ROOT
-from ribomamba.sweeps import best_val_ema, run_to_completion
+from ribomamba.sweeps import best_val_ema, run_to_completion, settings_from_config
 
 
 def main() -> None:
@@ -30,12 +30,7 @@ def main() -> None:
     summary = json.loads((REPO_ROOT / "checkpoints" / f"{args.prefix}_dropout_summary.json").read_text())
     base = summary["chosen_run"]
     cfg = json.loads((REPO_ROOT / "checkpoints" / base / "config.json").read_text())
-    settings = ["--lr", str(cfg["lr"]), "--dropout", str(cfg["dropout"]), "--warmup-steps", str(cfg["warmup_steps"]),
-                "--eval-every", str(cfg["eval_every"]), "--d-model", str(cfg["d_model"]),
-                "--n-layers", str(cfg["n_layers"]), "--n-heads", str(cfg["n_heads"]),
-                "--min-lr-ratio", str(cfg["min_lr_ratio"]), "--weight-decay", str(cfg["weight_decay"]),
-                "--beta2", str(cfg["beta2"]), "--grad-clip", str(cfg["grad_clip"]),
-                "--ema-decay", str(cfg["ema_decay"]), "--max-tokens", str(cfg["max_tokens"])]
+    settings = settings_from_config(cfg)     # the whole recipe, architecture included (Phase 4 backbones too)
     results = {0: best_val_ema(base)}
     for seed in args.seeds:
         name = f"{base}_seed{seed}"
