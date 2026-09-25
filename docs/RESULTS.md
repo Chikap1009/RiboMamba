@@ -245,6 +245,34 @@ since none of the Transformer's 13 training runs diverged. Code:
 `scripts/train.py`; tests in `tests/test_sweeps.py`; checked end to end by a
 deliberately diverging debug run (logbook 2026-09-25).
 
+### Amendment A2 — 2026-09-26: the boundary rule may not stop at the end of a finite list
+
+**Why.** Rule 2b (D-011, and the docstring of `scripts/lr_sweep.py`) says:
+while the winner is the smallest or largest value tried, add the next value
+on the half-decade grid in that direction and re-apply the rule, "repeat
+until the winner is interior". The code held the grid as a finite list that
+ended at 10⁻² (and the dropout grid at 0.4), and when a winner reached the
+end of the list it stopped quietly. BiMamba's sweep hit exactly that:
+3×10⁻⁴ 1.9265, 10⁻³ 1.9184, 3×10⁻³ 1.9124, then 10⁻² 1.9086, still the
+largest value tried, and the code declared 10⁻² the winner and started the
+dropout sweep. That contradicts the written rule, which requires 3×10⁻².
+
+**Amendment.** The learning-rate grid now runs from 10⁻⁶ to 1 and the dropout
+grid to 0.7, and reaching either end **raises an error** instead of stopping
+(`ribomamba/sweeps.py`, `next_candidate`). The BiMamba sweep resumes with
+3×10⁻² as the written rule requires. The dropout run that had started at
+10⁻² (step 2,400, no checkpoint, no validation result) was stopped and set
+aside (`checkpoints/bimamba_M_do0_aborted_lrcap`).
+
+**Conditions (P1.4).** Mechanical (it restores the written rule; no
+judgement); identical for every backbone; it changes no existing result:
+replaying the Transformer's sweep through the new code gives the same
+choice (tested), because its winner was at the lower edge far from the list's
+end. Made after 10⁻² was seen to win, but the rule it enforces was written
+on 2026-09-24, before any Mamba run, and it affects only results that did
+not exist yet (the 3×10⁻² candidate and the dropout sweep). Tests:
+`tests/test_sweeps.py` (4 new).
+
 ### Clarification C1 — 2026-09-25: which trained model gives each temperature curve
 
 P5's secondary temperature curve is computed "for every model". In this

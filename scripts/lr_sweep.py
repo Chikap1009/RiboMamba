@@ -25,9 +25,11 @@ import argparse
 import json
 
 from ribomamba.paths import REPO_ROOT
-from ribomamba.sweeps import final_val_ema, pick_lowest, run_to_completion
+from ribomamba.sweeps import final_val_ema, next_candidate, pick_lowest, run_to_completion
 
-GRID = [3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2]     # half-decade steps (x ~3.16 between neighbours)
+# Half-decade steps (x ~3.16 between neighbours). Wide on purpose: the first version ended at 1e-2 and
+# silently stopped rule 2b there (amendment A2); now running off either end raises instead.
+GRID = [1e-6, 3e-6, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2, 1e-1, 3e-1, 1.0]
 CANDIDATE_LRS = [3e-4, 1e-3, 3e-3]              # where every sweep starts
 SWEEP_STEPS, SWEEP_WARMUP = 8000, 1000
 FULL_STEPS, FULL_WARMUP, FULL_EVAL_EVERY = 200_000, 2000, 5000
@@ -51,13 +53,10 @@ def main() -> None:
             results[lr] = final_val_ema(name)
             print(f"lr {lr:g}: final validation {results[lr]:.4f} bits/nt (EMA)", flush=True)
         best = pick_lowest(results)                      # a diverged candidate (+inf) never wins
-        i = GRID.index(best)
-        if best == min(tried) and i > 0:                  # rule 2b: winner on the lower edge
-            tried.insert(0, GRID[i - 1])
-        elif best == max(tried) and i < len(GRID) - 1:    # rule 2b: winner on the upper edge
-            tried.append(GRID[i + 1])
-        else:
+        extra = next_candidate(best, tried, GRID)         # rule 2b: winner on an edge -> its next neighbour
+        if extra is None:
             break
+        tried.append(extra)
 
     summary = {"rule": "lowest final validation bits/nt (EMA) after the sweep run; "
                        "extend the grid while the winner is on its edge",

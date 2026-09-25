@@ -24,9 +24,9 @@ import argparse
 import json
 
 from ribomamba.paths import REPO_ROOT
-from ribomamba.sweeps import best_val_ema, pick_lowest, run_to_completion
+from ribomamba.sweeps import best_val_ema, next_candidate, pick_lowest, run_to_completion
 
-GRID = [0.0, 0.1, 0.2, 0.3, 0.4]
+GRID = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]      # wider than any plausible winner; the end raises (A2)
 CANDIDATES = [0.0, 0.1, 0.2]
 STEPS, WARMUP, EVAL_EVERY = 30_000, 1000, 2500
 
@@ -49,11 +49,10 @@ def main() -> None:
             results[rate] = best_val_ema(name)
             print(f"dropout {rate:g}: best validation {results[rate]:.4f} bits/nt (EMA)", flush=True)
         best = pick_lowest(results)                      # a diverged candidate (+inf) never wins
-        i = GRID.index(best)
-        if best == max(tried) and i < len(GRID) - 1:       # winner on the upper edge: extend
-            tried.append(GRID[i + 1])
-        else:
+        extra = next_candidate(best, tried, GRID, extend_down=False)   # 0 has no lower neighbour
+        if extra is None:
             break
+        tried.append(extra)
 
     summary = {"rule": "lowest best-during-run validation bits/nt (EMA); extend while the winner is the largest rate",
                "lr": lr, "steps": STEPS, "results": {f"{k:g}": results[k] for k in sorted(results)},

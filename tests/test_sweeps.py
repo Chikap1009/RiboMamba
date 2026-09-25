@@ -76,3 +76,35 @@ def test_divergence_does_not_stop_a_sweep_but_a_crash_does(tmp_path, monkeypatch
     monkeypatch.setattr(sweeps, "train", train_that_fails(1))
     with pytest.raises(subprocess.CalledProcessError):
         sweeps.run_to_completion("crash_run", 8000, "--lr", "1e-3")
+
+
+LR_GRID = [1e-6, 3e-6, 1e-5, 3e-5, 1e-4, 3e-4, 1e-3, 3e-3, 1e-2, 3e-2, 1e-1, 3e-1, 1.0]
+
+
+def test_boundary_rule_replays_the_transformer_sweep_unchanged():
+    # tf_M: 3e-4 won on the lower edge -> 1e-4 added -> 3e-4 interior -> stop (RESULTS.md, D-011)
+    tried = [3e-4, 1e-3, 3e-3]
+    assert sweeps.next_candidate(3e-4, tried, LR_GRID) == 1e-4
+    assert sweeps.next_candidate(3e-4, tried + [1e-4], LR_GRID) is None
+
+
+def test_boundary_rule_keeps_going_past_the_old_grid_end():
+    # bimamba_M: 3e-3 won -> 1e-2 added -> 1e-2 won, still the largest tried. The first grid ended at
+    # 1e-2 and stopped here silently; the written rule says try 3e-2 (amendment A2).
+    assert sweeps.next_candidate(3e-3, [3e-4, 1e-3, 3e-3], LR_GRID) == 1e-2
+    assert sweeps.next_candidate(1e-2, [3e-4, 1e-3, 3e-3, 1e-2], LR_GRID) == 3e-2
+    assert sweeps.next_candidate(1e-2, [3e-4, 1e-3, 3e-3, 1e-2, 3e-2], LR_GRID) is None   # now interior
+
+
+def test_running_off_the_grid_raises_instead_of_stopping_quietly():
+    with pytest.raises(RuntimeError, match="top of the grid"):
+        sweeps.next_candidate(1.0, [0.1, 0.3, 1.0], LR_GRID)
+    with pytest.raises(RuntimeError, match="bottom of the grid"):
+        sweeps.next_candidate(1e-6, [1e-6, 3e-6, 1e-5], LR_GRID)
+
+
+def test_dropout_rule_extends_upward_only():
+    grid = [0.0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7]
+    assert sweeps.next_candidate(0.0, [0.0, 0.1, 0.2], grid, extend_down=False) is None    # 0 is a floor
+    assert sweeps.next_candidate(0.2, [0.0, 0.1, 0.2], grid, extend_down=False) == 0.3
+    assert sweeps.next_candidate(0.1, [0.0, 0.1, 0.2], grid, extend_down=False) is None

@@ -42,6 +42,26 @@ def best_val_ema(run_name: str) -> float:
     return min(float(r["val_bits_ema"]) for r in eval_rows(run_name))
 
 
+def next_candidate(best, tried: list, grid: list, extend_down: bool = True):
+    """Rule 2b (D-011, D-012): the next value to try, or None when the winner is interior.
+
+    While the winner is the largest value tried, try the next grid value above it; while it is the
+    smallest (and extend_down), the next below. Running off either end of the grid raises instead of
+    stopping quietly: the written rule says "repeat until the winner is interior", and a silent stop
+    at the grid's end would break it (amendment A2, 2026-09-26: the first grids ended at 1e-2 and 0.4).
+    """
+    i = grid.index(best)
+    if extend_down and best == min(tried):                  # winner on the lower edge
+        if i == 0:
+            raise RuntimeError(f"winner {best} is the bottom of the grid {grid}: extend the grid, don't stop")
+        return grid[i - 1]
+    if best == max(tried):                                  # winner on the upper edge
+        if i == len(grid) - 1:
+            raise RuntimeError(f"winner {best} is the top of the grid {grid}: extend the grid, don't stop")
+        return grid[i + 1]
+    return None                                             # interior: the rule is satisfied
+
+
 def pick_lowest(results: dict) -> object:
     """The setting with the lowest value; refuse if every candidate diverged (nothing to choose)."""
     if all(v == float("inf") for v in results.values()):

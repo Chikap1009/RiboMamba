@@ -623,6 +623,15 @@ the same reasons as the boundary rule: mechanical, symmetric, and it changes
 no Transformer result (none diverged). Recorded in the frozen protocol as
 amendment A1 (RESULTS.md).
 
+**Amendment, 2026-09-26 (session 05) — rule 2b really repeats until the
+winner is interior.** The code's grid ended at 10⁻², and when BiMamba's
+winner reached it (10⁻² at 1.9086, the largest value tried) the sweep stopped
+quietly instead of trying 3×10⁻² as this rule's text requires. The grids are
+now wide (learning rate 10⁻⁶…1, dropout 0…0.7) and running off either end
+raises. A bug fix that restores the written rule, identical for every
+backbone, changing no Transformer result (tested by replaying its sweep).
+Amendment A2 in RESULTS.md.
+
 ---
 
 ## D-012 — Regularise with dropout, chosen by a pre-registered sweep over shorter full schedules
