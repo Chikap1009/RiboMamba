@@ -223,6 +223,28 @@ scripts/check_oracle_overlap.py --split test` at `67687ed`: exact matches
 **0 of 56,873** (validation: 0.30 %, all tRNA; tRNA sits in validation, not
 test). The second oracle has seen nothing related to the test set.
 
+### Amendment A1 — 2026-09-25: a diverged tuning run ranks last
+
+**Why.** The tuning rules P4 refers to (D-011: lowest final validation
+bits/nt; D-012: lowest best-during-run value) assume every candidate
+finishes its schedule. A candidate learning rate can instead make training
+diverge (the training loss becomes inf or nan). The code then stopped with
+an error, which would halt an unattended Phase 4 queue, and the rules did
+not say how such a candidate ranks.
+
+**Amendment.** A run whose training loss becomes non-finite is recorded as
+diverged (a `DIVERGED` file in its checkpoint folder, with the step) and
+stops. In a sweep it ranks last (value +∞), whatever it reached before
+diverging, because it did not complete its schedule; the sweep continues.
+If every candidate of a sweep diverges, the sweep stops with an error.
+
+**Conditions (P1.4).** Mechanical; identical for every model; made before
+any Phase 4 (Mamba) training run exists; it changes no existing result,
+since none of the Transformer's 13 training runs diverged. Code:
+`ribomamba/sweeps.py` (`diverged`, `pick_lowest`, `run_to_completion`),
+`scripts/train.py`; tests in `tests/test_sweeps.py`; checked end to end by a
+deliberately diverging debug run (logbook 2026-09-25).
+
 ---
 
 ## Train/test overlap audit

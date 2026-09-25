@@ -615,6 +615,14 @@ cannot favour one architecture. The full run that had started with 3×10⁻⁴
 was stopped at step ~500 (no checkpoint yet) and restarts with the winner
 of the extended sweep.
 
+**Amendment, 2026-09-25 (session 05) — diverged candidates rank last.** A
+candidate whose training loss becomes inf or nan is recorded as diverged and
+ranks last (+∞) in the learning-rate and dropout sweeps; the sweep carries
+on; if all candidates diverge, it stops. Written before any Mamba run, for
+the same reasons as the boundary rule: mechanical, symmetric, and it changes
+no Transformer result (none diverged). Recorded in the frozen protocol as
+amendment A1 (RESULTS.md).
+
 ---
 
 ## D-012 — Regularise with dropout, chosen by a pre-registered sweep over shorter full schedules

@@ -25,6 +25,7 @@ import csv
 import json
 import math
 import subprocess
+import sys
 import time
 
 import numpy as np
@@ -35,6 +36,7 @@ from ribomamba.data.tokenizer import is_nucleotide
 from ribomamba.models.build import ARCHS, build_model, check_parameter_budget, objective
 from ribomamba.models.transformer import count_parameters
 from ribomamba.paths import REPO_ROOT
+from ribomamba.sweeps import DIVERGED_EXIT, DIVERGED_MARKER
 
 
 def parse_args() -> argparse.Namespace:
@@ -205,8 +207,10 @@ def main() -> None:
                 group["lr"] = lr
             with torch.autocast("cuda", dtype=torch.bfloat16):
                 loss, stats = loss_fn(model, ids, att, g)
-            if not torch.isfinite(loss):
-                raise RuntimeError(f"loss became {loss.item()} at step {step}; last good state is last.pt")
+            if not torch.isfinite(loss):          # D-011 amendment: a diverged run is recorded, not crashed
+                (run_dir / DIVERGED_MARKER).write_text(f"step {step}: training loss {loss.item()}\n")
+                print(f"diverged: loss became {loss.item()} at step {step}; last good state is last.pt", flush=True)
+                sys.exit(DIVERGED_EXIT)
             optimizer.zero_grad(set_to_none=True)
             loss.backward()
             grad_norm = torch.nn.utils.clip_grad_norm_(model.parameters(), cfg["grad_clip"])

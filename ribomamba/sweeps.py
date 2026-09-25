@@ -1,10 +1,24 @@
-"""Shared helpers for hyperparameter sweeps (D-011, D-012): run, resume, read results."""
+"""Shared helpers for hyperparameter sweeps (D-011, D-012): run, resume, read results.
+
+Divergence (D-011 amendment, 2026-09-25, made before any Mamba run): if a
+run's training loss stops being a finite number, scripts/train.py leaves a
+DIVERGED file in the run's folder and exits with DIVERGED_EXIT. Such a run did
+not complete its schedule, so in a sweep it ranks last (its value is +inf),
+whatever it reached before, and the sweep carries on instead of crashing.
+"""
 
 import csv
 import subprocess
 import sys
 
 from ribomamba.paths import REPO_ROOT
+
+DIVERGED_EXIT = 3              # train.py's exit code when the training loss became inf or nan
+DIVERGED_MARKER = "DIVERGED"   # the file it leaves in checkpoints/<run>/, recording the step
+
+
+def diverged(run_name: str) -> bool:
+    return (REPO_ROOT / "checkpoints" / run_name / DIVERGED_MARKER).exists()
 
 
 def eval_rows(run_name: str) -> list[dict]:
@@ -17,11 +31,22 @@ def eval_rows(run_name: str) -> list[dict]:
 
 
 def final_val_ema(run_name: str) -> float:
+    if diverged(run_name):
+        return float("inf")
     return float(eval_rows(run_name)[-1]["val_bits_ema"])
 
 
 def best_val_ema(run_name: str) -> float:
+    if diverged(run_name):
+        return float("inf")
     return min(float(r["val_bits_ema"]) for r in eval_rows(run_name))
+
+
+def pick_lowest(results: dict) -> object:
+    """The setting with the lowest value; refuse if every candidate diverged (nothing to choose)."""
+    if all(v == float("inf") for v in results.values()):
+        raise RuntimeError(f"every candidate diverged: {results}")
+    return min(results, key=results.get)
 
 
 # The config keys that define a training recipe, i.e. everything train.py accepts except
@@ -55,11 +80,19 @@ def run_to_completion(name: str, steps: int, *new_run_args: str) -> None:
     alone is not enough: an interrupted run has one too, and choosing a
     setting from a half-trained run would break the protocol.
     """
+    if diverged(name):
+        return
     rows = eval_rows(name)
     if rows and int(rows[-1]["step"]) >= steps:
         return
     last = REPO_ROOT / "checkpoints" / name / "last.pt"
-    if last.exists():
-        train("--resume", str(last))
-    else:
-        train("--run-name", name, "--max-steps", str(steps), *new_run_args)
+    try:
+        if last.exists():
+            train("--resume", str(last))
+        else:
+            train("--run-name", name, "--max-steps", str(steps), *new_run_args)
+    except subprocess.CalledProcessError as error:
+        if error.returncode != DIVERGED_EXIT:          # a real crash: stop and show it
+            raise
+        print(f"{name}: diverged, ranks last ({(REPO_ROOT / 'checkpoints' / name / DIVERGED_MARKER).read_text().strip()})",
+              flush=True)
