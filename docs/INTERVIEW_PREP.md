@@ -508,3 +508,29 @@ learned pairing anyway: its samples hold their shape no better than random
 letters. So it's an empirical question, and the protocol was frozen before
 any Mamba existed.
 **Source:** instalment 3.
+
+### Q: Tell me about a time your own pipeline broke your own rules.
+**Draft answer:** In Phase 4 the learning-rate rule, written before any Mamba
+run, said: if the winner sits on the edge of the grid, try the next value
+out, and repeat until the winner is in the middle. BiMamba kept winning at
+the top edge, and at 10⁻² my code quietly stopped, because I'd stored the
+grid as a list that ended there. It declared an edge winner and started the
+next stage. I caught it from the summary file, stopped the queue before the
+next stage produced any result, and fixed it by a dated amendment: wide grids,
+and an error if the end is ever reached. It applies to every backbone, and
+replaying the Transformer's sweep through the new code gives the same answer.
+The extra candidate, 3×10⁻², lost, so the choice didn't change, but the
+procedure now does what it promised.
+**Likely follow-up:** "Isn't changing a rule after seeing results cheating?"
+→ It restored the rule as written; it's mechanical, symmetric, and only
+affected results that didn't exist yet.
+**Source:** RESULTS.md amendment A2; logbook 2026-09-26.
+
+### Q: Why did BiMamba need a different learning rate from the Transformer?
+**Draft answer:** They're different machines; we give them the same *rule*
+for choosing settings, not the same settings. BiMamba's sweep chose 10⁻²,
+about thirty times the Transformer's 3×10⁻⁴; at the Transformer's rate it
+would have scored 1.9265 instead of 1.9086 on validation. If we'd copied the
+Transformer's settings, the comparison would have been quietly unfair to
+Mamba.
+**Source:** RESULTS.md, "BiMamba learning-rate sweep".

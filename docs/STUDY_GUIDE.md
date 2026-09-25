@@ -1962,6 +1962,49 @@ whole padded rows; normalising before the gate), and the tests caught every
 bug. Finally, the protocol's size rule is enforced in code: the training
 script refuses to start a model outside the ±2 % window.
 
+### 6.12 Tuning BiMamba by the same rules
+
+Every backbone gets the same *rules* for choosing its settings, not the same
+settings. BiMamba shows why. Its learning-rate sweep (8,000 steps per
+candidate, lowest final validation value wins, extend the grid while the
+winner sits on an edge) went 3×10⁻⁴ → 1.9265, 10⁻³ → 1.9184, 3×10⁻³ →
+1.9124, 10⁻² → 1.9086, 3×10⁻² → 1.9349. So BiMamba's best rate is 10⁻²,
+about thirty times the Transformer's (3×10⁻⁴). Trained at the Transformer's
+setting it would have ended at 1.9265 instead of 1.9086, and the comparison
+would have been unfair to it without anyone noticing. At low rates it also
+started overfitting inside the short sweep, earlier than the Transformer did.
+
+### 6.13 Mistakes and surprises in this phase (so far)
+
+- **A pre-registered rule, broken by its own code.** The written rule said
+  "extend the grid until the winner is interior". The code kept the grid as
+  a list ending at 10⁻², and when BiMamba's winner reached the end, the code
+  stopped quietly and declared an edge winner. Caught by reading the sweep's
+  summary; fixed by a dated amendment (A2) that restores the written rule
+  for every backbone; checked by replaying the Transformer's sweep through
+  the new code (same choice). 3×10⁻² then lost, so the answer didn't change,
+  but the procedure now matches its promise.
+- **A power cut.** The laptop ran out of battery mid-run. Nothing was lost,
+  because checkpoints are written atomically, but restarting the interrupted
+  run in its old folder would have appended a second header to its log and
+  crashed the sweep; the folder was moved aside first. The logs also showed
+  the laptop had been on battery before it died: training ran at 25–26 k
+  letters per second instead of 33.
+- **Runs that started on a "dirty" tree.** The queue starts each run the
+  moment the previous one ends; twice, uncommitted edits (evaluation code,
+  study guide) were open at that moment, so the runs recorded "-dirty".
+  Training never imports those files and the training code was identical,
+  so the results stand, with a footnote. Lesson: commit every edit
+  immediately while a queue runs.
+- **A wrong guess about speed.** Mamba ran slower per letter on short
+  sequences. The first hypothesis (a chunk size of 256 wasting work) was
+  tested and mostly rejected: smaller chunks gave identical outputs and at
+  most ≈ 20 % speed. The real reason is that every sequence carries a
+  full-size state, however short it is.
+- **Tests that could fail.** After all tests passed, the code was broken on
+  purpose twice (reversing whole padded rows; normalising before the gate),
+  and the tests caught both. A test that has never failed proves little.
+
 ## Part 7 — Steering the model toward a target shape  *(Phase 5)*
 
 ## Part 8 — Results, and what they mean  *(Phases 4–5)*
