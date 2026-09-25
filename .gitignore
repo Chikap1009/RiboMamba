@@ -9,3 +9,6 @@
 __pycache__/
 *.egg-info/
 .pytest_cache/
+
+# Claude Code's local tool permissions (per machine, not part of the project)
+/.claude/
