@@ -1,7 +1,12 @@
-"""Train a masked-diffusion denoiser on the Rfam training split (Phase 2, D-011).
+"""Train a model on the Rfam training split (Phase 2, D-011; Phase 4 backbones, D-015, D-016).
+
+--arch transformer | bimamba   masked-diffusion denoisers (loss: 1/t-weighted NELBO)
+--arch ar_mamba                left-to-right model (loss: exact next-token cross-entropy)
+Every run must hold 14,174,976 +- 2 % parameters (frozen protocol P4); --allow-any-size is for debugging.
 
 Usage (inside `conda activate ribomamba`, from the repo root):
     python scripts/train.py --run-name tf_M_lr1e-3 --lr 1e-3 --max-steps 60000
+    python scripts/train.py --run-name bimamba_M_x --arch bimamba --n-layers 14 --lr 1e-3 --max-steps 8000
     python scripts/train.py --resume checkpoints/tf_M_lr1e-3/last.pt     # continue after a crash or sleep
 
 Writes checkpoints/<run-name>/ (ignored by Git):
@@ -10,7 +15,7 @@ Writes checkpoints/<run-name>/ (ignored by Git):
     last.pt       latest state: weights, EMA weights, optimiser, step, epoch  (for resuming)
     best.pt       the state with the lowest validation bits/nt (EMA weights)
 
-Per step: bf16 autocast forward + masked-diffusion loss, backward, gradient
+Per step: bf16 autocast forward + the architecture's loss, backward, gradient
 clipping, AdamW with warmup + cosine learning rate, EMA update.
 """
 
@@ -27,8 +32,8 @@ import torch
 
 from ribomamba.data.dataset import make_dataloader
 from ribomamba.data.tokenizer import is_nucleotide
-from ribomamba.diffusion.masked import diffusion_loss
-from ribomamba.models.transformer import TransformerConfig, TransformerDenoiser, count_parameters
+from ribomamba.models.build import ARCHS, build_model, check_parameter_budget, objective
+from ribomamba.models.transformer import count_parameters
 from ribomamba.paths import REPO_ROOT
 
 
@@ -36,11 +41,16 @@ def parse_args() -> argparse.Namespace:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--run-name")
     p.add_argument("--resume", help="path to a last.pt to continue from (all other settings come from it)")
-    # model (D-010, D-011)
+    # model (D-010, D-011; Phase 4: D-015, D-016)
+    p.add_argument("--arch", choices=ARCHS, default="transformer")
     p.add_argument("--d-model", type=int, default=384)
     p.add_argument("--n-layers", type=int, default=8)
-    p.add_argument("--n-heads", type=int, default=6)
+    p.add_argument("--n-heads", type=int, default=6, help="Transformer only")
+    p.add_argument("--d-state", type=int, default=128, help="Mamba only: state numbers per channel")
+    p.add_argument("--expand", type=int, default=2, help="Mamba only: channels inside the mixer = expand x d")
+    p.add_argument("--headdim", type=int, default=64, help="Mamba only: channels per head")
     p.add_argument("--dropout", type=float, default=0.0, help="D-012: dropout rate during training")
+    p.add_argument("--allow-any-size", action="store_true", help="skip the +-2 %% parameter check (debug runs)")
     # optimisation (D-011)
     p.add_argument("--lr", type=float, default=1e-3, help="peak learning rate")
     p.add_argument("--min-lr-ratio", type=float, default=0.1, help="cosine decays to this fraction of the peak")
@@ -101,11 +111,12 @@ def update_ema(ema_model: torch.nn.Module, model: torch.nn.Module, step: int, de
 
 
 @torch.no_grad()
-def evaluate(model: torch.nn.Module, loader, device) -> float:
+def evaluate(model: torch.nn.Module, loader, device, loss_fn) -> float:
     """Validation bits per nucleotide, with the SAME noise every time.
 
     A fixed generator seed gives every evaluation identical t values and masks,
-    so a change in the number reflects the model, not the dice.
+    so a change in the number reflects the model, not the dice. (The AR loss
+    uses no noise, so for it the generator changes nothing.)
     """
     model.eval()
     g = torch.Generator(device=device).manual_seed(1234)
@@ -114,7 +125,7 @@ def evaluate(model: torch.nn.Module, loader, device) -> float:
         ids = batch["input_ids"].to(device, non_blocking=True)
         att = batch["attention_mask"].to(device, non_blocking=True)
         with torch.autocast("cuda", dtype=torch.bfloat16):
-            loss, _ = diffusion_loss(model, ids, att, g)                   # nats per nucleotide in this batch
+            loss, _ = loss_fn(model, ids, att, g)                          # nats per nucleotide in this batch
         n = int(is_nucleotide(ids).sum())
         total_nats += loss.item() * n
         total_nt += n
@@ -141,18 +152,20 @@ def main() -> None:
     else:
         assert args.run_name, "--run-name is required for a new run"
         cfg = {k: v for k, v in vars(args).items() if k != "resume"}
+        # record only the settings the chosen architecture actually uses
+        unused = ("d_state", "expand", "headdim") if cfg["arch"] == "transformer" else ("n_heads",)
+        cfg = {k: v for k, v in cfg.items() if k not in unused}
         cfg["git_commit"] = git_commit()
     run_dir = REPO_ROOT / "checkpoints" / cfg["run_name"]
-    run_dir.mkdir(parents=True, exist_ok=True)
 
     torch.manual_seed(cfg["seed"])
     np.random.seed(cfg["seed"])
-    model_cfg = TransformerConfig(d_model=cfg["d_model"], n_layers=cfg["n_layers"], n_heads=cfg["n_heads"],
-                                  dropout=cfg.get("dropout", 0.0))      # runs before D-012 had none
-    model = TransformerDenoiser(model_cfg).to(device)
+    model = build_model(cfg).to(device)          # configs without "arch" (before Phase 4) are Transformers
+    cfg["parameters"] = count_parameters(model) if cfg.get("allow_any_size") else check_parameter_budget(model)
+    run_dir.mkdir(parents=True, exist_ok=True)           # only after the size check: a refused run leaves nothing
+    loss_fn = objective(cfg.get("arch", "transformer"))
     ema_model = copy.deepcopy(model).requires_grad_(False)
     optimizer = make_optimizer(model, cfg)
-    cfg["parameters"] = count_parameters(model)
 
     step, epoch, best_val = 0, 0, float("inf")
     if state is not None:
@@ -191,7 +204,7 @@ def main() -> None:
             for group in optimizer.param_groups:
                 group["lr"] = lr
             with torch.autocast("cuda", dtype=torch.bfloat16):
-                loss, stats = diffusion_loss(model, ids, att, g)
+                loss, stats = loss_fn(model, ids, att, g)
             if not torch.isfinite(loss):
                 raise RuntimeError(f"loss became {loss.item()} at step {step}; last good state is last.pt")
             optimizer.zero_grad(set_to_none=True)
@@ -216,8 +229,8 @@ def main() -> None:
                 window = {"bits": [], "grad": [], "nt": 0, "t0": time.time()}
 
             if step % cfg["eval_every"] == 0 or step == cfg["max_steps"]:
-                val_live = evaluate(model, val_loader, device)
-                val_ema = evaluate(ema_model, val_loader, device)
+                val_live = evaluate(model, val_loader, device, loss_fn)
+                val_ema = evaluate(ema_model, val_loader, device, loss_fn)
                 log.writerow([step, epoch, f"{lr:.3e}", "", "", f"{val_live:.4f}", f"{val_ema:.4f}", "", "",
                               f"{(time.time() - start) / 3600:.3f}"])
                 log_file.flush()

@@ -12,6 +12,10 @@ Usage:
     python scripts/sample.py --checkpoint checkpoints/tf_M_do0/best.pt --lengths-from val \
         --steps 256 --temperature 1.0 --out samples/eval/tf_M_do0_T1.0_S256.fasta
 
+An autoregressive checkpoint (arch ar_mamba) is sampled left to right with the
+length constraint of protocol P5 (<eos> forbidden before the target length,
+forced at it); --steps does not apply to it.
+
 Output: FASTA, one record per sequence, in the order the lengths were drawn:
     >sample_<i> length=<L> checkpoint=<run>@<step>
 """
@@ -23,6 +27,7 @@ import numpy as np
 import polars as pl
 import torch
 
+from ribomamba.autoregressive import sample_ar
 from ribomamba.data.tokenizer import decode
 from ribomamba.diffusion.masked import sample, sample_lengths
 from ribomamba.eval.reference import reference_sample
@@ -67,18 +72,22 @@ def main() -> None:
     lengths, order = lengths.sort(descending=True)
 
     tag = f"{state['config']['run_name']}@{state['step']}"
+    autoregressive = state["config"].get("arch") == "ar_mamba"
     generated = [""] * n
     for start in range(0, n, args.batch_size):
         batch_lengths = lengths[start:start + args.batch_size]
-        ids = sample(model, batch_lengths, args.steps, generator=g, temperature=args.temperature)
+        if autoregressive:
+            ids = sample_ar(model, batch_lengths, generator=g, temperature=args.temperature)
+        else:
+            ids = sample(model, batch_lengths, args.steps, generator=g, temperature=args.temperature)
         for i, row in enumerate(ids.cpu()):
             generated[int(order[start + i])] = decode(row)            # drops <bos>, <eos>, <pad>
     args.out.parent.mkdir(parents=True, exist_ok=True)
     with open(args.out, "w") as f:
         for i, seq in enumerate(generated):
             f.write(f">sample_{i} length={len(seq)} checkpoint={tag}\n{seq}\n")
-    print(f"wrote {n} sequences to {args.out} ({tag}, {args.steps} steps, T={args.temperature}, "
-          f"{args.weights} weights)")
+    how = "left to right, length-constrained" if autoregressive else f"{args.steps} steps"
+    print(f"wrote {n} sequences to {args.out} ({tag}, {how}, T={args.temperature}, {args.weights} weights)")
 
 
 if __name__ == "__main__":
