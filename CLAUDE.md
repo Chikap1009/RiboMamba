@@ -74,7 +74,7 @@ Bad: *"What does MDLM stand for?"*
 
 **If I reply to one of the remaining checks with only "ok", "got it", "yes", "continue", or similar, treat that as a red flag, not as confirmation.** Ask me to explain the concept back in my own words first. I will sometimes try to rush you through the checks that remain. **Do not let me.**
 
-### 1.5 The phase gate (amended 2026-09-23, session 02)
+### 1.5 The phase gate (amended 2026-09-23, session 02; may be split in two, §5, amended session 05)
 
 **Original rule:** I teach the phase back to you in a monologue. **Amended at my request:** I will not write essays or long teach-backs. **Interrogate me instead.**
 
@@ -234,6 +234,8 @@ These are non-negotiable and are themselves a selling point of the project:
 ## 5. PHASES
 
 Do not skip ahead. Do not begin a phase until the previous phase's Feynman gate (§1.5) is passed.
+
+**Amended 2026-09-25 (session 05), my words: "We'll go with your recommendation we keep moving towards completion of the project doing literally everything we can that doesn't concern with the training going on in the background."** When a phase ends in long unattended compute (Phase 4: about 70 GPU-hours), its gate is split in two: a **concept half**, asked once I have read the phase's teaching, and a **results half**, asked when the results exist. The next phase's concept teaching and build may start once the concept half is passed; the results half must be passed before the next phase's own results are evaluated or its gate is taken. Nothing is skipped: every concept is still taught before its code, and every gate question is still asked (§1.6 unchanged). Work that belongs to no phase (checking the novelty claim, verifying citations, writing the study guide) may happen at any time.
 
 **Phase 0 — Foundations.** WSL2 + CUDA + conda environment. Install ViennaRNA. Learn RNA from zero: nucleotides, base pairing, secondary structure, dot-bracket notation, minimum free energy. Fold real sequences by hand and with software. *Concepts: what RNA is, what folding is, what "design" means, why it is hard.*
 
