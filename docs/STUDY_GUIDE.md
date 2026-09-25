@@ -102,6 +102,28 @@ structured than chance**: 55 % of samples fold better than their own
 shuffles, against 79 % of real RNA. Closing that gap is what the rest of the
 project is about.
 
+*(Phase 3 addition.)* Before comparing architectures we built the
+**measuring equipment** and froze the rules. The key idea: for every metric,
+ask what the dumbest generator that wins it would be. Low folding energy is
+won by GC-rich random letters, so we compare each sequence with **shuffles of
+itself**; real RNA beats its own shuffles 79 % of the time, random letters
+50 %, and our baseline only 56 %. "Does the predicted shape equal the target"
+is won by flimsy designs, so we also measure the **ensemble defect**, the
+expected share of letters in the wrong state, which stays meaningful on real
+RNA where the exact shape is almost never occupied. Diversity and novelty are
+won by random letters, so they are **guardrails**, not scores. Every number
+comes with a bootstrap error bar that counts the right unit, and we checked
+those error bars against the real spread over five sampling seeds. A
+**second, independent folding program** (EternaFold, whose parameters were
+learned from experiments rather than taken from energy tables) guards against
+our model learning the quirks of the one we steer with. The whole protocol,
+metrics, thresholds, targets and statistical tests, was written into
+`RESULTS.md` and **frozen before any Mamba model existed**, with the test data
+locked in code until then. Then we mapped the baseline's sampling behaviour
+over 48 temperature and step settings, and found the finding that defines the
+rest of the project: **no sampling setting makes its RNA hold a shape better
+than random letters do.** The sampler is not the problem; the model is.
+
 ---
 
 ## Part 1 — What RNA is, and what "folding" means  *(Phase 0)*
@@ -1636,6 +1658,85 @@ same result, so the change cannot have been made to flatter or hurt it.
 - **My seed recommendation was wrong.** The concept block suggested three
   training seeds per architecture; writing the statistics showed three can
   never support a claim (5.9), so the protocol asks for five.
+
+### 5.14 What Phase 3 settled, and what it left open
+
+**Settled:**
+- A harness that measures RNA quality several ways at once, each way covering
+  another's blind spot, with every metric pinned by a test against a
+  hand-computed or brute-force answer.
+- A calibrated scale: real held-out RNA, a second real sample (the noise
+  floor), training RNA, shuffled RNA and random letters, all length-matched.
+- Error bars that count the right unit (families for real RNA, samples for
+  generated sets, trained models for architecture claims), checked against
+  the real spread over five sampling seeds.
+- A second, independent oracle (EternaFold), and the knowledge that it has
+  seen nothing related to our test set.
+- A protocol frozen in writing, enforced in code, before the competing models
+  existed; test target sets built and checksummed right after the freeze.
+- The baseline's sampling behaviour mapped over 48 settings, and its
+  training-seed variation measured over five retrainings.
+
+**Left open, honestly:**
+- **The central problem is unsolved.** The baseline's RNA holds its shape no
+  better than random letters do (defect 0.24-0.26 against real RNA's 0.175),
+  and no sampling setting changes that. Phases 4 and 5 exist to attack it.
+- The harness measures what our oracles can see: nested secondary structure,
+  no pseudoknots, no 3D, no wet-lab validation.
+- `bprna` targets are hard in a specific way: ViennaRNA reproduces their
+  annotated structure for only 4-6 % of the natural sequences that carry
+  them, so the oracle and the annotations disagree about most natural RNA.
+- The power calculation says the comparison can detect differences of about
+  3 per-seed standard deviations (~0.008 bits/nt, ~0.04 in beats-shuffles).
+  Smaller real differences will come back as "not detectable with 5 seeds".
+- One replication split exists, not many; and both splits come from the same
+  cleaned corpus.
+
+### 5.15 Easy mix-ups (from the Phase 3 quiz; reread these)
+
+- **The ensemble is many *shapes* of one *sequence*.** Changing letters is a
+  mutation, a different molecule with its own ensemble. When you read
+  "alternative structures", no letter has changed.
+- **There is exactly one MFE structure**, by definition. A 120-letter RNA has
+  *thousands* of alternatives, and most differ from the best one by a single
+  pair at the end of a stem. That is why the exact shape can be rare (3 %)
+  while the molecule is still 90 % correct on average.
+- **P(exact shape) is a frame error rate; the ensemble defect is a bit error
+  rate.** On real RNA the first is near zero and useless; the second is the
+  graded measure.
+- **Low folding energy mostly means "many G and C letters".** A random
+  GC-rich sequence reaches -26 kcal/mol and is *less* stable than its own
+  shuffles. Only the shuffle comparison separates arrangement from
+  composition.
+- **Diversity is a guardrail, not a score.** Real RNA has near-twins (57 % of
+  1,000 real sequences do) because families are sets of relatives. Random
+  letters have none. A number that randomness maximises cannot measure
+  quality.
+- **Copying the training data and gaming the oracle are different failures.**
+  Copying → samples resemble training sequences → caught by the novelty
+  check. Gaming → great under the oracle we steer with, poor under the other
+  → caught by the second oracle. A copying model would score well under
+  *both* oracles.
+- **When two judges agree, believe them.** Doubt the verdict of the judge you
+  have been optimising against, never the independent one.
+- **A zero that your own filter created is not evidence.** The audit's
+  "0 at >= 80 % identity" was produced by the step that removed exactly those
+  sequences. Read the unfiltered columns (1.05 % have any relative at all)
+  and the control row (a random split: 96 %).
+- **A confidence interval says how much the number would wobble if you drew
+  different samples.** Ours predicted the real wobble correctly: five
+  sampling seeds gave 55.4-57.1 %, all inside the reported 55-58 %.
+  Overlapping intervals mean no claim.
+- **More samples from one trained model cannot settle an architecture
+  question.** They shrink sampling noise only. Retraining moves the numbers
+  more (0.0135 in beats-shuffles vs 0.009 from sampling), so the *training*
+  has to be repeated: five seeds per architecture.
+- **The length filter looks at the family first** because long families
+  contain short *fragments* (83,525 of them), pieces of big molecules cut off
+  by sequencing, which a per-sequence length cap would happily keep.
+- **A rule changed after seeing results can still be honest** if it is
+  mechanical, identical for every model, added before the other models
+  existed, applied to validation only, and written down with its date.
 
 ## Part 6 — What Mamba is, and why we chose it  *(Phase 4)*
 

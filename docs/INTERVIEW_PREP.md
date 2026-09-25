@@ -345,3 +345,73 @@ models even exist, so it can't have been fitted to them. The code enforces
 it: the test split can't be loaded until the file says "FROZEN". And every
 endpoint gets reported for every model, including losses.
 **Source:** RESULTS.md; `ribomamba/eval/protocol.py`.
+
+### Q: How do you know a generated RNA actually folds, rather than just looking stable?
+**Draft answer (Chirag's words from the Phase 3 gate):** Folding energy mostly
+comes from the letters, not the arrangement. G and C make strong pairs, so a
+sequence full of G and C gets a very low energy even if you shuffle it into
+random order. So I compare every sequence with dinucleotide shuffles of
+itself: same letters, same neighbour statistics, arrangement destroyed. Real
+validation RNA beats its own shuffles 79 % of the time, random sequences 50 %,
+and our baseline only 56 %. That difference is the part that comes from
+arrangement, which is what structure actually is.
+**Likely follow-up:** "Why not just report the energy?" -> A random 80-mer at
+70 % GC folds to -26 kcal/mol and is still *less* stable than its own
+shuffles. The energy alone would call it structured.
+**Source:** logbook 2026-09-25, gate batch 2 (Q5).
+
+### Q: Your samples are far more diverse than real RNA. Isn't that good?
+**Draft answer:** Not by itself. Among 1,000 real validation sequences, 57 %
+have a near-twin in that same set, because RNA families are sets of
+relatives. Our samples have none, and neither do random letters. Any number
+that random letters maximise can't measure quality. So I use diversity as a
+guardrail: if it collapsed, say a third of samples being near-copies of each
+other, I'd stop trusting the quality numbers. Above that floor, more isn't
+better.
+**Source:** RESULTS.md reference scale; gate batch 3 (Q9).
+
+### Q: Your audit reports zero test sequences with an 80 %-identical training relative. Convincing?
+**Draft answer (his words):** On its own, no, and I'd point that out myself.
+An earlier step removed exactly those sequences using the same search, so the
+zero is there by construction: it's like deleting every bruised apple and then
+reporting that no apples are bruised. The informative numbers are the ones
+nothing was filtered on: 1.05 % of test sequences have any detectable relative
+in training at all, 0.40 % at 50 % identity. And the control row, a
+deliberately random split measured the same way, gives 96 %. That contrast is
+the real evidence.
+**Source:** gate batch 4 and 5 (Q12, Q14).
+
+### Q: You steer generation with ViennaRNA. How do you know you're not just learning its quirks?
+**Draft answer (his words):** That's exactly the risk, so I score everything
+with a second program too. EternaFold is a different kind of model: its
+parameters were learned from chemical-mapping experiments instead of taken
+from measured energy tables, and it's never used for steering. If designs look
+good under both, I trust them. If they look good only under ViennaRNA, the
+likely explanation is that the model learned the patterns ViennaRNA prefers,
+and the verdict to doubt is ViennaRNA's, not EternaFold's. I also checked that
+EternaFold's own training data contains nothing related to our test set.
+**Likely follow-up:** "Couldn't that just be memorisation of training RNA?" ->
+No: memorised real RNA folds well under both programs. Memorisation shows up
+in the novelty check instead, which reads 0 %.
+**Source:** DECISIONS D-013; gate batches 6-7 (Q16, Q19).
+
+### Q: You changed a tuning rule after seeing results. Isn't that cheating?
+**Draft answer (his words):** It would be if the change applied to one model
+only. The rule was "if the best learning rate is at the edge of the grid, test
+the next value beyond it". It's mechanical, so there's no judgement call; it
+applies identically to every backbone; it was added before any other backbone
+was swept, so it can't have been shaped to favour one; it only ever touched
+validation-based tuning, never the test set; and it's recorded as a dated
+amendment rather than an edit. If I'd added it only for Mamba, it would have
+been cheating.
+**Source:** DECISIONS D-011 amendment; gate batches 6-7 (Q17, Q20).
+
+### Q: Why keep only sequences from families whose typical member is short, instead of filtering by length?
+**Draft answer (his words):** Because long families turn up in Rfam partly as
+short fragments: pieces of a 2,000-letter ribosomal RNA cut off where the
+sequenced stretch of genome ended. Those pieces are under 256 letters, so a
+plain length filter keeps them, and we measured 83,525 of them. They have no
+proper start or end, so they don't fold into anything meaningful and they
+aren't molecules anyone could make. Dropping the family by its median length
+removes the pieces with it.
+**Source:** DECISIONS D-007; gate batch 8 (Q22).
