@@ -908,6 +908,53 @@ error, and a step takes 4–15 s instead of < 1 s.
 
 ---
 
+## Phase 4 — tuning on validation (the frozen protocol's P4 recipe)
+
+### BiMamba learning-rate sweep (D-011 with rule 2b; amendments A1, A2)
+
+`scripts/phase4_queue.sh` → `python scripts/lr_sweep.py --prefix bimamba_M --
+--arch bimamba --n-layers 14`; 14,010,608 parameters; 8,000 steps × 16,384
+tokens, warmup 1,000, cosine to 10 %; EMA validation (fixed noise, seed
+1234) every 2,000 steps; seed 0. Rule: lowest **final** (8k) value;
+extend while the winner is on an edge.
+
+| peak LR | 2k | 4k | 6k | **8k (rule)** | recorded commit |
+|---|---|---|---|---|---|
+| 3×10⁻⁴ | 1.9198 | 1.9117 | 1.9174 | 1.9265 | `63d3cdf` |
+| 10⁻³ | 1.9214 | 1.9120 | 1.9118 | 1.9184 | `9bda71b-dirty` † |
+| 3×10⁻³ | 1.9269 | 1.9149 | 1.9096 | 1.9124 | `e2538ab-dirty` † |
+| **10⁻²** (edge extension) | 1.9401 | 1.9256 | 1.9128 | **1.9086** | `51de98c` ‡ |
+| 3×10⁻² (edge extension, A2) | 1.9499 | 1.9480 | 1.9430 | 1.9349 | `bec54cf` |
+
+**Chosen: 10⁻²** (interior after 3×10⁻² was tried). Summary
+`checkpoints/bimamba_M_sweep_summary.json`.
+
+† The queue starts each run as the previous one ends; these two started
+while tracked files had uncommitted edits: the evaluation scripts later
+committed as `adc3750` (`reference.py`, `evaluate_samples.py`, `sample.py`,
+`eval_likelihood.py`) and the study guide later committed as `30a8948`.
+None of them is imported by training, and `git diff 63d3cdf e84e248` on
+every file training uses is empty, so all five runs used identical training
+code. ‡ Restarted from step 0 after a power loss at step 1,100 (the aborted
+attempt: `checkpoints/bimamba_M_sweep_lr0.01_aborted_powerloss`).
+
+**Reading it.**
+- BiMamba prefers learning rates ≈ 30× higher than the Transformer (whose
+  sweep chose 3×10⁻⁴, the *lowest* value then tried). Tuning each backbone
+  by the same rule matters: training BiMamba at the Transformer's rate would
+  have left it at 1.9265 instead of 1.9086.
+- At low rates BiMamba overfits inside 8,000 steps (3×10⁻⁴: best 1.9117 at
+  4k, 1.9265 at 8k); at 10⁻² it is still improving at 8k. The rule's "final
+  value" therefore favours the rate that overfits later, as it did for the
+  Transformer; the dropout sweep (30,000 steps, best-during-run) decides
+  how long to train.
+- Sweep values are single runs on one fixed noise draw and are for
+  choosing settings only; they are not the E1 comparison (5 seeds, 4 draws,
+  test set).
+- The rule's first version would have stopped at 10⁻² while it was still on
+  the edge (amendment A2); 3×10⁻² was worse, so the choice is the same
+  either way here, but the procedure now matches its written rule.
+
 ## Phase 0 — oracle sanity checks (not experiments)
 
 Hand-calculated predictions from session 01, checked against ViennaRNA.
