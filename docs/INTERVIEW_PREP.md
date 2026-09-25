@@ -415,3 +415,79 @@ proper start or end, so they don't fold into anything meaningful and they
 aren't molecules anyone could make. Dropping the family by its median length
 removes the pieces with it.
 **Source:** DECISIONS D-007; gate batch 8 (Q22).
+
+---
+
+## Phase 4 — Mamba (drafts from the concept block; rewritten in Chirag's words after the gate)
+
+### Q: What is a state-space model, and what does "selective" add?
+**Draft answer:** It reads the sequence once, left to right, and keeps a
+fixed-size summary, the state, which it updates at every letter: new state =
+keep factor × old state + what this letter writes. It's exactly the
+state-space form from control theory, h′ = Ah + Bx, y = Ch + Dx, turned into
+steps with a step size Δ. In the old version the keep factor was the same for
+every letter, so it behaved like a fading echo that forgets every letter at
+the same rate. Selective means Δ, B and C are computed from each letter, so
+the model decides per letter what to keep and what to write. In my toy
+example, after a 12-letter loop a fixed rule kept 0–25 % of the memory of
+the G's and a selective rule kept 88 %.
+**Likely follow-up:** "Then how does it stay parallel?" The update is
+"multiply by a, add u", and two such steps combine into one of the same form,
+in any grouping, so a GPU can combine them as a tree: 256 positions in 8
+rounds.
+**Source:** logbook 2026-09-25 (instalments 1–2); GLOSSARY.
+
+### Q: Mamba is linear-time. Was it faster than your Transformer?
+**Draft answer:** No, not at our lengths, and I measured it. One Mamba-2
+block took 6.0 ms against 3.8 ms for a Transformer block at 256 letters; only
+at 1,024 was Mamba faster (11.7 vs 21.7 ms). Big-O says how cost grows, not
+what it costs at a given size, and a GPU is very good at the matrix
+multiplications attention uses. So for my project Phase 4 is purely a
+question of quality: every model gets the same number of training steps on
+the same batches, and speed doesn't enter the comparison. Linear time would
+matter for long RNAs like ribosomal RNA, which our 256-letter cap excludes.
+**Source:** RESULTS.md, "Does Mamba run here"; instalment 1.
+
+### Q: Why does a diffusion denoiser need a bidirectional Mamba, and how did you build it?
+**Draft answer:** A hidden letter's best evidence is often its pairing
+partner, and that can be on its right: in GGGAAACCC with the first G hidden,
+the partner is the last C. A left-to-right scan at position 1 has seen
+nothing yet. So each layer runs two scans, one each way, and adds them. The
+two directions share the big input and output projections and each has its
+own convolution, step-size bias, keep factors and skip, the pattern of Vision
+Mamba and Caduceus, because RNA is directional (a GC stack is −3.4, a CG
+stack −2.4 kcal/mol). One trap: batches are padded on the right, so flipping
+a whole row puts padding first in the backward scan, and a scan has no mask,
+so the padding would leak into every real position. I reverse each sequence
+within its own length instead, and a test shows padding can't change any
+real output.
+**Likely follow-up:** "How do you know the fused kernels do what you think?"
+A test compares them with a step-by-step loop of the textbook recurrence,
+each sequence alone; and I broke the code on purpose twice to check the tests
+catch it.
+**Source:** instalment 3; DECISIONS D-016; tests/test_bimamba.py.
+
+### Q: Why keep an autoregressive Mamba in the comparison?
+**Draft answer:** Three models give two controlled comparisons. Transformer
+vs BiMamba, both diffusion, changes only the backbone. BiMamba vs the
+left-to-right Mamba, same kind of layers, changes only the generation order.
+In Phase 2 I argued left to right is awkward for RNA, not impossible; this
+tests it. It's also how Mamba is normally used. Two details: its likelihood is
+exact while diffusion's is an upper bound, so that comparison is secondary;
+and I give it the same lengths as the diffusion models by forbidding the end
+token before the target length and forcing it there.
+**Source:** instalment 3; protocol P5, P7.
+
+### Q: Isn't attention better suited to base pairing?
+**Draft answer:** That's the real question, and it's open. In
+favour of attention: pairs are nested like brackets, checking brackets left
+to right needs a stack, and attention can look a partner up directly, while
+a scan must carry every open bracket in its state; published work shows
+state-space models are weaker at exact recall and copying. But at our
+lengths the state isn't small: one Mamba-2 direction holds 98,304 numbers
+per layer, more than attention stores for a typical 95-letter RNA, so the
+difference is how memory is used, not how much. And our Transformer barely
+learned pairing anyway: its samples hold their shape no better than random
+letters. So it's an empirical question, and the protocol was frozen before
+any Mamba existed.
+**Source:** instalment 3.

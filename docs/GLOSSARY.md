@@ -647,6 +647,154 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Where it appears:** Why Phase 3 adds a second, independent oracle; the risk in Phase 5's reward-guided steering.
 - **First explained:** session 02 (as a risk, STUDY_GUIDE §1.10); by name, session 04.
 
+*The next eleven entries were taught in Phase 2 (session 03, STUDY_GUIDE §4.5 and §4.7) but never entered here; added in session 05, when Phase 4 started to depend on them.*
+
+### Logits, softmax
+- **Definition:** **Logits** are a model's raw scores, one per possible token, any real number. **Softmax** turns them into probabilities: p_i = e^{logit_i} / Σ_j e^{logit_j}, all positive, summing to 1. A logit of −∞ gives probability exactly 0, which is how our models forbid special tokens.
+- **Analogy:** Raw marks in an exam turned into each student's share of a prize pot: the bigger your mark relative to the others, the bigger your share, and everyone's shares add up to the whole pot.
+- **Where it appears:** Every model's head outputs (B, L, 8) logits; `masked_fill(forbidden, -inf)`; the samplers' `torch.softmax`.
+- **First explained:** session 03 (Phase 2); entry added session 05.
+
+### Attention (query, key, value)
+- **Definition:** A way for every position to gather information from every other position. Each position makes a **query** (what am I looking for?), a **key** (what do I contain?) and a **value** (what I hand over). Query·key scores every pair (an L × L grid), a softmax turns each row into weights, and each position receives the weighted average of the values. Worked: scores 1, 0, 2, ÷√2, give weights 0.284, 0.140, 0.576.
+- **Analogy:** In a meeting, everyone states what they need, looks round the whole table, and listens mostly to the people whose expertise matches.
+- **Where it appears:** `SelfAttention` in `ribomamba/models/transformer.py`; the thing BiMamba replaces in Phase 4.
+- **First explained:** session 03 (Phase 2); entry added session 05.
+
+### Residual connection (residual stream)
+- **Definition:** Each block adds its output to its input (x + f(x)) instead of replacing it, so information and gradients can pass straight through a deep stack; the running x is the "residual stream".
+- **Analogy:** Editing a document with tracked suggestions instead of retyping it: every editor adds changes, and the original text is never lost.
+- **Where it appears:** Every Transformer block and every Mamba block (`x + Dropout(Mixer(LayerNorm(x)))`).
+- **First explained:** session 03 (Phase 2); entry added session 05.
+
+### LayerNorm, RMSNorm
+- **Definition:** **LayerNorm** rescales each position's vector to mean 0 and spread 1, then applies a learned scale and shift; it keeps numbers in a healthy range through deep networks. **RMSNorm** is the simpler cousin that only divides by the root-mean-square (no mean subtraction, no shift); Mamba-2 uses a gated RMSNorm inside its layer.
+- **Analogy:** Automatic volume control on each speaker's microphone before mixing, so no one voice drowns the others.
+- **Where it appears:** Pre-norm blocks in both backbones (LayerNorm, D-016); the gate-normalisation inside every Mamba-2 mixer (RMSNorm).
+- **First explained:** session 03 (Phase 2); RMSNorm session 05.
+
+### MLP; activation functions (GELU, SiLU)
+- **Definition:** The **MLP** is a small two-layer network applied to each position separately (d → 4d → d in our Transformer), the "thinking within a position" step. Between its layers sits a smooth on/off function: **GELU** in the Transformer; **SiLU** (z · sigmoid(z)) in Mamba.
+- **Analogy:** After a meeting (attention), each person goes back to their own desk to think over what they heard.
+- **Where it appears:** `Block.mlp` in the Transformer. Mamba layers have no separate MLP: their expansion to 768 channels and the SiLU gate do that job.
+- **First explained:** session 03 (Phase 2); SiLU session 05.
+
+### Rotary position encoding (RoPE)
+- **Definition:** Positions enter attention by rotating pairs of numbers in the query and key by an angle proportional to position, so a score depends only on the distance between two positions. No parameters.
+- **Analogy:** Two clock hands turned by amounts set by where each person sits: the angle between them tells how far apart they sit, wherever they are at the table.
+- **Where it appears:** `RotaryEmbedding` in the Transformer. Mamba needs none: a scan reads positions in order, so order is built in.
+- **First explained:** session 03 (Phase 2); entry added session 05.
+
+### AdamW; learning rate; warmup and cosine decay
+- **Definition:** **AdamW** is the optimiser: it gives every weight its own step size from running averages of its gradients, and shrinks weight matrices slightly each step (weight decay). The **learning rate** sets the overall step size; we raise it linearly from ~0 (**warmup**, 1,000 steps) and then lower it along half a cosine to 10 % of the peak.
+- **Analogy:** Learning to drive: start slowly in the car park, go at full speed on the open road, slow down again as you approach the destination.
+- **Where it appears:** `make_optimizer` and `learning_rate` in `scripts/train.py`; the learning-rate sweep (D-011) chooses the peak.
+- **First explained:** session 03 (Phase 2); entry added session 05.
+
+### bf16 mixed precision
+- **Definition:** Doing most arithmetic in bfloat16, a 16-bit number format with float32's range but less precision, while keeping the weights in float32. About twice as fast and half the memory; sampling probabilities are then formed in float64 on purpose.
+- **Analogy:** Rough working in pencil on scrap paper, with the final answers copied neatly into the notebook.
+- **Where it appears:** `torch.autocast("cuda", dtype=torch.bfloat16)` in training, evaluation and sampling.
+- **First explained:** session 03 (Phase 2); entry added session 05.
+
+### Gradient clipping
+- **Definition:** If the gradient's overall size (norm) exceeds a limit (1.0 for us), it is scaled down to that limit before the step, so one unusual batch cannot throw the weights far off.
+- **Analogy:** A speed limiter on a car: you can still go anywhere, just never dangerously fast.
+- **Where it appears:** `clip_grad_norm_(..., 1.0)` in `scripts/train.py`.
+- **First explained:** session 03 (Phase 2); entry added session 05.
+
+### EMA of the weights
+- **Definition:** An exponential moving average of the weights, updated every step: ema ← 0.9999 · ema + 0.0001 · weights. It smooths out step-to-step jitter; evaluation and sampling use it. It is itself a one-number state-space model with keep factor 0.9999, remembering roughly the last 10,000 steps.
+- **Analogy:** Your running impression of a restaurant: each new meal nudges it a little, and old meals fade slowly.
+- **Where it appears:** `update_ema` in `scripts/train.py`; the `ema` weights in every checkpoint; the first example in Phase 4's concept block.
+- **First explained:** session 03 (Phase 2); entry added session 05.
+
+### Early stopping by best checkpoint
+- **Definition:** Evaluate on validation every 2,500 steps and keep the state with the lowest validation bits/nt (`best.pt`), whatever happens afterwards.
+- **Analogy:** Keeping your best practice-exam paper rather than your last one.
+- **Where it appears:** `best.pt` in every run; "best-during-run" in the protocol (P4).
+- **First explained:** session 03; entry added session 05.
+
+*Phase 4 vocabulary (session 05, concept instalments 1–3).*
+
+### State-space model (SSM)
+- **Definition:** A model that reads a sequence once, carrying a fixed-size summary (the **state**) that it updates at every position: h_t = a·h_{t−1} + b·x_t, output y_t = c·h_t. In continuous time, h′ = Ah + Bx, y = Ch + Dx: the same equations as in Control Systems (where the state is called x and the input u).
+- **Analogy:** A bank balance: one number summing every transaction, updated with each one; it never grows, but you cannot recover a single transaction from it.
+- **Where it appears:** The core of every Mamba layer (`ribomamba/models/bimamba.py`).
+- **First explained:** session 05, instalment 1.
+
+### Keep factor (decay)
+- **Definition:** The number a (between 0 and 1) that multiplies the old state at each step. A state remembers roughly the last 1/(1 − a) steps: a = 0.5 about 2, 0.9 about 10, 0.9999 about 10,000.
+- **Analogy:** How much of yesterday's gossip you still remember today.
+- **Where it appears:** `exp(Δ·A)` inside the Mamba-2 kernel; one A per head, always negative (A = −exp(A_log)), so the model stays stable.
+- **First explained:** session 05, instalment 1.
+
+### Step size Δ (discretisation)
+- **Definition:** Converting the continuous h′ = Ah + Bx into steps with step size Δ gives keep factor a = e^{ΔA} (zero-order hold) and write strength b ≈ Δ·B. Small Δ: keep the memory, barely write the letter; large Δ: wipe the memory, write the letter strongly. One dial controls both.
+- **Analogy:** How long you look at something: a glance leaves your thoughts as they were; a long look replaces them.
+- **Where it appears:** `dt` in Mamba-2 (softplus of a learned projection plus `dt_bias`, one per head per position).
+- **First explained:** session 05, instalment 2.
+
+### Selective (selection mechanism)
+- **Definition:** Mamba's key idea: Δ, B and C are computed from each position's own features, so the model decides per letter how much to remember and what to write and read. Measured example: after a 12-letter loop, fixed keep factors retain 0–25 % of the memory of the G's; a selective rule retains 88 %.
+- **Analogy:** Taking notes in a lecture: you write down the important points, skip the jokes, and the choice depends on what is being said.
+- **Where it appears:** Every Mamba-2 layer (the `dt`, `B`, `C` parts of `in_proj`).
+- **First explained:** session 05, instalment 2.
+
+### Scan (parallel scan)
+- **Definition:** Computing all the running states of a recurrence. Each step "multiply by a, add u" is a pair (a, u); two steps combine into one pair, (a₂a₁, a₂u₁ + u₂), and the combination is associative, so a GPU can combine in a tree: 256 positions in 8 rounds instead of 256 sequential steps.
+- **Analogy:** Totalling a long receipt: one cashier goes line by line; a team splits it, adds pairs of lines at once, then pairs of pairs.
+- **Where it appears:** Inside `mamba_split_conv1d_scan_combined` (the fused kernel we call).
+- **First explained:** session 05, instalment 2.
+
+### Mamba, Mamba-2, state-space duality
+- **Definition:** **Mamba** (Gu & Dao 2023): a sequence model built from selective state-space layers, linear in length, with fused GPU kernels. **Mamba-2** (Dao & Gu 2024): one keep factor per head, which makes the layer equal to an attention-like grid (**state-space duality**): y_t = Σ_{s≤t} (C_t·B_s)(a_{s+1}⋯a_t) Δ_s x_s. It is computed in chunks with fast matrix multiplications, allows larger states (128 vs 16), but the grid is constrained: one direction, no softmax, fading through whatever lies between, built from a fixed-size state.
+- **Analogy:** A single pass through a book with an index card per chapter (the state), versus attention's spreading every page on a table.
+- **Where it appears:** `mamba-ssm` 2.3.2.post1's `Mamba2`; our BiMamba and AR Mamba.
+- **First explained:** session 05, instalment 2.
+
+### Head (in Mamba-2)
+- **Definition:** A group of 64 channels that share one keep factor at each letter; a d = 384 layer has 12 heads, each channel carrying a 128-number state (98,304 state numbers per layer).
+- **Analogy:** A team whose members all get the same "how much to forget" instruction but take different notes.
+- **Where it appears:** `headdim=64`, `nheads = 768 / 64 = 12` in `Mamba2`.
+- **First explained:** session 05, instalment 2.
+
+### Gate (gating)
+- **Definition:** Multiplying a signal by a learned value between about 0 and 1 (here SiLU of another projection, z) so the network can open or close each channel per position.
+- **Analogy:** A tap on each pipe that the network turns per letter.
+- **Where it appears:** `y · SiLU(z)` before the gate-normalisation in every Mamba-2 mixer.
+- **First explained:** session 05, instalment 2.
+
+### Short causal convolution (in Mamba)
+- **Definition:** Before the scan, each channel mixes each position with its 3 previous positions (width 4), looking only backwards. It gives the scan immediate local context.
+- **Analogy:** Reading each word together with the three words before it.
+- **Where it appears:** `conv1d` in `Mamba2` (per direction in BiMamba).
+- **First explained:** session 05, instalment 2.
+
+### BiMamba (bidirectional Mamba)
+- **Definition:** Two scans per layer, left to right and right to left, outputs added, so every position summarises both sides. Ours shares `in_proj`/`out_proj` between directions and gives each its own convolution, Δ bias, A, D and gate-norm (D-016); each sequence is reversed within its own length so padding never enters a real position.
+- **Analogy:** Proof-reading a sentence forwards and then backwards, and combining both readings.
+- **Where it appears:** `BiMamba2Mixer` in `ribomamba/models/bimamba.py`: the Phase 4 denoiser.
+- **First explained:** session 05, instalment 3.
+
+### Next-token prediction (shift by one); length-constrained sampling
+- **Definition:** How the autoregressive model trains: the output at position i predicts the token at position i + 1 (`<bos> G C A` → `G C A <eos>`), cross-entropy everywhere, exact likelihood. **Length-constrained sampling** forbids `<eos>` before the target length and forces it there, so the AR model receives the same lengths as the diffusion models (protocol P5).
+- **Analogy:** Predictive text on a phone, told how many words the message must have.
+- **Where it appears:** `ribomamba/autoregressive.py` (`next_token_targets`, `ar_loss`, `sample_ar`).
+- **First explained:** Phase 2 (chain rule); code session 05, instalment 3.
+
+### Parameter matching (by depth or by width)
+- **Definition:** Giving every compared model the same number of learnable parameters (the protocol allows ±2 %), so a difference can't come from size. A Mamba-2 layer holds 56 % of a Transformer block, so Mamba must be matched **by depth** (same width 384, more layers: 14) or **by width** (same 8 layers, each wider).
+- **Analogy:** A fixed kitchen budget: more cooks of the same kind (depth), or the same number of cooks at bigger stations (width).
+- **Where it appears:** D-015; `check_parameter_budget` in `ribomamba/models/build.py` refuses any run outside ±2 %.
+- **First explained:** session 05, instalment 3.
+
+### Associative recall
+- **Definition:** Finding the item that was stored together with a cue seen earlier ("which letter sat opposite this one?"). Published tests show state-space models are weaker at exact recall and copying than attention (Arora et al. 2023; Jelassi et al. 2024).
+- **Analogy:** Remembering which coat belongs to which cloakroom ticket.
+- **Where it appears:** Why Phase 4's question is open: base pairing looks like recall.
+- **First explained:** session 05, instalment 3.
+
 ---
 
 ## Maths
@@ -800,6 +948,18 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Analogy:** Wasserstein: the work to reshape one sand pile into another. Calibration: measuring the scope's noise floor with the probe grounded before trusting a small reading.
 - **Where it appears:** Phase 3 distributional comparison of generated vs real RNA.
 - **First explained:** session 04.
+
+### Impulse response; linear time-invariant (LTI) system; convolution
+- **Definition:** For a system that applies the same rule at every step (time-invariant) and adds contributions linearly, the output is the input **convolved** with the **impulse response** (its reaction to a single unit input). For the one-number state h_t = a·h_{t−1} + x_t with a = 0.5 the impulse response is 1, 0.5, 0.25, …; a letter 4 steps back contributes 0.0625.
+- **Analogy:** A clap in a hall: you hear it, then fainter and fainter echoes, and every sound gets the same echo.
+- **Where it appears:** Why a non-selective state-space model can be trained as one big convolution (S4), and why it treats every letter alike; selection breaks it.
+- **First explained:** session 05, instalment 1.
+
+### Linear vs quadratic time
+- **Definition:** How cost grows with length L: a scan costs proportional to L; attention compares every pair, proportional to L² (256 → 65,536 pairs). Big-O says how cost *grows*, not the price at a given size: at L = 256 one Mamba-2 block measured 6.0 ms against the Transformer block's 3.8 ms, and only at L = 1,024 was it faster (11.7 vs 21.7 ms).
+- **Analogy:** Shaking hands with everyone at a party (grows with the square of the guests) versus greeting each guest once at the door (grows with the number of guests); for a small party the handshakes can still be quicker.
+- **Where it appears:** RESULTS.md, "Does Mamba run here"; why linear time buys no speed at our 256-letter cap.
+- **First explained:** session 05, instalment 1 (Big-O itself: session 01).
 
 ---
 
@@ -1158,3 +1318,15 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Analogy:** A mask on which nets get dumped to the waveform file; without anchoring, the wildcard catches more than intended.
 - **Where it appears:** `/data/`, `/checkpoints/`. Unanchored `data/` briefly hid the code folder `ribomamba/data/` (session 03).
 - **First explained:** session 03.
+
+### Fused GPU kernel; Triton
+- **Definition:** A **kernel** is one program the GPU runs; a **fused** kernel does several steps (convolution, scan, gate, normalisation) in one go, keeping intermediate numbers in the GPU's small fast memory instead of writing them out. **Triton** is a language for writing such kernels in Python-like code; Mamba-2's are written in it and compiled on first use.
+- **Analogy:** Cooking a whole dish at one station instead of carrying the pan to a different counter after every step.
+- **Where it appears:** `mamba_split_conv1d_scan_combined` (called directly by `BiMamba2Mixer`); the reason the Mamba models run only on a GPU.
+- **First explained:** session 05, instalment 2.
+
+### Testing the tests (deliberate bugs)
+- **Definition:** After tests pass, introduce a known bug on purpose and check that some test fails; a test that cannot fail proves nothing. The software version of a positive control.
+- **Analogy:** Pressing the smoke alarm's test button: silence means the alarm is broken, not that there is no fire.
+- **Where it appears:** Session 05: a whole-row flip and a swapped gate/normalisation order were each caught by `tests/test_bimamba.py`.
+- **First explained:** session 05 (positive controls: session 03).

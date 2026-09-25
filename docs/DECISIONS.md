@@ -799,3 +799,69 @@ architecture says nothing about the architecture.
   sizes with intervals are reported regardless.
 - Validation numbers depend on one split draw (seed 0); the proposed
   replication split addresses this descriptively.
+
+---
+
+## D-016 — How the Mamba models are built: shared projections, per-direction scans, everything else as the Transformer
+**Date:** 2026-09-25   **Phase:** 4   **Logbook:** logbook/2026-09-25-session-05.md (14:40, 14:50–15:32)
+**Status:** accepted (my choice within the build, explained to Chirag in concept instalment 3; open to his veto)
+
+**Context.** Phase 4 swaps the Transformer denoiser for a Mamba-2 one and adds
+a left-to-right Mamba. A Mamba-2 layer reads in one direction only, but a
+masked-diffusion denoiser needs both sides of a hidden letter (its pairing
+partner is often to its right). Several ways to make Mamba bidirectional
+exist, they differ in parameters per layer (so in depth at matched size), and
+everything around the mixer must be settled so that only the mixing differs
+between the compared models.
+
+**Decision.**
+1. **BiMamba layer:** one shared `in_proj` (d → z, x, B, C, Δ) and one shared
+   `out_proj` (768 → d); each direction has its own short causal convolution,
+   Δ bias, A (keep factors), D (skip) and gate-normalisation weight. The
+   forward scan reads the sequence; the backward scan reads each sequence
+   reversed **within its own length** (padding stays last); the two outputs
+   are added, then projected once. 1,000,264 parameters per layer at d = 384.
+2. **AR Mamba layer:** the library's `Mamba2` unchanged (one direction).
+3. **Around the mixer, copy the Transformer:** the same embedding, pre-norm
+   residual blocks with LayerNorm, final LayerNorm, untied linear head,
+   residual-branch dropout (D-012's knob), `<bos>`/`<eos>` framing (D-010).
+   No separate MLP (the standard Mamba layer has none).
+4. **Initialisation:** the library's own (Mamba2's constructor; its GPT-2-style
+   `out_proj` rescale by 1/√n_layers); embedding and head normal(0, 0.02) as
+   the Transformer.
+5. **Forbidden outputs:** BiMamba never predicts a special token (as the
+   Transformer); the AR model may predict `<eos>` (it must end sequences).
+
+**Alternatives rejected.**
+- *Two complete Mamba-2 mixers per layer* (1,987,912 parameters): at matched
+  size only 7 layers, half the depth of the other designs.
+- *One mixer used for both directions:* no direction-specific parameters, but
+  RNA is directional: the stack 5′-GC-3′/3′-CG-5′ is −3.40 kcal/mol, the
+  same letters as 5′-CG-3′/3′-GC-5′ −2.40 (ViennaRNA 2.7.2, checked).
+- *Alternating directions by layer:* right-hand context reaches a position
+  only every other layer; the two directions are treated unequally.
+- *Hydra (Hwang et al. 2024), a principled bidirectional Mamba-2:* not in the
+  installed library; it would mean new, unvalidated kernel code.
+- *Flipping whole padded rows* (the obvious implementation): puts padding
+  first in the backward scan, which has no mask, so padding would write into
+  every real position's state. A test pins that padding cannot change any
+  real output, and a deliberately broken version fails it.
+- *RMSNorm in the residual blocks* (Mamba's usual choice): LayerNorm keeps
+  everything outside the mixer identical to the Transformer.
+- *Calling `Mamba2.forward` twice per layer:* computes the 384 → 1,804 input
+  projection twice; since it acts per position, one projection reversed is
+  identical and cheaper.
+
+**Precedent.** The sharing pattern is that of Vision Mamba (Zhu et al. 2024)
+and Caduceus (Schiff et al. 2024), both Mamba-1 models. Adapted to Mamba-2,
+where the B, C and Δ projections sit inside `in_proj`, those projections are
+shared too; each direction still convolves x, B and C with its own weights.
+
+**Consequences / trade-offs accepted.**
+- Per layer, BiMamba runs two scans; its cost per step exceeds the AR
+  model's (measured before the long runs, RESULTS.md).
+- The direction-specific part is small (5,924 parameters per layer). If
+  BiMamba underperforms, "too little direction-specific capacity" is one
+  hypothesis we cannot rule out; the two-full-mixers design would test it.
+- Correctness rests on a test that compares the fused kernels with a
+  step-by-step loop of the textbook recurrence, each sequence processed alone.
