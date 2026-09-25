@@ -31,7 +31,7 @@ import polars as pl
 from ribomamba.eval.harness import distances, per_sequence, summarise
 from ribomamba.eval.protocol import frozen_date, git_commit
 from ribomamba.eval.reference import load_split, reference_sets
-from ribomamba.paths import EVAL_DIR
+from ribomamba.paths import EVAL_DIR, PROCESSED_DIR, REPO_ROOT
 
 SHOW = ["gc", "mfe_per_nt", "paired_fraction", "p_mfe", "ned_mfe", "mfe_z", "beats_shuffles",
         "ef_ned_own", "ef_ned_vienna", "oracles_agree", "stems_per_100nt", "multiloops_per_100nt",
@@ -46,12 +46,18 @@ def sha256(path: Path) -> str:
     return hashlib.sha256(Path(path).read_bytes()).hexdigest()
 
 
-def reference_tables(split: str, n: int, seed: int, train: list[str], processes) -> pl.DataFrame:
-    path = EVAL_DIR / f"reference_{split}_n{n}_s{seed}.parquet"
+def reference_name(split: str, n: int, seed: int, data_dir: Path) -> str:
+    """reference_<split>_n<n>_s<seed> for the frozen split; the data folder's name is added for any other."""
+    where = "" if data_dir == PROCESSED_DIR else f"{data_dir.name}_"
+    return f"reference_{where}{split}_n{n}_s{seed}"
+
+
+def reference_tables(split: str, n: int, seed: int, train: list[str], processes, data_dir: Path) -> pl.DataFrame:
+    path = EVAL_DIR / f"{reference_name(split, n, seed, data_dir)}.parquet"
     if path.exists():
         return pl.read_parquet(path)
     tables = []
-    for name, seqs in reference_sets(split, n, seed).items():
+    for name, seqs in reference_sets(split, n, seed, data_dir).items():
         print(f"  reference set {name}: {len(seqs)} sequences", flush=True)
         tables.append(per_sequence(seqs, train, seed=seed, processes=processes).with_columns(pl.lit(name).alias("set")))
     table = pl.concat(tables)
@@ -74,15 +80,18 @@ def main() -> None:
     p.add_argument("--n", type=int, default=1000, help="reference sequences per set")
     p.add_argument("--seed", type=int, default=0, help="reference selection, shuffles, bootstrap")
     p.add_argument("--processes", type=int)
+    p.add_argument("--data-dir", default="data/processed",
+                   help="split folder, relative to the repo root (data/processed_split1 = replication split, P4)")
     args = p.parse_args()
+    data_dir = (REPO_ROOT / args.data_dir).resolve()
 
-    train = load_split("train", ["sequence"])["sequence"].to_list()
-    ref = reference_tables(args.split, args.n, args.seed, train, args.processes)
+    train = load_split("train", ["sequence"], data_dir)["sequence"].to_list()     # novelty is judged against THIS train
+    ref = reference_tables(args.split, args.n, args.seed, train, args.processes, data_dir)
     real = ref.filter(pl.col("set") == "real")
     report = {
         "provenance": {"command": " ".join(sys.argv), "git_commit": git_commit(), "date": datetime.now().isoformat(
             timespec="seconds"), "split": args.split, "n": args.n, "seed": args.seed,
-            "protocol_frozen_on": frozen_date()},
+            "data_dir": args.data_dir, "protocol_frozen_on": frozen_date()},
         "reference": {},
     }
     columns = {}
@@ -107,7 +116,7 @@ def main() -> None:
         columns[name] = report["samples"]["summary"]
         out = EVAL_DIR / f"{name}.json"
     else:
-        out = EVAL_DIR / f"reference_{args.split}_n{args.n}_s{args.seed}.json"
+        out = EVAL_DIR / f"{reference_name(args.split, args.n, args.seed, data_dir)}.json"
     out.write_text(json.dumps(report, indent=2))
 
     width = 28

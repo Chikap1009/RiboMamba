@@ -32,7 +32,7 @@ from ribomamba.data.tokenizer import decode
 from ribomamba.diffusion.masked import sample, sample_lengths
 from ribomamba.eval.reference import reference_sample
 from ribomamba.models.checkpoint import load_model
-from ribomamba.paths import PROCESSED_DIR
+from ribomamba.paths import REPO_ROOT
 
 
 def main() -> None:
@@ -45,6 +45,8 @@ def main() -> None:
                    help="copy the lengths of the harness's real reference set (ribomamba/eval/reference.py)")
     p.add_argument("--lengths-n", type=int, default=1000, help="size of that reference set")
     p.add_argument("--lengths-seed", type=int, default=0, help="seed of that reference set")
+    p.add_argument("--data-dir", default="data/processed",
+                   help="split folder the lengths come from (data/processed_split1 = replication split, P4)")
     p.add_argument("--weights", choices=["ema", "live"], default="ema")
     p.add_argument("--temperature", type=float, default=1.0)
     p.add_argument("--batch-size", type=int, default=128)
@@ -53,17 +55,18 @@ def main() -> None:
     args = p.parse_args()
 
     device = torch.device("cuda")
+    data_dir = (REPO_ROOT / args.data_dir).resolve()
     model, state = load_model(args.checkpoint, args.weights, device)
     g_cpu = torch.Generator().manual_seed(args.seed)                  # lengths
     g = torch.Generator(device=device).manual_seed(args.seed)         # masks and letters
     if args.lengths_from:
-        lengths = torch.tensor(reference_sample(args.lengths_from, args.lengths_n, args.lengths_seed)["length"]
-                               .to_list())
+        lengths = torch.tensor(reference_sample(args.lengths_from, args.lengths_n, args.lengths_seed,
+                                                data_dir)["length"].to_list())
     elif args.length:
         lengths = torch.full((args.n,), args.length)
     else:
         train_lengths = torch.from_numpy(
-            pl.read_parquet(PROCESSED_DIR / "train.parquet", columns=["length"])["length"].to_numpy().astype(np.int64))
+            pl.read_parquet(data_dir / "train.parquet", columns=["length"])["length"].to_numpy().astype(np.int64))
         lengths = sample_lengths(args.n, train_lengths, g_cpu)
     n = len(lengths)
     # Generate in order of length so each batch holds similar lengths (little padding);

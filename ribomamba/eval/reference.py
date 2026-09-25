@@ -26,14 +26,15 @@ from ribomamba.eval.protocol import require_frozen
 from ribomamba.paths import PROCESSED_DIR
 
 
-def load_split(split: str, columns: list[str] | None = None) -> pl.DataFrame:
+def load_split(split: str, columns: list[str] | None = None, data_dir=PROCESSED_DIR) -> pl.DataFrame:
+    """One split of the frozen split (data/processed) or of a replication split (data/processed_split<k>)."""
     require_frozen(split)                           # the test split stays locked until the freeze
-    return pl.read_parquet(PROCESSED_DIR / f"{split}.parquet", columns=columns)
+    return pl.read_parquet(data_dir / f"{split}.parquet", columns=columns)
 
 
-def reference_sample(split: str, n: int, seed: int) -> pl.DataFrame:
+def reference_sample(split: str, n: int, seed: int, data_dir=PROCESSED_DIR) -> pl.DataFrame:
     """n random sequences of `split` (columns: sequence, family, length). Same (split, n, seed) -> same rows."""
-    return load_split(split, ["sequence", "family", "length"]).sample(n, seed=seed)
+    return load_split(split, ["sequence", "family", "length"], data_dir).sample(n, seed=seed)
 
 
 def length_matched(pool: list[str], lengths: list[int], seed: int, exclude: set[str] = frozenset()) -> list[str]:
@@ -72,13 +73,13 @@ def shuffled_copies(sequences: list[str], seed: int) -> list[str]:
     return [dinucleotide_shuffle(s, rng) for s in sequences]
 
 
-def reference_sets(split: str, n: int, seed: int) -> dict[str, list[str]]:
+def reference_sets(split: str, n: int, seed: int, data_dir=PROCESSED_DIR) -> dict[str, list[str]]:
     """The five sets described in the module docstring, each a list of n sequences in real's order."""
-    real = reference_sample(split, n, seed)
+    real = reference_sample(split, n, seed, data_dir)
     lengths = real["length"].to_list()
     real_seqs = real["sequence"].to_list()
-    split_pool = load_split(split, ["sequence"])["sequence"].to_list()
-    train_pool = load_split("train", ["sequence"])["sequence"].to_list()
+    split_pool = load_split(split, ["sequence"], data_dir)["sequence"].to_list()
+    train_pool = load_split("train", ["sequence"], data_dir)["sequence"].to_list()
     return {
         "real": real_seqs,
         "real2": length_matched(split_pool, lengths, seed + 1, exclude=set(real_seqs)),

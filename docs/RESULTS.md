@@ -245,6 +245,18 @@ since none of the Transformer's 13 training runs diverged. Code:
 `scripts/train.py`; tests in `tests/test_sweeps.py`; checked end to end by a
 deliberately diverging debug run (logbook 2026-09-25).
 
+### Clarification C1 — 2026-09-25: which trained model gives each temperature curve
+
+P5's secondary temperature curve is computed "for every model". In this
+protocol "model" means architecture ("Three models: …", P4), so the curve is
+computed once per architecture, from its **seed-0 model** (the dropout-sweep
+winner), as the Phase 3 ablation did for the Transformer: T ∈ {0.5, 0.6, 0.7,
+0.8, 0.9, 1.1, 1.2} at 256 steps (the AR model left to right,
+length-constrained), plus the primary T = 1.0 already computed for all five
+seeds. A reading, not a change: written before any Mamba model had finished
+training, it selects nothing by results, and it is identical for the three
+architectures. Implemented in `scripts/phase4_evaluate.py`.
+
 ---
 
 ## Train/test overlap audit

@@ -38,7 +38,7 @@ from ribomamba.diffusion.masked import mask_tokens, masked_nelbo, sample_times
 from ribomamba.eval.protocol import git_commit, require_frozen
 from ribomamba.eval.stats import cluster_bootstrap_ci
 from ribomamba.models.checkpoint import load_model
-from ribomamba.paths import EVAL_DIR, PROCESSED_DIR
+from ribomamba.paths import EVAL_DIR, PROCESSED_DIR, REPO_ROOT
 
 BASE_SEED = 1234           # train.py's validation noise seed; draw k uses BASE_SEED + k
 
@@ -82,26 +82,30 @@ def main() -> None:
     p.add_argument("--split", default="val", choices=["val", "test"])
     p.add_argument("--draws", type=int, default=4)
     p.add_argument("--weights", choices=["ema", "live"], default="ema")
+    p.add_argument("--data-dir", default="data/processed",
+                   help="split folder (data/processed_split1 = replication split, P4)")
     args = p.parse_args()
     require_frozen(args.split)
+    data_dir = (REPO_ROOT / args.data_dir).resolve()
+    where = "" if data_dir == PROCESSED_DIR else f"{data_dir.name}_"         # output name: which split folder
 
     device = torch.device("cuda")
     model, state = load_model(args.checkpoint, args.weights, device)
-    dataset = RNADataset(args.split, add_bos=True, add_eos=True)
-    table = pl.read_parquet(PROCESSED_DIR / f"{args.split}.parquet", columns=["family", "length"])
+    dataset = RNADataset(args.split, add_bos=True, add_eos=True, data_dir=data_dir)
+    table = pl.read_parquet(data_dir / f"{args.split}.parquet", columns=["family", "length"])
     tag = f"{state['config']['run_name']}@{state['step']}"
     if state["config"].get("arch") == "ar_mamba":
         framed, letters = exact_nll_per_sequence(model, dataset, state["config"]["max_tokens"], device)
         table = table.with_columns(pl.Series("nats_mean", framed), pl.Series("nats_letters", letters))
         length = table["length"].to_numpy()
-        print(f"{tag} on {args.split} ({args.weights} weights, commit {git_commit()}): exact, no noise draws")
+        print(f"{tag} on {where}{args.split} ({args.weights} weights, commit {git_commit()}): exact, no noise draws")
         print(f"  recorded best validation value in the checkpoint: {state.get('best_val')}")
         for column, label in (("nats_mean", "framed sequence incl. <eos> (P6)"), ("nats_letters", "letters only")):
             est, low, high = cluster_bootstrap_ci(table[column].to_numpy() / math.log(2),
                                                   table["family"].to_list(), denominators=length)
             print(f"  {label}: {est:.4f} bits/nt, family-cluster 95 % CI [{low:.4f}, {high:.4f}]")
         EVAL_DIR.mkdir(parents=True, exist_ok=True)
-        table.write_parquet(EVAL_DIR / f"likelihood_{tag}_{args.split}.parquet")
+        table.write_parquet(EVAL_DIR / f"likelihood_{tag}_{where}{args.split}.parquet")
         return
     for k in range(args.draws):
         table = table.with_columns(pl.Series(f"nats_{k}", nelbo_per_sequence(
@@ -114,8 +118,8 @@ def main() -> None:
     est, low, high = cluster_bootstrap_ci(table["nats_mean"].to_numpy() / math.log(2), table["family"].to_list(),
                                           denominators=length)
     EVAL_DIR.mkdir(parents=True, exist_ok=True)
-    table.write_parquet(EVAL_DIR / f"likelihood_{tag}_{args.split}.parquet")
-    print(f"{tag} on {args.split} ({args.weights} weights, commit {git_commit()}):")
+    table.write_parquet(EVAL_DIR / f"likelihood_{tag}_{where}{args.split}.parquet")
+    print(f"{tag} on {where}{args.split} ({args.weights} weights, commit {git_commit()}):")
     print(f"  recorded best validation value in the checkpoint: {state.get('best_val')}")
     for k, v in enumerate(per_draw):
         print(f"  draw {k} (seed {BASE_SEED + k}): {v:.4f} bits/nt")
