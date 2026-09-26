@@ -955,6 +955,48 @@ attempt: `checkpoints/bimamba_M_sweep_lr0.01_aborted_powerloss`).
   the edge (amendment A2); 3×10⁻² was worse, so the choice is the same
   either way here, but the procedure now matches its written rule.
 
+### BiMamba dropout sweep (D-012) → BiMamba's recipe
+
+`python scripts/dropout_sweep.py --prefix bimamba_M -- --arch bimamba
+--n-layers 14` (from `scripts/phase4_queue.sh`): learning rate 10⁻² (the
+sweep above), 30,000 steps, warmup 1,000, cosine to 10 %, EMA validation
+every 2,500; seed 0. Rule: lowest **best-during-run** value; extend upward
+if the largest rate wins. Validation bits/nt (EMA):
+
+| dropout | 2.5k | 5k | 7.5k | 10k | 12.5k | 15k | 17.5k | 20k | 22.5k | 25k | 27.5k | 30k | **best** | train, last 1,000 steps |
+|---|---|---|---|---|---|---|---|---|---|---|---|---|---|---|
+| 0 | 1.9344 | 1.9227 | 1.9186 | 1.9143 | 1.9122 | 1.9095 | 1.9076 | **1.9068** | 1.9075 | 1.9094 | 1.9125 | 1.9181 | 1.9068 | 1.849 |
+| **0.1** | 1.9335 | 1.9197 | 1.9138 | 1.9100 | 1.9061 | 1.9052 | 1.9027 | **1.9006** | 1.9019 | 1.9105 | 1.9158 | 1.9231 | **1.9006** | 1.821 |
+| 0.2 | 1.9366 | 1.9223 | 1.9181 | 1.9140 | 1.9136 | 1.9102 | 1.9076 | **1.9070** | 1.9080 | 1.9114 | 1.9160 | 1.9226 | 1.9070 | 1.871 |
+
+Commits: dropout 0 `58974b8`; 0.1 `d2b31fa`; 0.2 `448ed89`, resumed at
+step 27,500 at `cf178e9` after a laptop shutdown at step 29,700 (the resumed
+segment sees its epoch's batches in a different order; the run was already
+past its best). All clean. "Train" = mean of the last ten logged training
+values (steps 29,100–30,000), each a 100-step average of the 1/t-weighted
+batch loss with dropout active (for the Transformer the same computation
+gives 1.619 / 1.721 / 1.803, matching its table above).
+
+**Rule result: dropout 0.1** (interior; `checkpoints/bimamba_M_dropout_summary.json`).
+**BiMamba's recipe = learning rate 10⁻², dropout 0.1, 30,000 steps, best
+EMA checkpoint**; its seed 0 is `bimamba_M_do0.1` (best 1.9006 at step
+20,000). Seeds 1–4 train with this recipe (P4).
+
+**Reading it** (single runs, one noise draw, validation: orientation only;
+the comparison is E1 with five seeds per model on the test set).
+- Same shape as the Transformer: every run improves until step 20,000
+  (≈ 6.5 epochs) and then overfits; the best points are later than the
+  Transformer's (10k), consistent with the higher learning rate.
+- **BiMamba memorises much less.** At 30k its training loss is 1.82–1.87
+  against the Transformer's 1.62–1.80, with similar best validation (1.9006
+  vs 1.9040): the train–validation gap is ≈ 0.08 bits for BiMamba vs ≈ 0.29
+  for the Transformer. One reading: a running state stores less
+  family-specific detail than attention (the Phase 4 question); not tested
+  here.
+- **With dropout 0.1 BiMamba fits its training data better than with no
+  dropout** (1.821 vs 1.849), unusual for dropout. Hypothesis, untested:
+  dropout stabilises optimisation at the high learning rate.
+
 ## Phase 0 — oracle sanity checks (not experiments)
 
 Hand-calculated predictions from session 01, checked against ViennaRNA.
