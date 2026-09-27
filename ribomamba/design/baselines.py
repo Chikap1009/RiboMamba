@@ -274,4 +274,9 @@ BASELINES = {"samfeo": samfeo, "rnainverse": rnainverse, "samfeo_efilter": samfe
              "samfeo_cfilter": samfeo_cfilter}
 BASELINE_SETTINGS = {"samfeo": SAMFEO_SETTINGS, "rnainverse": RNAINVERSE_SETTINGS,
                      "samfeo_efilter": SAMFEO_EFILTER_SETTINGS, "samfeo_cfilter": SAMFEO_CFILTER_SETTINGS}
+# Development ablation of the filter width K (energy filter), registered as separate method names so
+# runs can be compared side by side. Changing K is a new candidate revision (needs its own look).
+for _k in (4, 16, 32, 64):
+    BASELINES[f"samfeo_efilter_k{_k}"] = samfeo_efilter
+    BASELINE_SETTINGS[f"samfeo_efilter_k{_k}"] = {**SAMFEO_EFILTER_SETTINGS, "filter_k": _k}
 __all__ = ["BASELINES", "BASELINE_SETTINGS", "BudgetExhausted", "load_samfeo", "samfeo_checkout_problem"]
