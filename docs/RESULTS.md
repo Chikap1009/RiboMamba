@@ -1179,3 +1179,19 @@ Run ew_dev_desirna_filter_v1 (192/192 units; 64 s, one dedicated core each): Des
 [-0.0155, -0.0032]) and 16 s (-0.0118 [-0.0203, -0.0038]); best log10 P -0.74 vs -0.86.
 The screen reduces DesiRNA's steps (119 vs 166 candidates by 64 s). Energy pre-screening
 improves ensemble quality in both hosts but improves uMFE only in SAMFEO (D-025).
+
+### Long-budget quality-time frontier (development, session 09) — run ew_dev_frontier_v1
+480/480 units valid (6 wall-limited units that spanned a laptop suspend were detected by the
+clock-gap check and rerun). 32 dev targets x seeds 0-2; one core per method run; 12 workers.
+uMFE by method time (s): 1 / 16 / 64 / 256 —
+SAMFEO 29 / 45 / 52 / 58 %; SAMFEO + energy 33 / 54 / 60 / 64 %; RNAinverse (<= 256 restarts)
+43 / 55 / 62 / 62 %; DesiRNA (256 s, 10 replicas on one core) 13 / 34 / 57 / 71 %;
+SamplingDesign (256 s, 1 thread, defaults incl. 2,500 samples/step) 0 / 25 / 33 / 38 %.
+Final best log10 P: SAMFEO + energy -0.70, SAMFEO -0.74, DesiRNA -0.76, RNAinverse -1.10,
+SamplingDesign -2.09; NED @256 s: SAMFEO + energy 0.048, SAMFEO 0.051, RNAinverse 0.064,
+DesiRNA 0.067. Paired uMFE: energy - SAMFEO +0.094 [0.021, 0.177] @16 s, +0.083 [0.031, 0.146]
+@64 s, +0.052 [0.010, 0.104] @256 s; DesiRNA - SAMFEO+energy -0.198 [-0.344, -0.073] @16 s,
+-0.031 @64 s, +0.073 [0.010, 0.156] @256 s; RNAinverse ~ SAMFEO+energy (|diff| <= 0.021).
+SamplingDesign is under-budgeted at one thread (its published runs use 64 cores); reported as
+such, not as its capability. No method dominates: SAMFEO + energy has the best ensemble quality
+at every budget; RNAinverse is fastest to first uMFE solutions; DesiRNA leads uMFE at 256 s.
