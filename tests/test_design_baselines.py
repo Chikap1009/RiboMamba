@@ -147,3 +147,12 @@ def test_effective_samfeo_settings_match_the_registered_intent():
     assert "filter" not in effective["samfeo_tcdprop_only"] and effective["samfeo_tcdprop_only"]["proposal_model"]
     assert effective["samfeo_efilter"]["filter"] == "energy"
     assert effective["samfeo_tcdprop_efilter"]["filter"] == "energy" and effective["samfeo_tcdprop_efilter"]["proposal_model"]
+
+
+@pytest.mark.skipif(not (baselines.DESIRNA_DIR / "DesiRNA.py").exists(), reason="DesiRNA checkout absent")
+def test_desirna_accepts_a_float_time_limit():
+    # The final runner passes unit_time_limit_s as a float (e.g. 128.0); DesiRNA's -t needs an int.
+    target = Target("toy", "((((((....))))))..((((((....))))))")
+    ev = Evaluator(target, budget=500)
+    baselines.desirna(target, 0, ev, {"time_limit_s": 3.0, "replicas": 2})
+    assert ev.rows

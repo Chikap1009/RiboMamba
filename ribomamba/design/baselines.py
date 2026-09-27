@@ -352,7 +352,7 @@ def desirna(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=
         if s.get("filter_k"):                       # energy pre-screen of DesiRNA's own proposals
             entry = Path(__file__).resolve().parents[2] / "scripts" / "external" / "desirna_filtered.py"
             env.update(DESIRNA_DIR=str(DESIRNA_DIR), DESIRNA_FILTER_K=str(s["filter_k"]))
-        cmd = [str(conda_python), str(entry), "-f", "in.txt", "-t", str(s["time_limit_s"]),
+        cmd = [str(conda_python), str(entry), "-f", "in.txt", "-t", str(int(round(float(s["time_limit_s"])))),
                "-p", str(s["param"]), "-R", str(s["replicas"]), "-seed", str(seed + 1), "-sws", s["stop_when_solved"],
                "-od", "out"]
         if s["one_core"]:
