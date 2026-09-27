@@ -34,7 +34,10 @@ One-core quality-time frontier (uMFE at 1 / 16 / 64 / 256 s; final best log10 P)
 SAMFEO 29/45/52/58 %, -0.74; SAMFEO + energy 33/54/60/64 %, -0.70; RNAinverse 43/55/62/62 %,
 -1.10; DesiRNA 13/34/57/71 %, -0.76; SamplingDesign 0/25/33/38 %, -2.09. No method dominates:
 the screen gives the best ensemble quality at every budget; RNAinverse is fastest to a first
-solution; DesiRNA leads uMFE at 256 s.
+solution. CORRECTION (2026-09-28 review): development DesiRNA times were stamped by step fraction
+while DesiRNA overshoots its limit (~240 s for a nominal 128 s), so its development curve is
+optimistic and "DesiRNA leads at 256 s" is unverified; SamplingDesign's may be pessimistic (output
+lost at the kill). The final benchmark uses real per-candidate timing for both (amendment 4).
 
 Learned filters (online, 1,024 evals): energy screen 58 %; critic_v1 52 %; sibling critics
 53-55 %; linear residual 54 %. Offline, per-position critics reduce best-of-8 regret from 1.00 to

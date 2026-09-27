@@ -37,17 +37,20 @@ Easy tier (rfam_val smoke): at ceiling; the shared start alone solves most.
 Trace finding: late in search only ~2 % of proposals improve; feedback edits waste
 ~33 % of late proposals on repeats. Defect-weighted site choice = random sites.
 
-## Exact next task (session 09, updated ~22:25 IST 2026-09-27)
-PROTOCOL v2 IS FROZEN (docs/PROTOCOL_design_v2.md, commit 35e0325, D-028). The FINAL benchmark
-is RUNNING: data/repair_pilot/run_final_v2.sh (nohup) runs, in order, final_v2_eterna100_v2
-(2,400 units), final_v2_eterna100_v1only, final_v2_rfam_taneda27; 8 methods x 3 seeds, 128 s
-method time per unit, 10 workers + GPU. Completion marker: data/repair_pilot/final_v2.done.
-If interrupted (sleep / WSL restart): rerun data/repair_pilot/run_final_v2.sh — finished units
-are skipped; wall-limited units that spanned a suspend are rerun automatically.
-Afterwards: `python scripts/final_report.py --eternafold` (frozen endpoints, V1 combination,
-EternaFold check), then write the technical report. Do NOT change methods, budgets or endpoints.
-Framing (D-026): Q1 non-neural energy screen; Q2 target-conditioned denoiser (conditioning
-criterion met on development; method criterion not met); negative neural results recorded.
+## Exact next task (updated 2026-09-28 ~01:10 IST)
+PROTOCOL v2 FROZEN (docs/PROTOCOL_design_v2.md; amendments 1-4 are operational/measurement fixes).
+FINAL benchmark RUNNING: data/repair_pilot/run_final_v2.sh (V2 -> V1-only -> Rfam-Taneda-27).
+After it ends (marker data/repair_pilot/final_v2.done): run data/repair_pilot/run_final_v2_retry.sh
+(moves DesiRNA/SamplingDesign units started before the real-timing fix to units_superseded/ and
+reruns them plus any errored units; marker final_v2_retry.done). Then
+`python scripts/final_report.py --eternafold` (it REFUSES unless coverage is complete and the retry is
+done), fill docs/REPORT_repair_v2.md section 4, update RESULTS/DECISIONS/logbook.
+Review fixes (2026-09-28, commit 74ec5f1, 047750e): DesiRNA real per-round timing + group kill;
+SamplingDesign line-buffered + arrival times (its empty traces were genuine: ~2 min per default
+step at 180 nt on one thread); kills labelled time_limit; zero-candidate time limits valid;
+report selects best designs/first successes within 128 s. Development DesiRNA timings are
+optimistic (RESULTS correction). Framing unchanged (D-026): TCD = development model-adaptation gain,
+not SOTA; energy screen = non-neural; negative neural results recorded.
 
 ## Execution environment
 WSL Ubuntu-24.04:
