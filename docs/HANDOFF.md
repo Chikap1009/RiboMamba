@@ -38,12 +38,23 @@ Trace finding: late in search only ~2 % of proposals improve; feedback edits was
 ~33 % of late proposals on repeats. Defect-weighted site choice = random sites.
 
 ## Exact next task
-1. Finish Stage B: summarise data/repair_pilot/ew_dev1024_neural_v1 and run
-   `python scripts/repair_compare.py --runs ew_dev1024_v1 ew_dev1024_neural_v1
-   --name dev_stageB --pairs neural_feedback_edits:feedback_pair_edits
-   neural_random_edits:random_pair_edits neural_feedback_edits:neural_random_edits`.
-2. Record the Stage B decision (continuation criterion in RESEARCH_PLAN.md) in
-   DECISIONS/RESULTS and this handoff. Then follow the decision recorded there.
+Stage B is DONE and NEGATIVE (D-020; RESULTS.md). In flight since 07:08 IST
+(check `ls data/repair_pilot/<run>/units/*/*.json | wc -l`; resume = rerun the
+same command, finished units are skipped):
+1. ew_dev1024_efilter_v1: SAMFEO with its mutations pre-screened by target
+   energy (best of 8), 32 dev targets x 3 seeds x 1024, 2 workers. Then:
+   `python scripts/repair_compare.py --runs ew_dev1024_v1 ew_dev1024_efilter_v1
+   ew_dev64_rnainverse_v1 --name dev_efilter --pairs samfeo_efilter:samfeo`.
+2. trainpool_samfeo_v1: unfiltered SAMFEO on the 700-puzzle training pool
+   (manifests/eternaweb_trainpool_v1.json), budget 400, seed 0, 2 workers.
+   Then `python scripts/repair_critic.py data --run trainpool_samfeo_v1` and
+   `python scripts/repair_critic.py train --data trainpool_samfeo_v1` (GPU,
+   <= 30 min), then a dev run of method samfeo_cfilter (--gpu).
+Decision rule: docs/experiments/2026-09-27-stageC-repair-critic.md. The critic
+must beat BOTH SAMFEO and the energy filter at comparable wall time.
+SamplingDesign (f0283c49, Apache-2.0) is cloned and BUILT in external/ with a
+separate toolchain env `rmtools` (g++); no adapter yet; its defaults (2,500
+LinearPartition samples per step, 2,000 steps) are far above laptop budgets.
 
 ## Execution environment
 WSL Ubuntu-24.04:
@@ -58,10 +69,11 @@ Use `python -u` for long runs (stdout is block-buffered under nohup).
 Waiting on a run: never `pgrep -f`/`pkill -f` a pattern that also matches the
 waiting shell's own command line.
 
-## Compute ledger (pilot cap: 8 elapsed CPU-h, 2 GPU-h)
-CPU elapsed so far ~0.7 h (diagnostics 5 min, manifests 3.4 min, smokes 1.6 min,
-dev1024 20.5 min, mfe_repair 1.4 min, RNAinverse 7.2 min). GPU: Stage B run
-started 06:27 IST (cap 0.9 h).
+## Compute ledger (pilot cap: 8 elapsed CPU-h at <= 4 workers, 2 GPU-h)
+Counted as elapsed hours x (workers / 4). Through 07:20 IST: CPU ~1.4 h
+(diagnostics 0.1, manifests 0.06, smokes 0.03, dev1024 0.34, mfe_repair 0.02,
+RNAinverse 0.12, Stage B neural 0.62, pool 0.01, build of SamplingDesign ~0).
+GPU ~0.62 h (Stage B). In flight: efilter (2 workers) + training data (2 workers).
 
 ## Existing assets (older)
 - data/processed/{train,val,test}.parquet; data/targets/*_val.parquet (validation).

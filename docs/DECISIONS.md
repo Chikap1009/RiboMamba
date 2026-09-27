@@ -1045,3 +1045,32 @@ commit: local research comparison only, never vendored or redistributed;
 clarify with the authors before any code release. Its per-candidate cost is
 one zero-band subopt plus one partition function, which differs from our
 methods' calls; comparisons therefore also use wall time.
+
+## D-020 — Stage B is negative: the unconditional Transformer does not improve repair proposals
+**Date:** 2026-09-27   **Phase:** repair pilot, Stage B   **Logbook:** logbook/2026-09-27-session-07.md
+**Status:** accepted
+
+**Context.** RESEARCH_PLAN Stage B asked whether the existing unconditional
+Transformer (EMA, 14.17 M parameters) helps coordinated repair when it fills
+the same masked sites a random legal proposal would, with everything else
+equal (shared start, site rule, NED objective, acceptance, budget, seeds).
+
+**Decision.** Record Stage B as negative and do not tune it further: on 32
+hard development targets x 3 seeds, uMFE @1024 changed by -4 pp (feedback
+sites) and +2 pp (random sites), intervals including 0, at 4-5x the wall
+time. Following the plan, investigate once with a specific trace-based
+hypothesis (most folds are wasted on non-improving proposals; pre-screening
+them may buy quality per fold), testing a non-neural energy filter first and
+a small learned critic only as a controlled Stage C candidate.
+
+**Alternatives rejected.**
+- More sampling temperatures / larger masks / longer runs of the same model:
+  unbounded tuning of a model that never saw the target.
+- Fine-tuning the unconditional model on design data now: bigger step than
+  the evidence supports; the critic probe is smaller and directly tests the
+  bottleneck the traces show.
+
+**Consequences / trade-offs accepted.** The project's working method is not
+yet neural. If neither filter helps, the honest outcome is a non-neural or
+negative result; RNAinverse (for uMFE per second) and SAMFEO (for P(target))
+remain the strongest development baselines.

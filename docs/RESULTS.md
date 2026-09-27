@@ -1103,3 +1103,23 @@ Paired per-target differences @1024 (a - b): neural_feedback - feedback uMFE
 best NED -0.002 / -0.004 (intervals include 0). By equal wall time the neural
 variants are worse (16 s: 30-32 % vs 38-40 %). DECISION (D-020): the
 unconditional model adds no measurable value; Stage B is negative.
+
+### Non-neural proposal filter: SAMFEO + energy pre-screen (best of K = 8 by E(target)), 32 dev targets x 3 seeds
+Run ew_dev1024_efilter_v1 (commit 1901933, 2 workers, 1,188 s, 96/96 units, 0 errors).
+K = 8 fixed before running (not tuned). SAMFEO otherwise unchanged (pinned e78b4b5).
+
+| method | uMFE @64 | @256 | @1024 | best NED @1024 | best log10 P @1024 |
+|---|---|---|---|---|---|
+| SAMFEO | 21 % [9, 33] | 35 % [21, 51] | 48 % [32, 64] | 0.068 | -1.20 |
+| SAMFEO + energy filter | 33 % [20, 48] | 45 % [28, 61] | 58 % [42, 74] | 0.055 | -0.81 |
+
+Paired per target (filter - SAMFEO): uMFE +0.125 [0.042, 0.229] @64,
++0.094 [0.031, 0.177] @256, +0.104 [0.031, 0.188] @1024 (6 better / 0 worse /
+26 tied); best NED -0.0134 [-0.0195, -0.0081] @1024 (29/3); best log10 P
++0.39 [0.21, 0.61] @1024 (30/2). The filtered search at 256 evaluations
+matches SAMFEO at 1024 (uMFE 45 vs 48 %, log10 P -1.22 vs -1.20): ~4x fewer
+partition-function evaluations at comparable quality. By method wall time
+(filter cost included): 38 vs 35 % @1 s, 48 vs 41 % @4 s, 56 vs 45 % @16 s,
+58 vs 48 % @64 s; RNAinverse 46 / 54 / 56 / 59 % with worse NED (0.071).
+Development evidence only; confirmation targets untouched; novelty unverified
+(energy-based screening of design moves is a simple, likely-precedented idea).
