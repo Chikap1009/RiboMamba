@@ -97,3 +97,22 @@ clock, which already included the whole external run, so their replays stopped a
 (0 rows). The check now uses each candidate's stamped method time. After the chain, EVERY desirna and
 samplingdesign unit finished before the fix time is moved to units_superseded/ (kept, not deleted) and
 rerun under the same configuration; budgets and settings are unchanged.
+Amendment 4 (2026-09-28 ~01:05 IST) — measurement-validity fixes from an independent review (no
+method, setting, budget or endpoint changes; nothing tuned on final outcomes):
+(a) DesiRNA: its trajectory is written only at the end and its limit is checked only between rounds
+    (nominal 128 s runs lasted ~240 s, 238-239 CPU-s), and candidates had been stamped by step
+    fraction, crediting post-deadline work. Now scripts/external/desirna_wrapped.py logs every
+    replica state per round with real seconds since launch; the process group is killed at 128 s;
+    only rows logged by then count (commit 74ec5f1).
+(b) SamplingDesign: all early traces were empty. Measured: one default step (2,500 samples, one
+    thread) takes ~119-125 s at 180 nt on this machine, so on long puzzles no step finishes within
+    128 s (a genuine budget outcome). Output is now line-buffered (stdbuf) so a finished step is never
+    lost at the kill, candidates carry their real arrival time, and raw stdout/stderr are kept.
+(c) A kill at the limit is status time_limit (not early_stop); a time_limit unit with zero candidates
+    is a valid unsolved outcome, not rerun.
+(d) Every desirna / samplingdesign unit that started before the fix time
+    (data/repair_pilot/final_v2_replay_fix_time.txt) is moved to units_superseded/ and rerun by
+    data/repair_pilot/run_final_v2_retry.sh.
+(e) scripts/final_report.py refuses FINAL output unless all expected units of all three sets are valid
+    and the retry pass is done; best-P designs, first successes and EternaFold inputs are selected
+    only among candidates within 128 s of method time (same rule as the success curves).

@@ -1,4 +1,6 @@
-"""Run DesiRNA (unmodified checkout) with its mutation proposals pre-screened by target energy.
+"""SUPERSEDED 2026-09-28 by scripts/external/desirna_wrapped.py (real per-round timing + the same filter); kept for provenance of runs before commit 74ec5f1.
+
+Run DesiRNA (unmodified checkout) with its mutation proposals pre-screened by target energy.
 
 Executed with the `desirna` env's Python by ribomamba/design/baselines.py (method desirna_efilter).
 DESIRNA_DIR and DESIRNA_FILTER_K come from the environment; all other arguments are DesiRNA's own.

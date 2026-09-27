@@ -1,7 +1,9 @@
 """Final-benchmark analysis for protocol v2 (docs/PROTOCOL_design_v2.md, frozen 2026-09-27).
 
-  python scripts/final_report.py                # after all final_v2_* runs complete
-  python scripts/final_report.py --eternafold   # + the independent EternaFold robustness check
+  python scripts/final_report.py --eternafold   # FINAL: refuses unless every expected unit of all three
+                                                # sets is valid and the corrective retry pass is done
+  python scripts/final_report.py --interim      # diagnostics on an incomplete benchmark, written to a
+                                                # separate file and labelled INTERIM (never final results)
 
 Endpoints exactly as frozen: puzzles solved (uMFE) by 128 s of method time — by any of the 3
 seeds and the mean over seeds — per set; uMFE at 1/4/16/64/128 s; best NED; best log10 P;
@@ -26,6 +28,8 @@ from ribomamba.paths import PILOT_DIR
 
 SETS = ("eterna100_v2", "eterna100_v1only", "rfam_taneda27")
 WALLS = (1, 4, 16, 64, 128)
+LIMIT_S = 128.0
+RETRY_DONE = PILOT_DIR / "final_v2_retry.done"
 PAIRS = [("samfeo_efilter", "samfeo"), ("samfeo_tcdprop_efilter", "samfeo"), ("samfeo_tcdprop_efilter", "samfeo_efilter"),
          ("desirna", "samfeo_efilter"), ("rnainverse", "samfeo_efilter"), ("samplingdesign", "samfeo_efilter"),
          ("tcd_sample", "random_pairs"), ("tcd_sample", "samfeo_efilter")]
@@ -54,14 +58,22 @@ def audit(s: str) -> dict:
 
 
 def per_unit(s: str) -> pl.DataFrame:
-    """One row per (method, target, seed, wall budget) with success/NED; plus final best P per unit."""
+    """One row per (method, target, seed, wall budget) with success/NED, plus the unit's best-P design
+    and first uMFE success, both chosen ONLY among candidates within LIMIT_S of method time (the same
+    eligibility rule as the success curves; review of 2026-09-28)."""
     units = summary.wall_unit_table(run_dir(s), walls=WALLS)
     _, statuses, traces = summary.load_run(run_dir(s))
-    best = (traces.sort("log_p_target", descending=True).group_by(["method", "target_id", "seed"]).first()
+    frames = []
+    for (method,), t in traces.group_by(["method"]):
+        t = t.sort(["target_id", "seed", "eval_index"])
+        frames.append(t.with_columns(summary.method_wall(t, method).alias("method_wall_s")))
+    eligible = pl.concat(frames).filter(pl.col("method_wall_s") <= LIMIT_S) if frames else traces
+    best = (eligible.sort("log_p_target", descending=True).group_by(["method", "target_id", "seed"]).first()
             .select("method", "target_id", "seed", (pl.col("log_p_target") / math.log(10)).alias("best_log10_p"),
                     "sequence"))
-    first = (traces.filter(pl.col("umfe")).group_by(["method", "target_id", "seed"])
-             .agg((pl.col("eval_index").min() + 1).alias("evals_to_first")))
+    first = (eligible.filter(pl.col("umfe")).group_by(["method", "target_id", "seed"])
+             .agg((pl.col("eval_index").min() + 1).alias("evals_to_first"),
+                  pl.col("method_wall_s").min().alias("seconds_to_first")))
     return units.join(best, on=["method", "target_id", "seed"], how="left").join(
         first, on=["method", "target_id", "seed"], how="left")
 
@@ -108,19 +120,34 @@ def eternafold_check(frames: dict) -> dict:
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--eternafold", action="store_true")
+    p.add_argument("--interim", action="store_true", help="allow an incomplete benchmark; output labelled INTERIM")
     args = p.parse_args()
-    report, frames = {"audit": {}, "sets": {}}, {}
+    report, frames = {"audit": {}, "sets": {}, "status": "INTERIM (incomplete benchmark)" if args.interim else "FINAL"}, {}
+    problems = []
     for s in SETS:
         if not (run_dir(s) / "run_config.json").exists():
+            problems.append(f"{s}: run has not started")
             continue
         report["audit"][s] = audit(s)
+        bad = {k: v for k, v in report["audit"][s]["validation"].items() if k != "valid"}
+        if bad:
+            problems.append(f"{s}: units not valid {bad}")
+    if not RETRY_DONE.exists():
+        problems.append("the corrective retry pass (data/repair_pilot/run_final_v2_retry.sh) has not completed")
+    report["coverage_problems"] = problems
+    if problems and not args.interim:
+        raise SystemExit("refusing to report FINAL results:\n  " + "\n  ".join(problems))
+    for s in SETS:
+        if s not in report["audit"]:
+            continue
         u = per_unit(s)
         frames[s] = u
         entry = {"solved_by_128s": solved_counts(u, 128).to_dicts(),
                  "curves": u.group_by(["method", "wall_s", "target_id"]).agg(pl.col("success_umfe").cast(pl.Float64).mean())
                  .group_by(["method", "wall_s"]).agg(pl.col("success_umfe").mean()).sort(["method", "wall_s"]).to_dicts(),
                  "quality_128s": u.filter(pl.col("wall_s") == 128).group_by("method").agg(
-                     pl.col("best_ned").mean(), pl.col("best_log10_p").mean(), pl.col("evals_to_first").median()).sort("method").to_dicts(),
+                     pl.col("best_ned").mean(), pl.col("best_log10_p").mean(), pl.col("evals_to_first").median(),
+                     pl.col("seconds_to_first").median()).sort("method").to_dicts(),
                  "paired": [r for a, b in PAIRS for w in (16, 128) for m in ("success_umfe", "best_ned")
                             if (r := paired(u, a, b, w, m)) is not None]}
         report["sets"][s] = entry
@@ -137,7 +164,9 @@ def main() -> None:
         report["sets"]["eterna100_v1_combined"] = {"solved_by_128s": v1.to_dicts(), "shared_structures": len(shared)}
     if args.eternafold and "eterna100_v2" in frames:
         report["eternafold_v2_best_designs"] = eternafold_check(frames)
-    (PILOT_DIR / "final_v2_report.json").write_text(json.dumps(report, indent=1, default=float))
+    out = PILOT_DIR / ("final_v2_report_INTERIM.json" if args.interim else "final_v2_report.json")
+    out.write_text(json.dumps(report, indent=1, default=float))
+    print(f"[{report['status']}] written to {out}")
     for s, e in report["sets"].items():
         print(f"## {s}")
         for r in e["solved_by_128s"]:
