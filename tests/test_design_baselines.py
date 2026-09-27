@@ -107,3 +107,14 @@ def test_zero_residual_model_ranks_like_the_energy_filter():
     energy = b.energy_scores(target, parent, kids, [0.1] * len(parent), ev)
     residual = scorer(target, parent, kids, [0.1] * len(parent), ev)
     assert list(np.argsort(energy)) == list(np.argsort(residual))
+
+
+@pytest.mark.skipif(not (baselines.DESIRNA_DIR / "DesiRNA.py").exists(), reason="DesiRNA checkout absent")
+def test_desirna_adapter_replays_its_trajectory_with_method_times():
+    target = Target("toy", "((((((....))))))..((((((....))))))")
+    ev = Evaluator(target, budget=500)
+    baselines.desirna(target, 0, ev, {"time_limit_s": 3, "replicas": 2})
+    assert ev.rows and ev.internal_available is False
+    times = [r["elapsed_s"] for r in ev.rows]
+    assert times == sorted(times) and 0 <= times[0] and times[-1] <= 3.0
+    assert len({r["sequence"] for r in ev.rows}) == len(ev.rows)

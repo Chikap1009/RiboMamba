@@ -284,9 +284,66 @@ def rnainverse(target: Target, seed: int, evaluate: Evaluator, settings: dict, l
         start = random_design(target, rng)
 
 
-BASELINES = {"samfeo": samfeo, "rnainverse": rnainverse, "samfeo_efilter": samfeo_efilter,
+DESIRNA_URL = "https://github.com/fryzjergda/DesiRNA.git"
+DESIRNA_COMMIT = "bdb490839941daf30fe9119cbc4e2961d57f3a36"
+DESIRNA_DIR = EXTERNAL_DIR / "DesiRNA"
+DESIRNA_SETTINGS = {"commit": DESIRNA_COMMIT, "param": 2004, "replicas": 10, "time_limit_s": 64, "one_core": True,
+                    "conda_env": "desirna", "stop_when_solved": "off"}
+
+
+def desirna(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=None) -> None:
+    """DesiRNA (Apache-2.0; pinned DESIRNA_COMMIT) run as a subprocess in its own env (ViennaRNA 2.7.2).
+
+    It runs for time_limit_s of wall time (Turner 2004, `replicas` replicas; with one_core the
+    whole process tree is pinned to one CPU so replicas time-share, for per-core fairness).
+    Its trajectory file (every replica's state at every exchange) is then replayed: each new
+    distinct sequence is scored by the harness (measurement) and stamped with the method time
+    time_limit_s * step / last_step (an approximation: DesiRNA logs steps, not times).
+    Internal calls are not countable. Child CPU seconds go to the unit log.
+    """
+    import csv
+    import os
+    import resource
+    import shutil
+    import tempfile
+    s = {**DESIRNA_SETTINGS, **settings}
+    evaluate.internal_available = False
+    work = Path(tempfile.mkdtemp(prefix="desirna_"))
+    try:
+        (work / "in.txt").write_text(f">name\nt\n>sec_struct\n{target.structure}\n>seq_restr\n{'N' * len(target)}\n")
+        conda_python = Path(os.environ.get("CONDA_EXE", "/home/chirag/miniforge3/bin/conda")).parent.parent / "envs" / \
+            s["conda_env"] / "bin" / "python"
+        cmd = [str(conda_python), str(DESIRNA_DIR / "DesiRNA.py"), "-f", "in.txt", "-t", str(s["time_limit_s"]),
+               "-p", str(s["param"]), "-R", str(s["replicas"]), "-seed", str(seed + 1), "-sws", s["stop_when_solved"],
+               "-od", "out"]
+        if s["one_core"]:
+            cmd = ["taskset", "-c", str(os.getpid() % (os.cpu_count() or 1))] + cmd
+        before = resource.getrusage(resource.RUSAGE_CHILDREN)
+        proc = subprocess.run(cmd, cwd=work, capture_output=True, text=True)
+        after = resource.getrusage(resource.RUSAGE_CHILDREN)
+        if log is not None:
+            log.write(f"cmd: {' '.join(cmd)}\nexit {proc.returncode}; child cpu s "
+                      f"{after.ru_utime + after.ru_stime - before.ru_utime - before.ru_stime:.1f}\n{proc.stderr[-2000:]}\n")
+        if proc.returncode != 0:
+            raise RuntimeError(f"DesiRNA exited {proc.returncode}: {proc.stderr[-500:]}")
+        traj = next(work.glob("out*/trajectory_files/*_traj.csv"))
+        rows = list(csv.DictReader(open(traj)))
+        last = max(int(r["sim_step"]) for r in rows) or 1
+        seen = set()
+        for r in sorted(rows, key=lambda r: (int(r["sim_step"]), int(r["replica_num"]))):
+            seq = r["sequence"]
+            if seq in seen:
+                continue
+            seen.add(seq)
+            evaluate(seq, objective=float(r["scoring_function"]),
+                     method_time_s=s["time_limit_s"] * int(r["sim_step"]) / last)
+    finally:
+        shutil.rmtree(work, ignore_errors=True)
+
+
+BASELINES = {"samfeo": samfeo, "rnainverse": rnainverse, "samfeo_efilter": samfeo_efilter, "desirna": desirna,
              "samfeo_cfilter": samfeo_cfilter}
-BASELINE_SETTINGS = {"samfeo": SAMFEO_SETTINGS, "rnainverse": RNAINVERSE_SETTINGS,
+BASELINE_SETTINGS = {"samfeo": SAMFEO_SETTINGS, "rnainverse": RNAINVERSE_SETTINGS, "desirna": DESIRNA_SETTINGS,
                      "samfeo_efilter": SAMFEO_EFILTER_SETTINGS, "samfeo_cfilter": SAMFEO_CFILTER_SETTINGS}
 # Competition-residual filters (docs/experiments/2026-09-27-competition-residual.md), frozen models only.
 RESIDUAL_VARIANTS = {"samfeo_rfilter_linear": "checkpoints/residual_v1/linear_rivals.json",

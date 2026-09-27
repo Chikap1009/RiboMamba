@@ -122,7 +122,10 @@ class Evaluator:
         if time.time() > self.deadline:
             raise DeadlineReached
 
-    def __call__(self, sequence: str, parent: int = -1, objective: float | None = None) -> Candidate:
+    def __call__(self, sequence: str, parent: int = -1, objective: float | None = None,
+                 method_time_s: float | None = None) -> Candidate:
+        """Score one proposal. method_time_s: for replayed external runs (DesiRNA), the method's own
+        time at which this candidate existed; recorded as elapsed_s instead of the harness clock."""
         self.check()
         hit = sequence in self.cache
         if not hit:
@@ -144,7 +147,8 @@ class Evaluator:
             "cum_proposals": index + 1, "cum_cache_misses": self.cache_misses,
             **self.oracle.as_dict("cum_oracle_"),
             **{k: (v if self.internal_available else None) for k, v in self.internal.as_dict("cum_internal_").items()},
-            "elapsed_s": time.perf_counter() - self.t0, "cpu_s": time.process_time() - self.c0,
+            "elapsed_s": time.perf_counter() - self.t0 if method_time_s is None else method_time_s,
+            "cpu_s": time.process_time() - self.c0,
             "score_wall_s": self.score_wall_s, "cum_model_calls": self.model_calls, "model_wall_s": self.model_wall_s,
         })
         return Candidate(index, sequence, result)
