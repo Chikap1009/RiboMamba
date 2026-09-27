@@ -315,13 +315,20 @@ def desirna(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=
         (work / "in.txt").write_text(f">name\nt\n>sec_struct\n{target.structure}\n>seq_restr\n{'N' * len(target)}\n")
         conda_python = Path(os.environ.get("CONDA_EXE", "/home/chirag/miniforge3/bin/conda")).parent.parent / "envs" / \
             s["conda_env"] / "bin" / "python"
-        cmd = [str(conda_python), str(DESIRNA_DIR / "DesiRNA.py"), "-f", "in.txt", "-t", str(s["time_limit_s"]),
+        entry = DESIRNA_DIR / "DesiRNA.py"
+        env = dict(os.environ)
+        if s.get("filter_k"):                       # energy pre-screen of DesiRNA's own proposals
+            entry = Path(__file__).resolve().parents[2] / "scripts" / "external" / "desirna_filtered.py"
+            env.update(DESIRNA_DIR=str(DESIRNA_DIR), DESIRNA_FILTER_K=str(s["filter_k"]))
+        cmd = [str(conda_python), str(entry), "-f", "in.txt", "-t", str(s["time_limit_s"]),
                "-p", str(s["param"]), "-R", str(s["replicas"]), "-seed", str(seed + 1), "-sws", s["stop_when_solved"],
                "-od", "out"]
         if s["one_core"]:
-            cmd = ["taskset", "-c", str(os.getpid() % (os.cpu_count() or 1))] + cmd
+            # One distinct core per pool worker (its 1-based identity), so pinned runs never share a core.
+            ident = (multiprocessing.current_process()._identity or (os.getpid(),))[0]
+            cmd = ["taskset", "-c", str((ident - 1) % (os.cpu_count() or 1))] + cmd
         before = resource.getrusage(resource.RUSAGE_CHILDREN)
-        proc = subprocess.run(cmd, cwd=work, capture_output=True, text=True)
+        proc = subprocess.run(cmd, cwd=work, capture_output=True, text=True, env=env)
         after = resource.getrusage(resource.RUSAGE_CHILDREN)
         if log is not None:
             log.write(f"cmd: {' '.join(cmd)}\nexit {proc.returncode}; child cpu s "
@@ -427,6 +434,8 @@ for _v in ("generic", "norival", "rival"):
     BASELINES[f"samfeo_sfilter_{_v}"] = samfeo_efilter
     BASELINE_SETTINGS[f"samfeo_sfilter_{_v}"] = {**SAMFEO_SETTINGS, "filter": "sibling", "filter_k": 8,
                                                  "residual_model": f"checkpoints/residual_v1/sibling_{_v}.pt"}
+BASELINES["desirna_efilter"] = desirna
+BASELINE_SETTINGS["desirna_efilter"] = {**DESIRNA_SETTINGS, "filter_k": 8}
 BASELINES["rnainverse_r64"] = rnainverse
 BASELINE_SETTINGS["rnainverse_r64"] = {**RNAINVERSE_SETTINGS, "max_restarts": 64}
 BASELINES["samfeo_efilter_eps"] = samfeo_efilter
