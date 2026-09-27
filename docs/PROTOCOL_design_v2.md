@@ -85,3 +85,9 @@ Amendment 1b (same evening): recycling alone left ~1.2 GB per worker because eve
 torch's CUDA build via the method registry; model methods are now registered lazily
 (ribomamba/design/lazy_methods.py), so CPU-method workers never import torch. Method settings and
 the run's config hash are unchanged (verified); the chain was stopped and resumed again.
+Amendment 2 (2026-09-27 ~22:45 IST) — operational bug fix: the runner passes the unit time limit
+as a float (128.0) and DesiRNA's -t option accepts only integers, so the first 15 DesiRNA units
+errored immediately (recorded, not dropped). The adapter now passes int(round(limit)) (b46f71d;
+same 128 s budget). Recycled workers pick up the fix for new units; errored units are rerun with
+--retry-errors after the chain (data/repair_pilot/run_final_v2_retry.sh). Settings and config
+hash unchanged.
