@@ -16,3 +16,6 @@ __pycache__/
 # Teaching drafts prepared ahead of a phase's concept block (not taught yet; kept out of Git so
 # editing them never makes a training run's recorded commit "-dirty")
 /drafts/
+
+# Pinned third-party baseline checkouts (see ribomamba/design/baselines.py; not redistributed)
+/external/

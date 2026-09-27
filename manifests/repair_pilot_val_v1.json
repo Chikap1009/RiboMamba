@@ -1,0 +1,1462 @@
+{
+ "content_sha256": "58df4ac15ee13260a98be5b3c4db1023d9d24cf4d622641f27700f6996d8bfd7",
+ "exclusions": [],
+ "funnel": {
+  "confirmation": 32,
+  "development": 32,
+  "eligible": 402,
+  "selected": 64,
+  "smoke": 8,
+  "source_rows": 402
+ },
+ "name": "repair_pilot_val_v1",
+ "purpose": "Repair pilot (RESEARCH_PLAN.md Stage A): VALIDATION targets only. Not a final benchmark; test targets were not read.",
+ "rules": {
+  "eligibility": [
+   "structure only ( ) . and balanced",
+   "length <= 256, equal to native",
+   ">= 4 base pairs",
+   "every pair encloses >= 3 nt",
+   "native A/C/G/U, forms every target pair canonically, recorded native MFE match",
+   "distinct target structure"
+  ],
+  "selection": "4 per cell, numpy default_rng(20260927), cells in order",
+  "smoke": "one development target per (length bin, paired-fraction half)",
+  "split": "2 development + 2 confirmation per cell",
+  "strata": "4 equal-count length bins x 4 equal-count paired-fraction bins within each; ties broken by family name"
+ },
+ "seed": 20260927,
+ "source": {
+  "built_by": "python scripts/build_targets.py --split val --seed 0",
+  "path": "data/targets/rfam_val.parquet",
+  "sha256": "8691cbdce49e22f4f237955884cf46f7c078f843959a3128ffdf76681817e045"
+ },
+ "strata": [
+  {
+   "eligible": 26,
+   "length_bin": 0,
+   "length_range": [
+    21,
+    72
+   ],
+   "paired_bin": 0,
+   "paired_fraction_range": [
+    0.1455,
+    0.4889
+   ]
+  },
+  {
+   "eligible": 25,
+   "length_bin": 0,
+   "length_range": [
+    20,
+    71
+   ],
+   "paired_bin": 1,
+   "paired_fraction_range": [
+    0.4918,
+    0.6154
+   ]
+  },
+  {
+   "eligible": 25,
+   "length_bin": 0,
+   "length_range": [
+    30,
+    73
+   ],
+   "paired_bin": 2,
+   "paired_fraction_range": [
+    0.6176,
+    0.7042
+   ]
+  },
+  {
+   "eligible": 25,
+   "length_bin": 0,
+   "length_range": [
+    56,
+    71
+   ],
+   "paired_bin": 3,
+   "paired_fraction_range": [
+    0.7164,
+    0.8955
+   ]
+  },
+  {
+   "eligible": 25,
+   "length_bin": 1,
+   "length_range": [
+    73,
+    85
+   ],
+   "paired_bin": 0,
+   "paired_fraction_range": [
+    0.2857,
+    0.5412
+   ]
+  },
+  {
+   "eligible": 25,
+   "length_bin": 1,
+   "length_range": [
+    73,
+    85
+   ],
+   "paired_bin": 1,
+   "paired_fraction_range": [
+    0.55,
+    0.6588
+   ]
+  },
+  {
+   "eligible": 25,
+   "length_bin": 1,
+   "length_range": [
+    73,
+    85
+   ],
+   "paired_bin": 2,
+   "paired_fraction_range": [
+    0.6667,
+    0.7143
+   ]
+  },
+  {
+   "eligible": 25,
+   "length_bin": 1,
+   "length_range": [
+    75,
+    85
+   ],
+   "paired_bin": 3,
+   "paired_fraction_range": [
+    0.7143,
+    0.881
+   ]
+  },
+  {
+   "eligible": 26,
+   "length_bin": 2,
+   "length_range": [
+    85,
+    115
+   ],
+   "paired_bin": 0,
+   "paired_fraction_range": [
+    0.1818,
+    0.5682
+   ]
+  },
+  {
+   "eligible": 25,
+   "length_bin": 2,
+   "length_range": [
+    86,
+    111
+   ],
+   "paired_bin": 1,
+   "paired_fraction_range": [
+    0.5747,
+    0.6531
+   ]
+  },
+  {
+   "eligible": 25,
+   "length_bin": 2,
+   "length_range": [
+    86,
+    112
+   ],
+   "paired_bin": 2,
+   "paired_fraction_range": [
+    0.6542,
+    0.7273
+   ]
+  },
+  {
+   "eligible": 25,
+   "length_bin": 2,
+   "length_range": [
+    85,
+    114
+   ],
+   "paired_bin": 3,
+   "paired_fraction_range": [
+    0.7368,
+    0.8837
+   ]
+  },
+  {
+   "eligible": 25,
+   "length_bin": 3,
+   "length_range": [
+    116,
+    224
+   ],
+   "paired_bin": 0,
+   "paired_fraction_range": [
+    0.3967,
+    0.549
+   ]
+  },
+  {
+   "eligible": 25,
+   "length_bin": 3,
+   "length_range": [
+    120,
+    249
+   ],
+   "paired_bin": 1,
+   "paired_fraction_range": [
+    0.55,
+    0.5946
+   ]
+  },
+  {
+   "eligible": 25,
+   "length_bin": 3,
+   "length_range": [
+    115,
+    204
+   ],
+   "paired_bin": 2,
+   "paired_fraction_range": [
+    0.595,
+    0.6435
+   ]
+  },
+  {
+   "eligible": 25,
+   "length_bin": 3,
+   "length_range": [
+    117,
+    227
+   ],
+   "paired_bin": 3,
+   "paired_fraction_range": [
+    0.6452,
+    0.9577
+   ]
+  }
+ ],
+ "targets": [
+  {
+   "family": "BaMV_CRE",
+   "id": "rfam_val:BaMV_CRE",
+   "length": 140,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.199377,
+    "umfe": true
+   },
+   "native_sequence": "AACGUUGCAUGAUCGUAAAACAUGCCCGGCUUACCGUGAGCCGCCUUUGAAAGAAAGGUUUACACGGACUCUGUUGCGUUACGCACGUACCUAACUUGUGCCGGCAGAAUAAAGACCUUUUGGUUUCUACAGUUUUUUCC",
+   "paired_bin": 0,
+   "paired_fraction": 0.5,
+   "pairs": 35,
+   "smoke": false,
+   "structure": "..((..(((((.........))))).)).....(((((....((((((.....))))))...)))))..(((((((......(((((.........))))))))))))....(((((....)))))..............",
+   "subset": "development"
+  },
+  {
+   "family": "CRISPR-DR17",
+   "id": "rfam_val:CRISPR-DR17",
+   "length": 25,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.02665,
+    "umfe": true
+   },
+   "native_sequence": "CUUUCUAAUCCCUCUUGGGAUUUUC",
+   "paired_bin": 0,
+   "paired_fraction": 0.48,
+   "pairs": 6,
+   "smoke": false,
+   "structure": "......((((((....))))))...",
+   "subset": "development"
+  },
+  {
+   "family": "CRISPR-DR40",
+   "id": "rfam_val:CRISPR-DR40",
+   "length": 30,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.23759,
+    "umfe": true
+   },
+   "native_sequence": "GUUUAACUUCUAUAUUAGAUAUAUUUAAAC",
+   "paired_bin": 2,
+   "paired_fraction": 0.666667,
+   "pairs": 10,
+   "smoke": false,
+   "structure": "((((((..((((...)))).....))))))",
+   "subset": "development"
+  },
+  {
+   "family": "CRISPR-DR66",
+   "id": "rfam_val:CRISPR-DR66",
+   "length": 36,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.102903,
+    "umfe": true
+   },
+   "native_sequence": "GGUUUAAUCCCUUGUAGGGAUUCUUAUUUAUGGAAC",
+   "paired_bin": 0,
+   "paired_fraction": 0.388889,
+   "pairs": 7,
+   "smoke": false,
+   "structure": ".....(((((((...)))))))..............",
+   "subset": "confirmation"
+  },
+  {
+   "family": "CoTC_ribozyme",
+   "id": "rfam_val:CoTC_ribozyme",
+   "length": 195,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.329238,
+    "umfe": true
+   },
+   "native_sequence": "GCAUAGUGUUACCAGCAGCAACACAUGCCAAUUUCAUUUUCUCAUUCAAUAGUCACUUACAUGGAUGCUUGAUUCUGGAAAUAAUAGGCGAACUUCAAGCAGUCCUUGUCCCGUCCUGCAUCUCAAUUUUGAAUCUAGUUGGGAAGAUUCUAAAGGUAAUGCAUCUAAUAUGUGACUAUAAAUGAGUGUACAGGA",
+   "paired_bin": 1,
+   "paired_fraction": 0.564103,
+   "pairs": 55,
+   "smoke": true,
+   "structure": "((((.(((((.(.....).)))))))))............((((((..((((((((..(((.(((((((((((((..............)))..))))))).))).))).......(((((..(..(((.((((((........)))))).))).)..)))))........)))))))).)))))).........",
+   "subset": "development"
+  },
+  {
+   "family": "Deinococcus_Y_RNA",
+   "id": "rfam_val:Deinococcus_Y_RNA",
+   "length": 126,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.066015,
+    "umfe": true
+   },
+   "native_sequence": "GCUCUGGGCCGAAGUGGUCACGGUUACUUCUCCAACCUCAAUGGGCGGAAGCGGUGCAAGCCGUUCCGGGUUCGAUUCCCGGCAUGAAGUGGCCCGUCCGUGACCCGAACCCUUGUCCAGAGCACU",
+   "paired_bin": 3,
+   "paired_fraction": 0.666667,
+   "pairs": 42,
+   "smoke": false,
+   "structure": "(((((((((....((((((((((((((((((((..((.....))..)))((((((....))))))(((((.......)))))...))))))))).....))))))...))....)))))))))...",
+   "subset": "confirmation"
+  },
+  {
+   "family": "GlsR9",
+   "id": "rfam_val:GlsR9",
+   "length": 79,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.221214,
+    "umfe": true
+   },
+   "native_sequence": "UAGCAACCCGUGAUUUGCAACGCUUAGUCCGUGUUUCGGAGUGUCUUGCACGCUGAUGAGUGAAAGCACACAUGAGGUU",
+   "paired_bin": 1,
+   "paired_fraction": 0.632911,
+   "pairs": 25,
+   "smoke": false,
+   "structure": "....((((((((...(((..((((((...(((((...(((...))).)))))....))))))...)))..)))).))))",
+   "subset": "confirmation"
+  },
+  {
+   "family": "IR_84",
+   "id": "rfam_val:IR_84",
+   "length": 189,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 2,
+    "ned": 0.426841,
+    "umfe": false
+   },
+   "native_sequence": "UUUCAGAUAAAAAAAACCAUUCAUACUAAGGGAGAAGUAUGAAUGGCCAAUACAUUGCGGGAAAACGUCUUACUUGCUGCACCGCCCUAAAAGGGAUGAAAAGAGCGGUGUGUGUCAGCAAUGACUAUUCUACCUACCUUAGUAUUAAAUGCCGUUAAGAUGUGAAAUGAUUUUAGUAAAUUGCGCGUA",
+   "paired_bin": 0,
+   "paired_fraction": 0.455026,
+   "pairs": 43,
+   "smoke": false,
+   "structure": "................(((((((((((........)))))))))))..........(((.((..((((((((.(((((((((((((((...............)).)))).))).))))))..((((............))))............)))))))).................)).)))...",
+   "subset": "confirmation"
+  },
+  {
+   "family": "MEG8_2",
+   "id": "rfam_val:MEG8_2",
+   "length": 105,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.164484,
+    "umfe": true
+   },
+   "native_sequence": "AGCCCGGGGCUCCCCCGUGUUGCCUGGAUCUGACUUCUCUUAACCGAAAACCGCCUCGUAUUCUCUCUUGCACUGUGUUGGAGGAUCGAGUUGCCUGCCCUGUGG",
+   "paired_bin": 1,
+   "paired_fraction": 0.628571,
+   "pairs": 33,
+   "smoke": false,
+   "structure": "..((((((((.....((.((((...(((.......)))..))))))......((((((.(((((((...(((...))).)))))))))))..))..)))))).))",
+   "subset": "confirmation"
+  },
+  {
+   "family": "MIR4372",
+   "id": "rfam_val:MIR4372",
+   "length": 123,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.294062,
+    "umfe": true
+   },
+   "native_sequence": "ACGUUGACAGUCACAUGUCGCACUUUUAUUGAACAUUAUAUGUCACGAUUUUAUUAGAGGUUGACAUUAAUUAAGUGUACAAAAUCAACGUCCAAUAAAUGCACGAUAUGUGACGGUAAACGG",
+   "paired_bin": 3,
+   "paired_fraction": 0.650407,
+   "pairs": 40,
+   "smoke": true,
+   "structure": ".((((.((.(((((((((((..(.(((((((.((((...)))).............((.(((((((((.....)))).......))))).))))))))).)..))))))))))).)).)))).",
+   "subset": "development"
+  },
+  {
+   "family": "MIR5534",
+   "id": "rfam_val:MIR5534",
+   "length": 102,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.055919,
+    "umfe": true
+   },
+   "native_sequence": "AAUUUUAGCGCCUUGACUACAACAGCUAGAAUGGCCGCGGCGACGGAGGAUUGUCCCCCGAUGAGGCCGCCAUUCUAGAUGUUAUCGUCGAGGCGCUAAAUU",
+   "paired_bin": 3,
+   "paired_fraction": 0.745098,
+   "pairs": 38,
+   "smoke": false,
+   "structure": "...((((((((((((((...((((.((((((((((.((..((.(((.(((...))).))).))..)).)))))))))).))))...))))))))))))))..",
+   "subset": "confirmation"
+  },
+  {
+   "family": "P13",
+   "id": "rfam_val:P13",
+   "length": 76,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.252989,
+    "umfe": true
+   },
+   "native_sequence": "UGUGCCGCACUGACCGCUCGUCAGCUCGUCGCGGAUGCUUUACCAUGGUGACUUCGCGCCGGAUCAGCUCCGGCGU",
+   "paired_bin": 1,
+   "paired_fraction": 0.552632,
+   "pairs": 21,
+   "smoke": true,
+   "structure": ".........(((((.....)))))...(((((..(((......))).)))))...((((((((.....))))))))",
+   "subset": "development"
+  },
+  {
+   "family": "PutA_thermometer",
+   "id": "rfam_val:PutA_thermometer",
+   "length": 72,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.166363,
+    "umfe": true
+   },
+   "native_sequence": "GAAAUAAAAUCAUAAUUCCCCUUAUCAAAGGAGACGAGCGACAUGGCGAAUACCACAAUGGGCGUAAAGCUU",
+   "paired_bin": 0,
+   "paired_fraction": 0.388889,
+   "pairs": 14,
+   "smoke": true,
+   "structure": "................((.((((....)))).)).((((...(((.(.............).)))...))))",
+   "subset": "development"
+  },
+  {
+   "family": "RAGATH-7-assoc",
+   "id": "rfam_val:RAGATH-7-assoc",
+   "length": 122,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.294993,
+    "umfe": true
+   },
+   "native_sequence": "AAAGAGCAUACUAUACUAUUAUACUGACCCAACAGUAUAUGAAAAUUCGUGUAUGAUGUAUAUCUCUCUAAUUGAGGCGUUACUAACAAAGUAUGAAGGCGCAGAAGUGUAUAGAGCUCUUU",
+   "paired_bin": 2,
+   "paired_fraction": 0.606557,
+   "pairs": 37,
+   "smoke": false,
+   "structure": "(((((((...((((((...(((((((......))))))).........((((((...))))))..(((.....)))((((((((.....)))).....))))......)))))).)))))))",
+   "subset": "development"
+  },
+  {
+   "family": "RybB",
+   "id": "rfam_val:RybB",
+   "length": 79,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.112696,
+    "umfe": true
+   },
+   "native_sequence": "ACUGCUUUUCUUUGAUGUCCCCAUUUUGUGGAGCCCAUCAACCCCGCCGUUUCGGUUCAAGGUUGAUGGGUUUUUUCUU",
+   "paired_bin": 0,
+   "paired_fraction": 0.506329,
+   "pairs": 20,
+   "smoke": false,
+   "structure": "....................((((...))))((((((((((((..((((...))))....)))))))))))).......",
+   "subset": "development"
+  },
+  {
+   "family": "SCARNA11",
+   "id": "rfam_val:SCARNA11",
+   "length": 140,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.038696,
+    "umfe": true
+   },
+   "native_sequence": "GUGUCCUGACCUUAUCUUUGCUCUUCCCUUCACCAGAGCUGUGGUGUUGGGGUUUUGGGGUGGACACAGAUCAACUUACCUCUCGUGUUAGGAGGGCUACCAAAGAUGUGUGGAAGCCCUUAAAGGCAGGAGAGGACACC",
+   "paired_bin": 1,
+   "paired_fraction": 0.585714,
+   "pairs": 41,
+   "smoke": false,
+   "structure": "((((((..((((((..........((((..(((((......)))))..))))...))))))))))))...........((((((.((((..(((((((.(((........))).)))))))...)))).)))))).....",
+   "subset": "confirmation"
+  },
+  {
+   "family": "SNORA8",
+   "id": "rfam_val:SNORA8",
+   "length": 139,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.429213,
+    "umfe": true
+   },
+   "native_sequence": "UGCACUGUGUGGUAUCUGCACCCAGCAGCCUUCUCCUGGUGGGAUGUUCAAAGAGCAGUGCUACAGCAGCCCAGUGUUUGGCAUCGUUGGUUUUCAGUCUGCUGUGUCUGUGAAACCUGGUAUUUGUGCUGGUACACUU",
+   "paired_bin": 0,
+   "paired_fraction": 0.532374,
+   "pairs": 37,
+   "smoke": false,
+   "structure": ".(((((((.........(((((((.(((.......))).)))).))).......)))))))..(((((..((((.((((.(((....((((.........))))....))).))))))))......)))))........",
+   "subset": "development"
+  },
+  {
+   "family": "SNORD105",
+   "id": "rfam_val:SNORD105",
+   "length": 83,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.096892,
+    "umfe": true
+   },
+   "native_sequence": "CUCCUGUCUCAUGAUGAACCCCCUGCCCUGAACAGUAGUGAUGCUGGCUUCAAAGUAAACGCUCUGAAGCAAUGGAGCAAGGC",
+   "paired_bin": 1,
+   "paired_fraction": 0.578313,
+   "pairs": 24,
+   "smoke": false,
+   "structure": ".....(((....))).....((.(((((....(((((....)))))((((((.(((....))).))))))...)).))).)).",
+   "subset": "development"
+  },
+  {
+   "family": "SNORD2",
+   "id": "rfam_val:SNORD2",
+   "length": 67,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.149647,
+    "umfe": true
+   },
+   "native_sequence": "UCGAGCGAUGAAGGCAUACCAUCUUUCGGCUGAACACAUGCUGAUAUUUUUUCAUUACUGAGCUCGA",
+   "paired_bin": 3,
+   "paired_fraction": 0.716418,
+   "pairs": 24,
+   "smoke": false,
+   "structure": "((((((((((((((.(((.......(((((((....)).)))))))).)))))))).....))))))",
+   "subset": "development"
+  },
+  {
+   "family": "ST7-OT3_3",
+   "id": "rfam_val:ST7-OT3_3",
+   "length": 115,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.228713,
+    "umfe": true
+   },
+   "native_sequence": "UAUUUACCUAUGUUUAGCUACCUGCUCUGUGUUAGGCAUGAAGCUGAGAGGCACUUUGACUCUCGCUAUUUAAGUACAUUUUGACCUCUAAGAGACUUAUUGUAAUUUACCUCAG",
+   "paired_bin": 0,
+   "paired_fraction": 0.504348,
+   "pairs": 29,
+   "smoke": false,
+   "structure": "........((((((((((............)))))))))).(((.(((((.........))))))))...(((((.(.(((((.....)))))))))))................",
+   "subset": "development"
+  },
+  {
+   "family": "STnc290",
+   "id": "rfam_val:STnc290",
+   "length": 65,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 2,
+    "ned": 0.08017,
+    "umfe": false
+   },
+   "native_sequence": "AUAAAAGAGUACCAAAAUGUCGUAUUCUGACAUGGUUACGAAGGGAGUACCGCUCCCUUCUUUUU",
+   "paired_bin": 1,
+   "paired_fraction": 0.615385,
+   "pairs": 20,
+   "smoke": false,
+   "structure": "........((((((...(((((.....)))))))).)))(((((((((...))))))))).....",
+   "subset": "development"
+  },
+  {
+   "family": "S_pombe_snR97",
+   "id": "rfam_val:S_pombe_snR97",
+   "length": 148,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 2,
+    "ned": 0.245441,
+    "umfe": false
+   },
+   "native_sequence": "AGGGUAAACUGUCGUUCCUUAAUACUUUUGUUACUUAUGCACCGAAUUCGACUAUUUCGCAUUCAUUAGUGAUAGACGUGAAUCAACAAAUCCAAGGGGUGUAGAUAGUUUAUAAUUUAUCUUGUAACGCAGUUUGUUUAUCACAUAC",
+   "paired_bin": 1,
+   "paired_fraction": 0.594595,
+   "pairs": 44,
+   "smoke": false,
+   "structure": ".((((((((((.((((.(....(((.(((((((((.(((...((((.........))))....))).))))))))).))).........((((...))))..((((((........)))))).).)))))))))))))).........",
+   "subset": "confirmation"
+  },
+  {
+   "family": "TB10Cs2H1",
+   "id": "rfam_val:TB10Cs2H1",
+   "length": 66,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.199719,
+    "umfe": true
+   },
+   "native_sequence": "AGGUGUUGUCGGUUGGGUCAGUGGCUCGUGCUCUCCCUGUAACCCUAUCUCGCAGCCCCGAGAACA",
+   "paired_bin": 1,
+   "paired_fraction": 0.606061,
+   "pairs": 20,
+   "smoke": false,
+   "structure": ".((.(((((.(((.(((((((.(((....)))....)))..)))).)))..))))).)).......",
+   "subset": "confirmation"
+  },
+  {
+   "family": "TtnuCD25",
+   "id": "rfam_val:TtnuCD25",
+   "length": 87,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 2,
+    "ned": 0.199051,
+    "umfe": false
+   },
+   "native_sequence": "UUCAACUGAUGAUUAAUUAGUUUCUCUAAAUUCGCAGUGACCCCCCUACUAGUCCGAAAGGCGCUGUAGGUUAGAGCCGUGUCUGAU",
+   "paired_bin": 1,
+   "paired_fraction": 0.643678,
+   "pairs": 28,
+   "smoke": true,
+   "structure": ".(((.(((.(((....((((.....))))..)))))))))....(((((.(((((....)).))))))))(((((......))))).",
+   "subset": "development"
+  },
+  {
+   "family": "TtnuCD32",
+   "id": "rfam_val:TtnuCD32",
+   "length": 98,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.087539,
+    "umfe": true
+   },
+   "native_sequence": "AACAUGAUGUAUAAAACGCAUGGAAAGAGGUUUGUAGUUAACCCUACUGAACCCAGGGUUAAGCCAUCCCUCGAUGAAUCCAUACCAAUCGUCUGAUU",
+   "paired_bin": 0,
+   "paired_fraction": 0.530612,
+   "pairs": 26,
+   "smoke": false,
+   "structure": "..((((.(((.....)))))))....((((..((...((((((((.........))))))))..))..))))(((((...........))))).....",
+   "subset": "development"
+  },
+  {
+   "family": "TtnuCD33",
+   "id": "rfam_val:TtnuCD33",
+   "length": 74,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.196122,
+    "umfe": true
+   },
+   "native_sequence": "UAUAAGGAUGAUUUAUUUGCAACAGCGAGAUCUAUAUGAUCCAUGAAAACUUCAUUUACGUCGAUAAUCUGAUU",
+   "paired_bin": 1,
+   "paired_fraction": 0.594595,
+   "pairs": 22,
+   "smoke": false,
+   "structure": ".....((((.((.(((((((....)))))...)).)).))))(((((...)))))....((((......)))).",
+   "subset": "confirmation"
+  },
+  {
+   "family": "TtnuHACA18",
+   "id": "rfam_val:TtnuHACA18",
+   "length": 130,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.237722,
+    "umfe": true
+   },
+   "native_sequence": "UCCUAGUAUCUCCCUCUGAUUCAUUCAUGUAUUAGCGGGUCGUAAAGGUUGCUAAAUAAAUAUGAAUUCUUUUUUUAUUUAAUUAUCAAACAAUAAAUUUGUUUAAUAAUUACUUAAGAAUGCUACAAUU",
+   "paired_bin": 3,
+   "paired_fraction": 0.646154,
+   "pairs": 42,
+   "smoke": false,
+   "structure": "...((((((..(((.(((((.((....)).))))).)))(((((...(((....)))...))))).......(((((..(((((((.((((((.....)))))).)))))))..))))))))))).....",
+   "subset": "confirmation"
+  },
+  {
+   "family": "TtnuHACA19",
+   "id": "rfam_val:TtnuHACA19",
+   "length": 121,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.163453,
+    "umfe": true
+   },
+   "native_sequence": "ACUAUCCUUGCUCAUUCAGGAACUAGCUGAAUGGUCACCAGAAUUGUUUGCGAAAUUACCUGAAUUUUCUUACCAUCACAAGCACUUCGAUUACUUGUGGUAAUUGCAUGUUCAGACAUUU",
+   "paired_bin": 0,
+   "paired_fraction": 0.396694,
+   "pairs": 24,
+   "smoke": false,
+   "structure": "........((.((((((((.......)))))))).))......................((((((.........((((((((...........))))))))........))))))......",
+   "subset": "confirmation"
+  },
+  {
+   "family": "U6atac",
+   "id": "rfam_val:U6atac",
+   "length": 115,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.263509,
+    "umfe": true
+   },
+   "native_sequence": "GUGUUGUAUGAAUGGAGAGAAGGUUAUCACUUCCCUUGACAAAGAUGGAAGAGGCCCUCGGGCCUGACAACACACAUAUGGUUUAAAAAUCUUAUAUUUAAAAUUAUUUUUUUUU",
+   "paired_bin": 0,
+   "paired_fraction": 0.556522,
+   "pairs": 32,
+   "smoke": false,
+   "structure": "(((((((.........((........)).((((((((....)))..)))))(((((....))))).)))))))....(((((((.(((........))).)))))))........",
+   "subset": "confirmation"
+  },
+  {
+   "family": "mir-2004",
+   "id": "rfam_val:mir-2004",
+   "length": 98,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.037496,
+    "umfe": true
+   },
+   "native_sequence": "AGAGGCUACUUGCGGACCUUUCUGUGGCUGUCGUGUUAAGUGUGAUUCUAUGAAGACACUUCACACACAACCACAGGAAGUUUUGCACGGUAGCCAUG",
+   "paired_bin": 3,
+   "paired_fraction": 0.795918,
+   "pairs": 39,
+   "smoke": true,
+   "structure": "...(((((((((((((.((((((((((.(((.((((.((((((..(((...))).)))))).))))))).)))))))))).)))))).)))))))...",
+   "subset": "development"
+  },
+  {
+   "family": "mir-205",
+   "id": "rfam_val:mir-205",
+   "length": 74,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.084153,
+    "umfe": true
+   },
+   "native_sequence": "UCCUGGUGCCCUUCAUUCCACCGGAAUCUGUCGCUGCAGAAUUUGGAUUUCAGUGAAAUGAAGCCCCUCAGAGA",
+   "paired_bin": 2,
+   "paired_fraction": 0.675676,
+   "pairs": 25,
+   "smoke": false,
+   "structure": "..((((.(..(((((((.(((.((((((((((......))...)))))))).))).)))))))..).))))...",
+   "subset": "development"
+  },
+  {
+   "family": "mir-210",
+   "id": "rfam_val:mir-210",
+   "length": 97,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.055657,
+    "umfe": true
+   },
+   "native_sequence": "UCCAGAAGCAGGUGAGCCACUGACUAACGCACAUUGUGCUGUUAGCGAUUCCACUGUGCGUGUGACAGCGGCUAACCUGCUUUUCGGACAUCGCUAU",
+   "paired_bin": 2,
+   "paired_fraction": 0.701031,
+   "pairs": 34,
+   "smoke": false,
+   "structure": "(((((((((((((.((((.(((.(..(((((((.((((((...))))....)).)))))))..).))).)))).)))))))))).))).........",
+   "subset": "development"
+  },
+  {
+   "family": "mir-221",
+   "id": "rfam_val:mir-221",
+   "length": 84,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.145384,
+    "umfe": true
+   },
+   "native_sequence": "UUGGGCAUGAACCUAACAUACAAUGUAGAAUUCUGUGUAUGCUGAGCAACAGCUACAUUGUCUGCUGGGUUUCCAGCUACCUGA",
+   "paired_bin": 2,
+   "paired_fraction": 0.666667,
+   "pairs": 28,
+   "smoke": false,
+   "structure": "...(((..(((((((.((.(((((((((....((((...(((...)))))))))))))))).)).)))))))...)))......",
+   "subset": "confirmation"
+  },
+  {
+   "family": "mir-231",
+   "id": "rfam_val:mir-231",
+   "length": 76,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 2,
+    "ned": 0.069626,
+    "umfe": false
+   },
+   "native_sequence": "UGUUGUUCUGACUGUUUCCAUAGCUUAUAUUGUCUCAAAAUGCAUAUAAGCUCGUGAACAACAGGCAGGACAACUG",
+   "paired_bin": 3,
+   "paired_fraction": 0.736842,
+   "pairs": 28,
+   "smoke": false,
+   "structure": ".(((((((((.(((((..((((((((((((.((........))))))))))).)))...))))).)))))))))..",
+   "subset": "confirmation"
+  },
+  {
+   "family": "mir-251",
+   "id": "rfam_val:mir-251",
+   "length": 61,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.018731,
+    "umfe": true
+   },
+   "native_sequence": "UUAAGUAGUGGUGCCGCUCUUAUUAGAUGAGAUAGUAAUAAGAGUUGCUCACUACUUAUCA",
+   "paired_bin": 3,
+   "paired_fraction": 0.721311,
+   "pairs": 22,
+   "smoke": false,
+   "structure": ".((((((((((.((.((((((((((..........)))))))))).))))))))))))...",
+   "subset": "confirmation"
+  },
+  {
+   "family": "mir-2772",
+   "id": "rfam_val:mir-2772",
+   "length": 86,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 2,
+    "ned": 0.278346,
+    "umfe": false
+   },
+   "native_sequence": "UGCCUUAUCUCCAAACUCAAAGUGGUACCAGCAGUGUGGAUGGUCAUCUGGUCGUUGCCGUGUUUGAGUUCUGGACCUGGAGCGUA",
+   "paired_bin": 1,
+   "paired_fraction": 0.651163,
+   "pairs": 28,
+   "smoke": false,
+   "structure": ".((((....((((((((((((.(((((((((..(((........))))))))....))))..)))))))).))))...)).))...",
+   "subset": "confirmation"
+  },
+  {
+   "family": "mir-3085",
+   "id": "rfam_val:mir-3085",
+   "length": 89,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 2,
+    "ned": 0.088313,
+    "umfe": false
+   },
+   "native_sequence": "GUCCCAACUCUGGGAAGGUGCCAUUCCGAGGGCCAAGAGUCUGAAUAUGAGUCACUCUGGCUGCUAUGGCCCCCUCCCAGGGCUUGGGC",
+   "paired_bin": 2,
+   "paired_fraction": 0.696629,
+   "pairs": 31,
+   "smoke": false,
+   "structure": "..(((((((((((((.((.(((((......(((((.((((((.......))..)))))))))...))))).)).)))))))).))))).",
+   "subset": "confirmation"
+  },
+  {
+   "family": "mir-346",
+   "id": "rfam_val:mir-346",
+   "length": 95,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.083073,
+    "umfe": true
+   },
+   "native_sequence": "GGUCUCUGUGUUGGGCGUCUGUCUGCCCGCAUGCCUGCCUCUCUGUUGCUCUGAAGGAGGCAGGGGCUGGGCCUGCAGCUGCCUGGGCAGAGUGG",
+   "paired_bin": 2,
+   "paired_fraction": 0.673684,
+   "pairs": 32,
+   "smoke": false,
+   "structure": "...((((((..((((((.((((..((((((...((((((((.((..........)))))))))).)).))))..)))).)))))).))))))...",
+   "subset": "confirmation"
+  },
+  {
+   "family": "mir-503",
+   "id": "rfam_val:mir-503",
+   "length": 71,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.092871,
+    "umfe": true
+   },
+   "native_sequence": "UGCCCUAGCAGCGGGAACAGUUCUGCAGUGAGCGAUUGGUGCUCUGGAGUAUUGUUUCCGCUGCCAGGGUA",
+   "paired_bin": 3,
+   "paired_fraction": 0.816901,
+   "pairs": 29,
+   "smoke": false,
+   "structure": "((((((.((((((((((((((.((.((..(((((.....))))))).)).)))))))))))))).))))))",
+   "subset": "development"
+  },
+  {
+   "family": "mir-608",
+   "id": "rfam_val:mir-608",
+   "length": 82,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 2,
+    "ned": 0.177322,
+    "umfe": false
+   },
+   "native_sequence": "GUGGGCCAGGGGUGGUGUUGGGACAGCUGCGUUUAAAAAGGCAUCUCCAAGAGCUUCCAUCAAAGGCUGCCUCUUGGUGCAG",
+   "paired_bin": 2,
+   "paired_fraction": 0.682927,
+   "pairs": 28,
+   "smoke": false,
+   "structure": ".((.((((((((((((.((((((.((((((.((....)).)).........)))))))..)))..)))))).)))))).)).",
+   "subset": "development"
+  },
+  {
+   "family": "mir-6095",
+   "id": "rfam_val:mir-6095",
+   "length": 83,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.028302,
+    "umfe": true
+   },
+   "native_sequence": "UACAUGGUAUAACACUAGUAUGUCCAUUUCCAUGUCAUGAUUUGCACGACAUAGAAAUGAACAUAUUGUUGACAUAUUAUGUA",
+   "paired_bin": 3,
+   "paired_fraction": 0.795181,
+   "pairs": 33,
+   "smoke": true,
+   "structure": "((((((((((..((.((((((((.((((((.(((((.((.....)).))))).)))))).)))))))).))..))))))))))",
+   "subset": "development"
+  },
+  {
+   "family": "mir-641",
+   "id": "rfam_val:mir-641",
+   "length": 98,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.054925,
+    "umfe": true
+   },
+   "native_sequence": "UGGGUGAAAGGAAGGAAAGACAUAGGAUAGAGUCACCUCUGUCCUCUGUCCUCCACCUAUAGAGGUGACUAUCCUAUGUCUUUCCUUCCUCUCACCCC",
+   "paired_bin": 3,
+   "paired_fraction": 0.816327,
+   "pairs": 40,
+   "smoke": false,
+   "structure": ".((((((.((((((((((((((((((((..((((((((((((....((.....))...)))))))))))))))))))))))))))))))).)))))).",
+   "subset": "confirmation"
+  },
+  {
+   "family": "mir-724",
+   "id": "rfam_val:mir-724",
+   "length": 60,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.060876,
+    "umfe": true
+   },
+   "native_sequence": "UUAAAGGGAAUUUGCGACUGUUAGUCACAUGAACAGAACAGCCACACCUUCCUUUUAAGA",
+   "paired_bin": 2,
+   "paired_fraction": 0.666667,
+   "pairs": 20,
+   "smoke": true,
+   "structure": "((((((((((..((.(.(((((..((....))....))))).).))..))))))))))..",
+   "subset": "development"
+  },
+  {
+   "family": "mir-727",
+   "id": "rfam_val:mir-727",
+   "length": 90,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.138373,
+    "umfe": true
+   },
+   "native_sequence": "CUGUAUGUCAUUUUCAGUCUUCAAUUCCUCCCAGCCCGUACUAUGGUAAUUGUGAGUUGAGGCGAGUUGAAGACUAAAAAUGCUGUACAG",
+   "paired_bin": 3,
+   "paired_fraction": 0.8,
+   "pairs": 36,
+   "smoke": false,
+   "structure": "(((((((.((((((.((((((((((((..((((((...(((.((....)).))).)))).)).)))))))))))).)))))).)))))))",
+   "subset": "development"
+  },
+  {
+   "family": "mir-7910",
+   "id": "rfam_val:mir-7910",
+   "length": 58,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 2,
+    "ned": 0.100567,
+    "umfe": false
+   },
+   "native_sequence": "UUUGAAAUGGUUCAGCUCCUAUUCAAGGCGCGGUUUGAUUAGGACUUGCAUUUCAAAU",
+   "paired_bin": 3,
+   "paired_fraction": 0.758621,
+   "pairs": 22,
+   "smoke": false,
+   "structure": "(((((((((...(((.(((((.(((((......))))).))))).)))))))))))).",
+   "subset": "confirmation"
+  },
+  {
+   "family": "mir-7961",
+   "id": "rfam_val:mir-7961",
+   "length": 56,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.086629,
+    "umfe": true
+   },
+   "native_sequence": "AAACUAACUUCGAUGGGUUUGUUGUACGUAAAUCAGUCCCACCGUUGUGAGUUUGU",
+   "paired_bin": 1,
+   "paired_fraction": 0.607143,
+   "pairs": 17,
+   "smoke": false,
+   "structure": "(((((.((..((.((((.(((.(........).))).)))).))..)).)))))..",
+   "subset": "development"
+  },
+  {
+   "family": "mir-929",
+   "id": "rfam_val:mir-929",
+   "length": 78,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.041696,
+    "umfe": true
+   },
+   "native_sequence": "CGGGGUCAAAUUGACUCUAGUAGGGAGUCCAGCGAAUCGAAGUACGCGACUCCCUAACGGAGUCAGAUUGACUCCUUU",
+   "paired_bin": 3,
+   "paired_fraction": 0.769231,
+   "pairs": 30,
+   "smoke": false,
+   "structure": ".((((((((.((((((((..(((((((((..(((.((....)).))))))))))))..)))))))).))))))))...",
+   "subset": "confirmation"
+  },
+  {
+   "family": "mir-992",
+   "id": "rfam_val:mir-992",
+   "length": 83,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.167422,
+    "umfe": true
+   },
+   "native_sequence": "AUUUUCGGAAGUGCCUGGUAUCAGAUAGGUGUAAUUUUUGUGUUUGUAUAGUACACGUUUCUGGAACCAAGCCCUUUGAGAAA",
+   "paired_bin": 3,
+   "paired_fraction": 0.746988,
+   "pairs": 31,
+   "smoke": false,
+   "structure": ".((((((((.(.((.((((.(((((.(.(((((....(((((....)))))))))).).))))).)))).))).)))))))).",
+   "subset": "development"
+  },
+  {
+   "family": "mir-H20",
+   "id": "rfam_val:mir-H20",
+   "length": 77,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.030958,
+    "umfe": true
+   },
+   "native_sequence": "ACAGGGGGGGAGACGAGGGGUCGGAAUCCAAAGGACGCAGACCACCUUUGGUUACGGACCCCUUUCUCCCCCCCUUC",
+   "paired_bin": 2,
+   "paired_fraction": 0.701299,
+   "pairs": 27,
+   "smoke": false,
+   "structure": "..(((((((((((.((((((((.(...(((((((..........)))))))...).)))))))))))))))))))..",
+   "subset": "confirmation"
+  },
+  {
+   "family": "rli45",
+   "id": "rfam_val:rli45",
+   "length": 78,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.284327,
+    "umfe": true
+   },
+   "native_sequence": "UUACUAUUUGCGCAAGUUUUUAUUUAUAUAGCUAUGCGCUAGCUCGUGAUAAUUCAAGUAUGAAUGAUGAACCAACGA",
+   "paired_bin": 0,
+   "paired_fraction": 0.410256,
+   "pairs": 16,
+   "smoke": false,
+   "structure": ".........(((((((((...........)))).)))))....((((......(((........))).......))))",
+   "subset": "confirmation"
+  },
+  {
+   "family": "rox2",
+   "id": "rfam_val:rox2",
+   "length": 71,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 2,
+    "ned": 0.057875,
+    "umfe": false
+   },
+   "native_sequence": "AAAAGACGUGUAAAAUGUUGCAAAUUAAGCAAAUAUAUAUGCAUAUAUGGGUAACGUUUUACGCGCCUUAA",
+   "paired_bin": 2,
+   "paired_fraction": 0.704225,
+   "pairs": 25,
+   "smoke": false,
+   "structure": "..(((.(((((((((((((((..((((.(((........))).)).))..))))))))))))))).)))..",
+   "subset": "confirmation"
+  },
+  {
+   "family": "sR16",
+   "id": "rfam_val:sR16",
+   "length": 53,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.224847,
+    "umfe": true
+   },
+   "native_sequence": "GAAUGAAGACGUUCCACCCGAGCGAGUGAUGAGCGAAACGGUUAAUACUGAUG",
+   "paired_bin": 1,
+   "paired_fraction": 0.528302,
+   "pairs": 14,
+   "smoke": false,
+   "structure": ".........(((((.....)))))((((.(((.((...)).))).))))....",
+   "subset": "confirmation"
+  },
+  {
+   "family": "sR53",
+   "id": "rfam_val:sR53",
+   "length": 58,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.02915,
+    "umfe": true
+   },
+   "native_sequence": "GCCGAUGAUGAUGGUGGGCACUCGCCGAUUGGUGAGGUAAGGGGCGAGGAGACAGAGG",
+   "paired_bin": 0,
+   "paired_fraction": 0.482759,
+   "pairs": 14,
+   "smoke": false,
+   "structure": "(((.((.......)).))).((((((..(((......)))..))))))..........",
+   "subset": "confirmation"
+  },
+  {
+   "family": "sX7",
+   "id": "rfam_val:sX7",
+   "length": 96,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.099632,
+    "umfe": true
+   },
+   "native_sequence": "UGUUUUCCGCUCUGGGCGAGGGACGCUGUCAGUGACGUCCCUCGCCCGGGGCACUCCGGAUGAGGCCAGGAGGACGGGCGCCAGGGAAGGCGCGCU",
+   "paired_bin": 2,
+   "paired_fraction": 0.708333,
+   "pairs": 34,
+   "smoke": false,
+   "structure": ".(((((((((((((((((((((((((.......).))))))))))))))))).(((.....)))....)))))))(.(((((......))))).).",
+   "subset": "development"
+  },
+  {
+   "family": "sX9",
+   "id": "rfam_val:sX9",
+   "length": 75,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.43375,
+    "umfe": true
+   },
+   "native_sequence": "AUGAACCACGCGUGCAUUACGGUUCCUGCACGCCGUCCGCACCCACCAGGCGGUUGCUCAGUCGUUUUGUUGGUC",
+   "paired_bin": 0,
+   "paired_fraction": 0.533333,
+   "pairs": 20,
+   "smoke": false,
+   "structure": "....((((.....(((..((((.....(((.((((.((..........)))))))))....))))..))))))).",
+   "subset": "confirmation"
+  },
+  {
+   "family": "sar",
+   "id": "rfam_val:sar",
+   "length": 67,
+   "length_bin": 0,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.021753,
+    "umfe": true
+   },
+   "native_sequence": "GUUGGUUUUUCUCCACGGAUUUACUGACAACCGAAGCCCUGACUGUUCCCGCAGUUGGGGCUUCACU",
+   "paired_bin": 2,
+   "paired_fraction": 0.686567,
+   "pairs": 23,
+   "smoke": false,
+   "structure": "((((((...(((....)))...))))))....((((((((((((((....))))))))))))))...",
+   "subset": "confirmation"
+  },
+  {
+   "family": "snR189",
+   "id": "rfam_val:snR189",
+   "length": 188,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 2,
+    "ned": 0.3369,
+    "umfe": false
+   },
+   "native_sequence": "UUUCAUAAACCGUACAUUCCAAGAACGAGUAUUAUUGUAGUGGAUUUGUGACGGUACUAUGUACCUUUUUUUCAGGCAAUAUCUUCUCUACAACUUGUUCGAGAGCGACAAUUUUAAGACUUCUAAGGUAUUUGGAGGUUGUUCGAUAACGACAAAGGGCUUUCUCCUCAUAUAAGGGUCACACAGUU",
+   "paired_bin": 2,
+   "paired_fraction": 0.617021,
+   "pairs": 58,
+   "smoke": false,
+   "structure": "........((((((((.((((...((((......))))..))))..))).)))))(((.(((((((((.....(((.........((((.....(((((...(((((((..(((((((((((...)))).))))))))))))))...)))))...))))......))).....)))))).))).))).",
+   "subset": "development"
+  },
+  {
+   "family": "snaR-A",
+   "id": "rfam_val:snaR-A",
+   "length": 115,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.033927,
+    "umfe": true
+   },
+   "native_sequence": "GUGGAGCCAUUGUGGCUCCAGCCGGUUGCGCGGGCCCUCGGACCCUCAGGGAGGCGAGGGUUCGAGGGCACGAGUUCGAGGCCAACCUGGUCCACAUGGGUUGAAAAAAAAAAAA",
+   "paired_bin": 2,
+   "paired_fraction": 0.626087,
+   "pairs": 36,
+   "smoke": false,
+   "structure": ".((((((((...))))))))(((....((.((.((((((((((((((........)))))))))))))).)).))....)))(((((((.......)))))))............",
+   "subset": "confirmation"
+  },
+  {
+   "family": "snoR128",
+   "id": "rfam_val:snoR128",
+   "length": 91,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 2,
+    "ned": 0.322294,
+    "umfe": false
+   },
+   "native_sequence": "UUGCGGUGAUGAGAUAUUUCAGUGUUGAAAGCAGAUCCCUGCUUGAUGAGUCUGGGAAAUACCAUUUCCUCCUGAGCGGUUACCUGAGCAA",
+   "paired_bin": 1,
+   "paired_fraction": 0.615385,
+   "pairs": 28,
+   "smoke": false,
+   "structure": "....((.((((..((.((((((..(((.((((((....))))))..)))..)))))).))..)))).))...((..(((....)))..)).",
+   "subset": "development"
+  },
+  {
+   "family": "snoR4",
+   "id": "rfam_val:snoR4",
+   "length": 80,
+   "length_bin": 1,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.38545,
+    "umfe": true
+   },
+   "native_sequence": "CUAACAAGGGGAUAAAAAAAUUCAAAUGUGAAACACCUAAUAUUCAAAUGUACGACGACCUUAAACAGCUCGGUGAAACU",
+   "paired_bin": 0,
+   "paired_fraction": 0.325,
+   "pairs": 13,
+   "smoke": false,
+   "structure": "...(((...((((......))))...)))....((((............((......))............)))).....",
+   "subset": "development"
+  },
+  {
+   "family": "snoR77Y",
+   "id": "rfam_val:snoR77Y",
+   "length": 85,
+   "length_bin": 2,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.29451,
+    "umfe": true
+   },
+   "native_sequence": "UUGCCAGUGAUGAUAAGUAUAUCAUGUUGGAAUUACCAUCUGAAUCCAUUGAUGUUAACAUUUGGCUGACUGUCUGAGGCCCAAA",
+   "paired_bin": 0,
+   "paired_fraction": 0.517647,
+   "pairs": 22,
+   "smoke": false,
+   "structure": "...((((..((((((....)))))).))))..(((.((((..........)))).))).....((((..(.....).))))....",
+   "subset": "confirmation"
+  },
+  {
+   "family": "snoTBR17",
+   "id": "rfam_val:snoTBR17",
+   "length": 121,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.180925,
+    "umfe": true
+   },
+   "native_sequence": "UGCUCGACGCCUCGCGUCUGAUGCUCCACCACGCAGCUGUCCCAUUAUGCAUAUCCUGUGUGCGCUCUAGCCCCGUCGGGGCCCUGAUGAGUCUGCAACAAACCAUGCAUUACACAUCCAC",
+   "paired_bin": 1,
+   "paired_fraction": 0.561983,
+   "pairs": 34,
+   "smoke": false,
+   "structure": ".(((((((((...))))).)).)).....(((((((.(((........)))....))))))).......(((((...)))))...((((.((.((((........))))..)).))))...",
+   "subset": "development"
+  },
+  {
+   "family": "sno_ZL1",
+   "id": "rfam_val:sno_ZL1",
+   "length": 143,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.361508,
+    "umfe": true
+   },
+   "native_sequence": "GAAGAAGCAAAGUGAUGAGCAAUACUUGCAUGAGCCAUAGUGAGUGAGUUGAGUGUGUGUGUAGUUGUGUGGUGGUUGUUUGAGAGAAUGGUGUGCCUUAUAAUUGGGCGAUGAUAGCUAAACUGAUAAGAUCUGAUUGCUUC",
+   "paired_bin": 3,
+   "paired_fraction": 0.671329,
+   "pairs": 48,
+   "smoke": false,
+   "structure": "...(((((((...(((......((((((((((...))).)))))))((((.(((...(((.((((((((.((((.((((((....))))))..)))).)))))))).)))......))).))))......)))...)))))))",
+   "subset": "development"
+  },
+  {
+   "family": "sot0042",
+   "id": "rfam_val:sot0042",
+   "length": 173,
+   "length_bin": 3,
+   "native_control": {
+    "mfe_backtrack": true,
+    "mfe_ties": 1,
+    "ned": 0.034215,
+    "umfe": true
+   },
+   "native_sequence": "AGAUAACUCCGAGUCCUCACGGCGAGGAUAGGAGUAACGGCUGUGUGGCACAGCCAUCGGUACACCUGUUCGACCGCGAAAGCGGGAUGUUCCAAUCGAGAGAACAGGUCGUAUCGUAGACCAGCAAAUAUCCCACCCUGCGGUACGGGAAGCCGCGUCCUUCAGGGCGCGGA",
+   "paired_bin": 2,
+   "paired_fraction": 0.624277,
+   "pairs": 54,
+   "smoke": false,
+   "structure": ".....(((((..((((((.....)))))).)))))...(((((((...)))))))..((((((((((((((..((((....))))(((......)))....)))))))).))))))..............(((((((....)))..))))..((((((((....)))))))).",
+   "subset": "confirmation"
+  }
+ ]
+}

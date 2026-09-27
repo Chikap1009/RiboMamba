@@ -1,0 +1,1190 @@
+{
+ "audit_sha256": {
+  "RNAsolo.jsonl": "56327e7b020c9e6cbe153a70b58aca866d546bc3c93536c996c602bb0e66187f",
+  "Rfam27.jsonl": "727d2f712e0168cb8c6ca856b453887a9b9fc27187099c0a4568efe017209e38",
+  "eterna100.jsonl": "beec5ee30b0232cf5e4433193663cbfc5ad4be6dd03bd11cc27d9ec7b635f831",
+  "eterna100v2.jsonl": "2f5a05fca9d98bcb4186c85ed0f8ccb26d5db05b244cc7dd2d37b46f33277184"
+ },
+ "audit_sources": {
+  "eterna100_v1_tsv": {
+   "n": 100
+  },
+  "eterna100_v2_tsv": {
+   "n": 100
+  },
+  "rnadesignlm_RNAsolo": {
+   "n": 764
+  },
+  "rnadesignlm_Rfam27": {
+   "n": 27
+  },
+  "rnadesignlm_eterna100": {
+   "n": 100
+  },
+  "rnadesignlm_eterna100v2": {
+   "n": 100
+  },
+  "samfeo_rf27": {
+   "n": 27
+  },
+  "samfeo_rf29": {
+   "n": 29
+  }
+ },
+ "content_sha256": "19f16b01e7e749fb8156116b9345b696864d1a05bab19a5a6150a5d6af63e00c",
+ "funnel": {
+  "confirmation": 32,
+  "development": 32,
+  "excluded_by_reason": {
+   "Eterna id is an Eterna100 puzzle id": 71,
+   "a pair encloses fewer than 3 nucleotides": 5,
+   "a shared start already solves it (probe)": 9994,
+   "fewer than 4 base pairs": 214,
+   "length outside 19-256": 2531
+  },
+  "probe_unsolved": 5549,
+  "rejected_during_selection": {
+   "near-duplicate of a selected target": 1,
+   "similar to a test-side structure": 8
+  },
+  "selected": 64,
+  "smoke": 8,
+  "source_rows": 18364,
+  "structurally_eligible": 15543
+ },
+ "name": "eternaweb_dev_v1",
+ "purpose": "HARD development targets for the repair pilot (Eterna web player puzzles). Validation-style development only; test-side benchmark structures were read solely for the leakage exclusion.",
+ "rules": {
+  "eligibility": [
+   "structure only ( ) . and balanced; 19-256 nt",
+   ">= 4 pairs",
+   "every pair encloses >= 3 nt",
+   "distinct structure",
+   "Eterna id not an Eterna100 puzzle id"
+  ],
+  "hardness_probe": "no shared start (seeds [0, 1, 2]) is a unique-MFE solution",
+  "leakage": "normalized edit distance to every test-side structure > 0.2",
+  "near_duplicates": "normalized edit distance to every selected target > 0.2",
+  "smoke": "one development target per (length bin, paired-fraction half)",
+  "split": "2 development + 2 confirmation per cell",
+  "strata": "4 x 4 equal-count bins (length, then paired fraction)"
+ },
+ "seed": 20260928,
+ "source": {
+  "downloaded": "2026-09-27",
+  "hf_revision": "609f573b1a373a4f4e6748057c90dcca07e02294",
+  "license": "MIT (github.com/KuNyaa/RNA-Design-LM)",
+  "paper": "Gautam, Dai, Zhou, Xie, Mathews, Huang 2026, arXiv:2602.12470",
+  "path": "data/raw/eternaweb_rnadesignlm/YRL_raw_EternaWeb.jsonl",
+  "sha256": "5f6e0f5c515a8c4a41168b64fbe822dd1d0c4b2aef36711cfebad83f10c9a6ed",
+  "url": "https://huggingface.co/Milanmg/LLM-RNA-Design-2026/resolve/main/data/YRL_raw/EternaWeb.jsonl"
+ },
+ "strata": [
+  {
+   "eligible": 347,
+   "length_bin": 0,
+   "length_range": [
+    20,
+    50
+   ],
+   "paired_bin": 0,
+   "paired_fraction_range": [
+    0.16,
+    0.4103
+   ]
+  },
+  {
+   "eligible": 347,
+   "length_bin": 0,
+   "length_range": [
+    19,
+    50
+   ],
+   "paired_bin": 1,
+   "paired_fraction_range": [
+    0.4103,
+    0.4865
+   ]
+  },
+  {
+   "eligible": 347,
+   "length_bin": 0,
+   "length_range": [
+    19,
+    50
+   ],
+   "paired_bin": 2,
+   "paired_fraction_range": [
+    0.4865,
+    0.56
+   ]
+  },
+  {
+   "eligible": 347,
+   "length_bin": 0,
+   "length_range": [
+    19,
+    50
+   ],
+   "paired_bin": 3,
+   "paired_fraction_range": [
+    0.56,
+    0.8571
+   ]
+  },
+  {
+   "eligible": 347,
+   "length_bin": 1,
+   "length_range": [
+    51,
+    80
+   ],
+   "paired_bin": 0,
+   "paired_fraction_range": [
+    0.1067,
+    0.4211
+   ]
+  },
+  {
+   "eligible": 347,
+   "length_bin": 1,
+   "length_range": [
+    50,
+    80
+   ],
+   "paired_bin": 1,
+   "paired_fraction_range": [
+    0.4211,
+    0.5085
+   ]
+  },
+  {
+   "eligible": 347,
+   "length_bin": 1,
+   "length_range": [
+    50,
+    80
+   ],
+   "paired_bin": 2,
+   "paired_fraction_range": [
+    0.5085,
+    0.5902
+   ]
+  },
+  {
+   "eligible": 346,
+   "length_bin": 1,
+   "length_range": [
+    50,
+    80
+   ],
+   "paired_bin": 3,
+   "paired_fraction_range": [
+    0.5902,
+    0.8986
+   ]
+  },
+  {
+   "eligible": 347,
+   "length_bin": 2,
+   "length_range": [
+    80,
+    122
+   ],
+   "paired_bin": 0,
+   "paired_fraction_range": [
+    0.0941,
+    0.44
+   ]
+  },
+  {
+   "eligible": 347,
+   "length_bin": 2,
+   "length_range": [
+    80,
+    122
+   ],
+   "paired_bin": 1,
+   "paired_fraction_range": [
+    0.44,
+    0.5208
+   ]
+  },
+  {
+   "eligible": 347,
+   "length_bin": 2,
+   "length_range": [
+    80,
+    122
+   ],
+   "paired_bin": 2,
+   "paired_fraction_range": [
+    0.521,
+    0.5957
+   ]
+  },
+  {
+   "eligible": 346,
+   "length_bin": 2,
+   "length_range": [
+    80,
+    122
+   ],
+   "paired_bin": 3,
+   "paired_fraction_range": [
+    0.5962,
+    0.8704
+   ]
+  },
+  {
+   "eligible": 347,
+   "length_bin": 3,
+   "length_range": [
+    123,
+    255
+   ],
+   "paired_bin": 0,
+   "paired_fraction_range": [
+    0.087,
+    0.48
+   ]
+  },
+  {
+   "eligible": 347,
+   "length_bin": 3,
+   "length_range": [
+    122,
+    256
+   ],
+   "paired_bin": 1,
+   "paired_fraction_range": [
+    0.4804,
+    0.5728
+   ]
+  },
+  {
+   "eligible": 347,
+   "length_bin": 3,
+   "length_range": [
+    123,
+    256
+   ],
+   "paired_bin": 2,
+   "paired_fraction_range": [
+    0.5728,
+    0.6562
+   ]
+  },
+  {
+   "eligible": 346,
+   "length_bin": 3,
+   "length_range": [
+    122,
+    256
+   ],
+   "paired_bin": 3,
+   "paired_fraction_range": [
+    0.6565,
+    0.91
+   ]
+  }
+ ],
+ "targets": [
+  {
+   "eterna_id": 10072095,
+   "id": "eternaweb:10072095",
+   "in_authors_rl_subset": false,
+   "length": 111,
+   "length_bin": 2,
+   "paired_bin": 3,
+   "paired_fraction": 0.702703,
+   "pairs": 39,
+   "probe_start_ned_mean": 0.022115,
+   "smoke": true,
+   "structure": "(.((.(((.(((.(((..((((((((((((((((..(((.(((.(((.((....)).))).))).))).))))...))))...))))...)))).))).))).))).)).)",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 10128505,
+   "id": "eternaweb:10128505",
+   "in_authors_rl_subset": false,
+   "length": 175,
+   "length_bin": 3,
+   "paired_bin": 3,
+   "paired_fraction": 0.697143,
+   "pairs": 61,
+   "probe_start_ned_mean": 0.359085,
+   "smoke": false,
+   "structure": "..(((..(((...(((((((....((((...(((((...))))))))))))...)))))))..)))(((((((...))))(((((((..((((...)).))..))))(((((((...((((((((((((((...)))))))...))))....)))))))...)))...)))))).",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 11604541,
+   "id": "eternaweb:11604541",
+   "in_authors_rl_subset": true,
+   "length": 85,
+   "length_bin": 2,
+   "paired_bin": 3,
+   "paired_fraction": 0.658824,
+   "pairs": 28,
+   "probe_start_ned_mean": 0.152356,
+   "smoke": false,
+   "structure": ".(((((((((...))))........((...))..)))))((((((.(((((((((((...)))...))))))...))..))))))",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 13344845,
+   "id": "eternaweb:13344845",
+   "in_authors_rl_subset": true,
+   "length": 49,
+   "length_bin": 0,
+   "paired_bin": 3,
+   "paired_fraction": 0.734694,
+   "pairs": 18,
+   "probe_start_ned_mean": 0.26001,
+   "smoke": false,
+   "structure": "((((((((((...))))(((...)))(((((...)))))))))))....",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 13385974,
+   "id": "eternaweb:13385974",
+   "in_authors_rl_subset": false,
+   "length": 63,
+   "length_bin": 1,
+   "paired_bin": 2,
+   "paired_fraction": 0.539683,
+   "pairs": 17,
+   "probe_start_ned_mean": 0.408462,
+   "smoke": false,
+   "structure": "(((.((.(((((.(....)..))..))).((..((....))))..((....))...)))).).",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 13567118,
+   "id": "eternaweb:13567118",
+   "in_authors_rl_subset": false,
+   "length": 128,
+   "length_bin": 3,
+   "paired_bin": 0,
+   "paired_fraction": 0.171875,
+   "pairs": 11,
+   "probe_start_ned_mean": 0.107845,
+   "smoke": false,
+   "structure": "........((...............))..........((.............))......((.............)).......((...........))...(((...............))).....",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 13600608,
+   "id": "eternaweb:13600608",
+   "in_authors_rl_subset": false,
+   "length": 100,
+   "length_bin": 2,
+   "paired_bin": 1,
+   "paired_fraction": 0.52,
+   "pairs": 26,
+   "probe_start_ned_mean": 0.020865,
+   "smoke": false,
+   "structure": "...............((((......(((((.((.(....).)).)))))...))))..(((((.(((..(((.(((....))))))..))).)))))...",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 13874902,
+   "id": "eternaweb:13874902",
+   "in_authors_rl_subset": true,
+   "length": 73,
+   "length_bin": 1,
+   "paired_bin": 0,
+   "paired_fraction": 0.328767,
+   "pairs": 12,
+   "probe_start_ned_mean": 0.16706,
+   "smoke": false,
+   "structure": "......(((.(.((.((.(.(((..............................))))))......))))))..",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 13909464,
+   "id": "eternaweb:13909464",
+   "in_authors_rl_subset": false,
+   "length": 198,
+   "length_bin": 3,
+   "paired_bin": 2,
+   "paired_fraction": 0.59596,
+   "pairs": 59,
+   "probe_start_ned_mean": 0.417567,
+   "smoke": false,
+   "structure": "..(((.(..(...)..).).)).((((.((((.((.(....)..))((((....).)))))))((((.(.(.(....).)..((..(.((.(((...)))(((...))).)))..).).((((.(((...))).((..((.(.(.(((.(....))).)))))...)).)))).((((...)))).))))).)).)).",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 1768928,
+   "id": "eternaweb:1768928",
+   "in_authors_rl_subset": false,
+   "length": 96,
+   "length_bin": 2,
+   "paired_bin": 2,
+   "paired_fraction": 0.5625,
+   "pairs": 27,
+   "probe_start_ned_mean": 0.062459,
+   "smoke": false,
+   "structure": "....(((((.(((((...(((....((.....((.(((.(((.....).))).))))....))))).))))).(.(((....)))).)))))....",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 1857410,
+   "id": "eternaweb:1857410",
+   "in_authors_rl_subset": true,
+   "length": 58,
+   "length_bin": 1,
+   "paired_bin": 3,
+   "paired_fraction": 0.62069,
+   "pairs": 18,
+   "probe_start_ned_mean": 0.251225,
+   "smoke": false,
+   "structure": "((((((((.((.((..(.(((((.....))..)))....)..).).))))))))).).",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 1879306,
+   "id": "eternaweb:1879306",
+   "in_authors_rl_subset": false,
+   "length": 79,
+   "length_bin": 1,
+   "paired_bin": 1,
+   "paired_fraction": 0.506329,
+   "pairs": 20,
+   "probe_start_ned_mean": 0.110405,
+   "smoke": false,
+   "structure": ".....(.(((.(((..(((((((((..((((....)))).......)).......))))))).).))).))).......",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 2245415,
+   "id": "eternaweb:2245415",
+   "in_authors_rl_subset": false,
+   "length": 83,
+   "length_bin": 2,
+   "paired_bin": 0,
+   "paired_fraction": 0.289157,
+   "pairs": 12,
+   "probe_start_ned_mean": 0.288976,
+   "smoke": false,
+   "structure": ".....(..(..((..(..((..(..((..(..(.........)..)..)....)..)..)..)..)..)....)..)..)...",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 2252295,
+   "id": "eternaweb:2252295",
+   "in_authors_rl_subset": false,
+   "length": 82,
+   "length_bin": 2,
+   "paired_bin": 1,
+   "paired_fraction": 0.512195,
+   "pairs": 21,
+   "probe_start_ned_mean": 0.027106,
+   "smoke": true,
+   "structure": ".....(((((((((((.((......(......).....)))))))....((((.(((...))).))))...)))))).....",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 2314766,
+   "id": "eternaweb:2314766",
+   "in_authors_rl_subset": true,
+   "length": 63,
+   "length_bin": 1,
+   "paired_bin": 2,
+   "paired_fraction": 0.539683,
+   "pairs": 17,
+   "probe_start_ned_mean": 0.119439,
+   "smoke": false,
+   "structure": "((.(.(.(((...((.((...((.(.((.(....).)).).))..)).))...))).).).))",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 2448296,
+   "id": "eternaweb:2448296",
+   "in_authors_rl_subset": false,
+   "length": 59,
+   "length_bin": 1,
+   "paired_bin": 0,
+   "paired_fraction": 0.237288,
+   "pairs": 7,
+   "probe_start_ned_mean": 0.236701,
+   "smoke": false,
+   "structure": ".........(.(..(..(..(.....(....).....)..)..(.....)..)..).).",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 2491617,
+   "id": "eternaweb:2491617",
+   "in_authors_rl_subset": false,
+   "length": 47,
+   "length_bin": 0,
+   "paired_bin": 3,
+   "paired_fraction": 0.595745,
+   "pairs": 14,
+   "probe_start_ned_mean": 0.07508,
+   "smoke": false,
+   "structure": "..((((((((((((((....))))).)......).))))))).....",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 2592474,
+   "id": "eternaweb:2592474",
+   "in_authors_rl_subset": false,
+   "length": 46,
+   "length_bin": 0,
+   "paired_bin": 2,
+   "paired_fraction": 0.521739,
+   "pairs": 12,
+   "probe_start_ned_mean": 0.178305,
+   "smoke": false,
+   "structure": "(((((((((..(......)..)..(..(......)..)))))))))",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 2596917,
+   "id": "eternaweb:2596917",
+   "in_authors_rl_subset": false,
+   "length": 136,
+   "length_bin": 3,
+   "paired_bin": 0,
+   "paired_fraction": 0.338235,
+   "pairs": 23,
+   "probe_start_ned_mean": 0.336832,
+   "smoke": false,
+   "structure": "(..(..(....(..(..(....(..(..((..(..(......)..)..)(..(..((..(..((..(....)..)....)..)..)....)..)..)(..(..(....)..)..))..)..))..)..))..)..)",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 2624571,
+   "id": "eternaweb:2624571",
+   "in_authors_rl_subset": false,
+   "length": 92,
+   "length_bin": 2,
+   "paired_bin": 2,
+   "paired_fraction": 0.565217,
+   "pairs": 26,
+   "probe_start_ned_mean": 0.112995,
+   "smoke": false,
+   "structure": "..(..((.(((.((((...))))..))).)........(.(((.((((....))))))).).(.(((..((((...)))).))).))..)..",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 2726853,
+   "id": "eternaweb:2726853",
+   "in_authors_rl_subset": true,
+   "length": 250,
+   "length_bin": 3,
+   "paired_bin": 2,
+   "paired_fraction": 0.584,
+   "pairs": 73,
+   "probe_start_ned_mean": 0.03567,
+   "smoke": false,
+   "structure": "....(((((.....((((((((((.(((((.....(((((..(((((.....)))))..(((((.....)))))..(((((.....)))))..(((((.....)))))..))))))))))....)))))(((((...(((((..(.....)...((.....)).....)))))..)))))(((((.....)))))(((((....(((((.....))))).)))))))))).....)))))..........",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 2870396,
+   "id": "eternaweb:2870396",
+   "in_authors_rl_subset": false,
+   "length": 113,
+   "length_bin": 2,
+   "paired_bin": 0,
+   "paired_fraction": 0.247788,
+   "pairs": 14,
+   "probe_start_ned_mean": 0.070812,
+   "smoke": false,
+   "structure": ".(.(((((.(..(......................................................................)..).)..)))).)((((((...)))))).",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 3069694,
+   "id": "eternaweb:3069694",
+   "in_authors_rl_subset": false,
+   "length": 75,
+   "length_bin": 1,
+   "paired_bin": 1,
+   "paired_fraction": 0.453333,
+   "pairs": 17,
+   "probe_start_ned_mean": 0.023145,
+   "smoke": true,
+   "structure": ".....(((((.((((((..(((..((....))..)))..))))))...(....)...........))))).....",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 3194555,
+   "id": "eternaweb:3194555",
+   "in_authors_rl_subset": true,
+   "length": 50,
+   "length_bin": 0,
+   "paired_bin": 2,
+   "paired_fraction": 0.56,
+   "pairs": 14,
+   "probe_start_ned_mean": 0.286973,
+   "smoke": false,
+   "structure": "...((((((.((((((((....)))).....))....))))).....)))",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 3248647,
+   "id": "eternaweb:3248647",
+   "in_authors_rl_subset": false,
+   "length": 87,
+   "length_bin": 2,
+   "paired_bin": 2,
+   "paired_fraction": 0.528736,
+   "pairs": 23,
+   "probe_start_ned_mean": 0.413274,
+   "smoke": false,
+   "structure": "((..((..(((...(..(.(..(....).).).).))))))).((..(((..(((...(..(.(..(....).).).).))))))))",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 3275032,
+   "id": "eternaweb:3275032",
+   "in_authors_rl_subset": false,
+   "length": 121,
+   "length_bin": 2,
+   "paired_bin": 1,
+   "paired_fraction": 0.495868,
+   "pairs": 30,
+   "probe_start_ned_mean": 0.321328,
+   "smoke": false,
+   "structure": "((((..(..(......))..))))((((..(..(......))..))))((((..(..(......))..))))((((..(..(......))..))))((((..(..(......))..)))).",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 3381320,
+   "id": "eternaweb:3381320",
+   "in_authors_rl_subset": false,
+   "length": 160,
+   "length_bin": 3,
+   "paired_bin": 3,
+   "paired_fraction": 0.7,
+   "pairs": 56,
+   "probe_start_ned_mean": 0.158718,
+   "smoke": false,
+   "structure": "(((.(((.(((((.((.(((.((((.((.(((.(((((.((.(((.(((((.((.(((.(((((.(((.(((...)))..).).))))))..).).))).)))))..).).))).)))))..).).))).))))..).).))).)))))..).).)))).",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 3433888,
+   "id": "eternaweb:3433888",
+   "in_authors_rl_subset": false,
+   "length": 91,
+   "length_bin": 2,
+   "paired_bin": 1,
+   "paired_fraction": 0.505495,
+   "pairs": 23,
+   "probe_start_ned_mean": 0.5028,
+   "smoke": false,
+   "structure": "((.(.(.((.(.(.(.(.((.(.(.(.(.(.(....).)).).).).)..(.(.(.(.(....).).)).)).).).).).).).).).))",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 3538355,
+   "id": "eternaweb:3538355",
+   "in_authors_rl_subset": false,
+   "length": 65,
+   "length_bin": 1,
+   "paired_bin": 2,
+   "paired_fraction": 0.523077,
+   "pairs": 17,
+   "probe_start_ned_mean": 0.167317,
+   "smoke": false,
+   "structure": "((..(((((.....(.(.(((((....)))).).)).....(((....)))..).))))..).).",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 3623520,
+   "id": "eternaweb:3623520",
+   "in_authors_rl_subset": false,
+   "length": 219,
+   "length_bin": 3,
+   "paired_bin": 3,
+   "paired_fraction": 0.712329,
+   "pairs": 78,
+   "probe_start_ned_mean": 0.025177,
+   "smoke": true,
+   "structure": "((((((((((((((((((((((((((((((....))))))))))))))))))))))))))))))...(.(((((((.((((.((((((.........(((.(((......))))))))))))....((((..(((((((...((..((((...))))))....)))))))..((.(((((.....))))).)).....))))..)))).).))))))).",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 4050405,
+   "id": "eternaweb:4050405",
+   "in_authors_rl_subset": false,
+   "length": 210,
+   "length_bin": 3,
+   "paired_bin": 0,
+   "paired_fraction": 0.361905,
+   "pairs": 38,
+   "probe_start_ned_mean": 0.361614,
+   "smoke": false,
+   "structure": "...(..(.(.(..(.(.(..(.(.(..(.(.(..(.(.(..(.(.(..(..(..(..(..(..(..(..(..(..(..(..(..(..(..(..(..(..(..(......)..).).)..).).)..).).)..).).)..).).)..).).)..)..)..)..)..)..)..)..)..)..)..)..)..)..)..)..)..)..)..).",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 4162538,
+   "id": "eternaweb:4162538",
+   "in_authors_rl_subset": false,
+   "length": 76,
+   "length_bin": 1,
+   "paired_bin": 0,
+   "paired_fraction": 0.394737,
+   "pairs": 15,
+   "probe_start_ned_mean": 0.391025,
+   "smoke": false,
+   "structure": ".(.(.(....).).).(.(.(....).).).(.(.(....).).).(.(.(....).).).(.(.(....).).).",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 416661,
+   "id": "eternaweb:416661",
+   "in_authors_rl_subset": false,
+   "length": 141,
+   "length_bin": 3,
+   "paired_bin": 3,
+   "paired_fraction": 0.780142,
+   "pairs": 55,
+   "probe_start_ned_mean": 0.052134,
+   "smoke": false,
+   "structure": ".....(.((.(((.((((.(((((.((((((.(((((((.((((((((.(((((((((.((((((((((....).)).))).)))).))))).)))))).))))))).)))))))).))))))))).))))))))))....",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 4364115,
+   "id": "eternaweb:4364115",
+   "in_authors_rl_subset": false,
+   "length": 90,
+   "length_bin": 2,
+   "paired_bin": 2,
+   "paired_fraction": 0.577778,
+   "pairs": 26,
+   "probe_start_ned_mean": 0.032513,
+   "smoke": false,
+   "structure": "....((((.((....))))))..((((.....((..((((((.(((.(((.((.........)).)))..))).).)))))..)))))).",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 4574972,
+   "id": "eternaweb:4574972",
+   "in_authors_rl_subset": false,
+   "length": 75,
+   "length_bin": 1,
+   "paired_bin": 3,
+   "paired_fraction": 0.613333,
+   "pairs": 23,
+   "probe_start_ned_mean": 0.026165,
+   "smoke": false,
+   "structure": "((((((((((......(....)..(((.((((..(((((....)))))..)))).)))..))).)))))))....",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 457736,
+   "id": "eternaweb:457736",
+   "in_authors_rl_subset": false,
+   "length": 77,
+   "length_bin": 1,
+   "paired_bin": 0,
+   "paired_fraction": 0.25974,
+   "pairs": 10,
+   "probe_start_ned_mean": 0.258917,
+   "smoke": false,
+   "structure": ".........(..(.(....)...)..).(..(.(..(....)...)...)..).(..(.(....)...)..).....",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 461276,
+   "id": "eternaweb:461276",
+   "in_authors_rl_subset": false,
+   "length": 60,
+   "length_bin": 1,
+   "paired_bin": 1,
+   "paired_fraction": 0.5,
+   "pairs": 15,
+   "probe_start_ned_mean": 0.101521,
+   "smoke": false,
+   "structure": "..((((..(...(.((((....))))..)...(.((((....))))..)...).))))..",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 4819207,
+   "id": "eternaweb:4819207",
+   "in_authors_rl_subset": false,
+   "length": 251,
+   "length_bin": 3,
+   "paired_bin": 2,
+   "paired_fraction": 0.629482,
+   "pairs": 79,
+   "probe_start_ned_mean": 0.018109,
+   "smoke": false,
+   "structure": "((((((((.(((((......((((((((((.(.(((.....))).)..))))))..))))...((((.((......)).))))........))))).....))))).)))..(((.((.(((..(((...(((.(((((((..((((((.(((....)))....)))))).((.((((((.(..(((.((((...)))).)))..).)))))))).))))))))))..))).)))))..))).........",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 5169423,
+   "id": "eternaweb:5169423",
+   "in_authors_rl_subset": false,
+   "length": 25,
+   "length_bin": 0,
+   "paired_bin": 0,
+   "paired_fraction": 0.32,
+   "pairs": 4,
+   "probe_start_ned_mean": 0.259749,
+   "smoke": false,
+   "structure": "((.(..(....)..).)).......",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 525892,
+   "id": "eternaweb:525892",
+   "in_authors_rl_subset": false,
+   "length": 45,
+   "length_bin": 0,
+   "paired_bin": 2,
+   "paired_fraction": 0.488889,
+   "pairs": 11,
+   "probe_start_ned_mean": 0.178774,
+   "smoke": true,
+   "structure": "((.(((..(...((.....))..)..(((...)))..))).).).",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 5354491,
+   "id": "eternaweb:5354491",
+   "in_authors_rl_subset": false,
+   "length": 54,
+   "length_bin": 1,
+   "paired_bin": 2,
+   "paired_fraction": 0.555556,
+   "pairs": 15,
+   "probe_start_ned_mean": 0.035399,
+   "smoke": false,
+   "structure": "..........((((((....(.((((((((....)))).)))).).))))))..",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 5572810,
+   "id": "eternaweb:5572810",
+   "in_authors_rl_subset": false,
+   "length": 70,
+   "length_bin": 1,
+   "paired_bin": 3,
+   "paired_fraction": 0.6,
+   "pairs": 21,
+   "probe_start_ned_mean": 0.270195,
+   "smoke": false,
+   "structure": "..(.((.((...)).)).)(..((((((...))))((((...))))))..)(.((.((...)).)).)..",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 5654857,
+   "id": "eternaweb:5654857",
+   "in_authors_rl_subset": false,
+   "length": 129,
+   "length_bin": 3,
+   "paired_bin": 2,
+   "paired_fraction": 0.589147,
+   "pairs": 38,
+   "probe_start_ned_mean": 0.21146,
+   "smoke": false,
+   "structure": "...((..(((((((((((....))(((((((...)))))))((....))))))...))))((((.((.((....))))..((((....)).)).))))((((...............)))))..))...",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 5698977,
+   "id": "eternaweb:5698977",
+   "in_authors_rl_subset": false,
+   "length": 60,
+   "length_bin": 1,
+   "paired_bin": 1,
+   "paired_fraction": 0.5,
+   "pairs": 15,
+   "probe_start_ned_mean": 0.23573,
+   "smoke": false,
+   "structure": ".(((...(.(.((....))).)(..(((....)))..)(.(((....)).).)...))).",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 5841861,
+   "id": "eternaweb:5841861",
+   "in_authors_rl_subset": false,
+   "length": 97,
+   "length_bin": 2,
+   "paired_bin": 0,
+   "paired_fraction": 0.371134,
+   "pairs": 18,
+   "probe_start_ned_mean": 0.212413,
+   "smoke": false,
+   "structure": ".((...((....((....))...))(((.(.....((....).).........(.(....)).....).))).((..((......))..))...)).",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 6001454,
+   "id": "eternaweb:6001454",
+   "in_authors_rl_subset": false,
+   "length": 115,
+   "length_bin": 2,
+   "paired_bin": 3,
+   "paired_fraction": 0.678261,
+   "pairs": 39,
+   "probe_start_ned_mean": 0.07728,
+   "smoke": false,
+   "structure": "...(((.....)).).(((((((((...))))))))).(((((((((.((((((((((...))))))))))...(((.....)).).))))))))).((.(((.....)))..))",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 6015099,
+   "id": "eternaweb:6015099",
+   "in_authors_rl_subset": false,
+   "length": 47,
+   "length_bin": 0,
+   "paired_bin": 0,
+   "paired_fraction": 0.340426,
+   "pairs": 8,
+   "probe_start_ned_mean": 0.062798,
+   "smoke": false,
+   "structure": "((.(....).)).....(((((...........))))).........",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 6039172,
+   "id": "eternaweb:6039172",
+   "in_authors_rl_subset": true,
+   "length": 41,
+   "length_bin": 0,
+   "paired_bin": 3,
+   "paired_fraction": 0.780488,
+   "pairs": 16,
+   "probe_start_ned_mean": 0.419292,
+   "smoke": false,
+   "structure": "((((((((...))))((((...))))((((...))))))))",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 6146289,
+   "id": "eternaweb:6146289",
+   "in_authors_rl_subset": false,
+   "length": 38,
+   "length_bin": 0,
+   "paired_bin": 1,
+   "paired_fraction": 0.473684,
+   "pairs": 9,
+   "probe_start_ned_mean": 0.299879,
+   "smoke": false,
+   "structure": ".((....((...(....)))))....((((...)))).",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 6434385,
+   "id": "eternaweb:6434385",
+   "in_authors_rl_subset": false,
+   "length": 80,
+   "length_bin": 2,
+   "paired_bin": 3,
+   "paired_fraction": 0.675,
+   "pairs": 27,
+   "probe_start_ned_mean": 0.017189,
+   "smoke": false,
+   "structure": "(((((..((((((((.(((.......(((..(..(((((((.....)))))))..)..))))))))))).))).))))).",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 6482281,
+   "id": "eternaweb:6482281",
+   "in_authors_rl_subset": false,
+   "length": 120,
+   "length_bin": 2,
+   "paired_bin": 0,
+   "paired_fraction": 0.35,
+   "pairs": 21,
+   "probe_start_ned_mean": 0.017987,
+   "smoke": false,
+   "structure": "........((((..((.....(((....)))...((((...((((.(((.....(....).....)))...)))).....))))................))..))))............",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 6703659,
+   "id": "eternaweb:6703659",
+   "in_authors_rl_subset": true,
+   "length": 184,
+   "length_bin": 3,
+   "paired_bin": 1,
+   "paired_fraction": 0.48913,
+   "pairs": 45,
+   "probe_start_ned_mean": 0.025004,
+   "smoke": false,
+   "structure": "((((((((...(((((..............)))))..((((((.(((((.....(....)..))))))))))).....))))))))............((((.((((.....(.(((..............)))))))))))).........((((((((................))))))))",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 741533,
+   "id": "eternaweb:741533",
+   "in_authors_rl_subset": true,
+   "length": 43,
+   "length_bin": 0,
+   "paired_bin": 1,
+   "paired_fraction": 0.465116,
+   "pairs": 10,
+   "probe_start_ned_mean": 0.114784,
+   "smoke": true,
+   "structure": ".....((((.(..(.(..(((.....))).)).))))).....",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 748681,
+   "id": "eternaweb:748681",
+   "in_authors_rl_subset": true,
+   "length": 52,
+   "length_bin": 1,
+   "paired_bin": 3,
+   "paired_fraction": 0.615385,
+   "pairs": 16,
+   "probe_start_ned_mean": 0.354452,
+   "smoke": true,
+   "structure": "((....((((((....))))((((....))))((((....))))))....))",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 7560730,
+   "id": "eternaweb:7560730",
+   "in_authors_rl_subset": false,
+   "length": 36,
+   "length_bin": 0,
+   "paired_bin": 0,
+   "paired_fraction": 0.277778,
+   "pairs": 5,
+   "probe_start_ned_mean": 0.277536,
+   "smoke": false,
+   "structure": ".(..(..(.(..(...........)..).)..).).",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 7563163,
+   "id": "eternaweb:7563163",
+   "in_authors_rl_subset": false,
+   "length": 43,
+   "length_bin": 0,
+   "paired_bin": 0,
+   "paired_fraction": 0.372093,
+   "pairs": 8,
+   "probe_start_ned_mean": 0.061344,
+   "smoke": false,
+   "structure": ".....(((....(...((((....))))...)...))).....",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 7567037,
+   "id": "eternaweb:7567037",
+   "in_authors_rl_subset": false,
+   "length": 29,
+   "length_bin": 0,
+   "paired_bin": 1,
+   "paired_fraction": 0.482759,
+   "pairs": 7,
+   "probe_start_ned_mean": 0.476124,
+   "smoke": false,
+   "structure": ".(.(.((.(((....).).).).).))..",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 7842207,
+   "id": "eternaweb:7842207",
+   "in_authors_rl_subset": false,
+   "length": 210,
+   "length_bin": 3,
+   "paired_bin": 0,
+   "paired_fraction": 0.12381,
+   "pairs": 13,
+   "probe_start_ned_mean": 0.065609,
+   "smoke": false,
+   "structure": ".(((.((((............................................................................))).).((........)).(.(((............................................................................................)))).))).",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 7926159,
+   "id": "eternaweb:7926159",
+   "in_authors_rl_subset": false,
+   "length": 36,
+   "length_bin": 0,
+   "paired_bin": 2,
+   "paired_fraction": 0.5,
+   "pairs": 9,
+   "probe_start_ned_mean": 0.412287,
+   "smoke": false,
+   "structure": ".((..(((.(....)).((.(....).)).))..))",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 7958962,
+   "id": "eternaweb:7958962",
+   "in_authors_rl_subset": false,
+   "length": 33,
+   "length_bin": 0,
+   "paired_bin": 1,
+   "paired_fraction": 0.484848,
+   "pairs": 8,
+   "probe_start_ned_mean": 0.279105,
+   "smoke": false,
+   "structure": ".(.(((.(.(..((......))).)).)).)..",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 8820332,
+   "id": "eternaweb:8820332",
+   "in_authors_rl_subset": false,
+   "length": 39,
+   "length_bin": 0,
+   "paired_bin": 3,
+   "paired_fraction": 0.615385,
+   "pairs": 12,
+   "probe_start_ned_mean": 0.119718,
+   "smoke": false,
+   "structure": ".(.((((((((((.(.......)))))...).)))))).",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 9557028,
+   "id": "eternaweb:9557028",
+   "in_authors_rl_subset": false,
+   "length": 232,
+   "length_bin": 3,
+   "paired_bin": 1,
+   "paired_fraction": 0.568966,
+   "pairs": 66,
+   "probe_start_ned_mean": 0.104026,
+   "smoke": false,
+   "structure": "(((((((((((((....(((((((((((((...(((((.((((((...))))))......................((((((..((((....))))....))))))..((((...)).)).......)))))......))))).))))...))))..))))))((((.((..........(((....)))))).)))))))((((((...........))))))))).....",
+   "subset": "confirmation"
+  },
+  {
+   "eterna_id": 9914854,
+   "id": "eternaweb:9914854",
+   "in_authors_rl_subset": false,
+   "length": 198,
+   "length_bin": 3,
+   "paired_bin": 1,
+   "paired_fraction": 0.515152,
+   "pairs": 51,
+   "probe_start_ned_mean": 0.05761,
+   "smoke": false,
+   "structure": "..((((.(.((((((...(((...((........))....)))..((((..(((((((((.(((((((...((((...(((((((((.(..(....)..)......))))))))).........))))...))))))).......))))))))).........))))....)))))...)...)..))))........",
+   "subset": "development"
+  },
+  {
+   "eterna_id": 9986851,
+   "id": "eternaweb:9986851",
+   "in_authors_rl_subset": false,
+   "length": 143,
+   "length_bin": 3,
+   "paired_bin": 1,
+   "paired_fraction": 0.531469,
+   "pairs": 38,
+   "probe_start_ned_mean": 0.342017,
+   "smoke": true,
+   "structure": "....((.((.((.((.((..((..((..((..((..((..((..((..((..((.((.((..((..((.((........))..)).)).))..))..)).)).)).)).)).)).)).)).)).))..))..))..))..)).",
+   "subset": "development"
+  }
+ ]
+}
