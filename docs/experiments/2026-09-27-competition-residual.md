@@ -129,3 +129,25 @@ not saturation: corr(a, c) = -0.549 overall, -0.415 for parents with P < 0.01,
 median -0.638 within parents; slope of c on a -0.44 to -0.69 by P stratum.
 The rival-bank physics control becomes c_bank = -(LSE_child - LSE_parent) over
 compatible rivals only (target excluded); NaN if a child has no compatible rival.
+
+## Results 1 (measured 2026-09-27, session 09): data, diagnosis, scalar models
+Collection (`python scripts/repair_residual.py collect --workers 10`, commit c95b447 code):
+700 training-pool puzzles x 8 parents = 5,600 sibling groups, 16 children each =
+89,600 fully scored children (76,800 train / 12,800 held-out puzzles); 8,946 draws equal
+to the parent and 1,167 repeats dropped; 2,853 CPU-seconds (rival banks 142 s).
+Diagnosis (`diagnose`): corr(c, c_bank) 0.701 (R^2 0.49); corr(a, c) -0.584; 1.2 % of
+children have no formable rival. Pairwise order accuracy within groups: a 0.647,
+a + c_bank 0.672, a + c_lin 0.659. The bank fixes 47.7 % of energy-misordered pairs.
+Offline (`offline`; 100 held-out puzzles, 800 groups; best-of-8 regret in ln P, lower
+better; puzzle bootstrap): energy 1.004 [0.873, 1.142]; raw bank 1.341; linear 0.804
+without rivals, 0.665 with; MLP 0.585 without, 0.531 with; critic_v1 0.283 [0.229, 0.342].
+Differences: linear rivals - no rivals -0.139 [-0.205, -0.079]; MLP -0.054 [-0.117, +0.004];
+raw bank - energy +0.338 [+0.212, +0.474]; MLP-rivals - critic_v1 +0.248 [+0.186, +0.317].
+Caveat: critic_v1's epoch was selected on the same 100 held-out puzzles (epoch range
+-0.189 to -0.173 on its own metric): a small optimistic bias for critic_v1.
+Interpretation: rival information carries real, causal signal for the competition term
+(clearly in the linear model), but raw physics over-corrects the top choice, and scalar
+summaries fall far short of the per-position generic critic. Diagnosed limitation:
+coarse features. Next (variants 6/7 as specified): the critic architecture trained on the
+SAME sibling data three ways — y (generic), c without rivals, c with per-position rival
+channels — with epoch selection on a 60-puzzle validation split carved from train.
