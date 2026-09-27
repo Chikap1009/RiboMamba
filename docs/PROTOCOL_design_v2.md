@@ -91,3 +91,9 @@ errored immediately (recorded, not dropped). The adapter now passes int(round(li
 same 128 s budget). Recycled workers pick up the fix for new units; errored units are rerun with
 --retry-errors after the chain (data/repair_pilot/run_final_v2_retry.sh). Settings and config
 hash unchanged.
+Amendment 3 (2026-09-27 ~23:05 IST) — operational bug fix (commit a420dc2, fix time
+2026-09-27T17:30:21+00:00): replayed external candidates (DesiRNA, SamplingDesign) were checked against the harness
+clock, which already included the whole external run, so their replays stopped at the first candidate
+(0 rows). The check now uses each candidate's stamped method time. After the chain, EVERY desirna and
+samplingdesign unit finished before the fix time is moved to units_superseded/ (kept, not deleted) and
+rerun under the same configuration; budgets and settings are unchanged.
