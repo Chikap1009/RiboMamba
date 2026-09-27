@@ -136,3 +136,25 @@ def test_wall_limited_units_that_slept_through_are_rerun(tmp_path):
     status["method"] = "desirna_t256"
     path.write_text(json.dumps(status))
     assert "clock gap" in runner.validate_unit(tmp_path, key, cfg["config_hash"], 12)
+
+
+def test_unit_time_limit_is_a_terminal_outcome(tmp_path, monkeypatch):
+    def slow(target, seed, evaluate, settings):
+        while True:
+            evaluate("A" * len(target))
+            time.sleep(0.05)
+    monkeypatch.setitem(runner.METHODS, "slow", slow)
+    monkeypatch.setitem(runner.METHOD_SETTINGS, "slow", {})
+    cfg = runner.make_config(MANIFEST, "toy", TARGETS, ["slow"], [0], 500, unit_time_limit_s=0.3)
+    assert cfg["unit_time_limit_s"] == 0.3 and cfg["config_hash"] != config(budget=500, methods=["slow"], seeds=[0])["config_hash"]
+    counts = runner.run(tmp_path, cfg, TARGETS, workers=1, progress=quiet)
+    assert counts == {"skipped_complete": 0, "time_limit": 2}
+    key = runner.unit_key("slow", "toy:a", 0)
+    status = json.loads(runner.unit_paths(tmp_path, key)[1].read_text())
+    assert 0 < status["n_rows"] < 500 and status["wall_s"] < 1.0
+    assert runner.validate_unit(tmp_path, key, cfg["config_hash"], 500) is None     # terminal: not rerun
+
+
+def test_wall_limited_tools_inherit_the_unit_time_limit():
+    cfg = runner.make_config(MANIFEST, "toy", TARGETS, ["desirna", "samfeo"], [0], 100, unit_time_limit_s=90)
+    assert cfg["methods"]["desirna"]["time_limit_s"] == 90 and "time_limit_s" not in cfg["methods"]["samfeo"]

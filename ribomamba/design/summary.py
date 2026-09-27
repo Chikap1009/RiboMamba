@@ -32,12 +32,7 @@ WALL_BUDGETS_S = (1, 2, 4, 8, 16, 32, 64, 128, 256)
 # Methods whose feedback comes from their OWN (counted) oracle calls: the harness's re-scoring
 # of their candidates is measurement overhead and is subtracted from their wall time. For
 # every other method the harness scoring IS the method's feedback, so it counts.
-EXTERNAL = {"rnainverse", "rnainverse_r64", "rnainverse_r256", "mfe_repair"}
-
-
-def self_scored(method: str) -> bool:
-    """SAMFEO and every SAMFEO-hosted variant score candidates themselves (their own counted calls)."""
-    return method in EXTERNAL or method.startswith("samfeo")
+from ribomamba.design.runner import self_scored  # noqa: E402  (one definition, shared with the runner)
 
 
 def load_run(run_dir: Path) -> tuple[dict, list[dict], pl.DataFrame]:

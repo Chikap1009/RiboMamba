@@ -33,15 +33,23 @@ from ribomamba.design.manifest import LOOKS_PATH, canonical_json
 from ribomamba.design.mfe_repair import MFE_METHODS, MFE_REPAIR_SETTINGS
 from ribomamba.design.neural import NEURAL, NEURAL_METHOD_SETTINGS
 from ribomamba.design.scoring import PRIMARY_SUCCESS, SUCCESS_POLICIES
-from ribomamba.design.search import CONTROL_SETTINGS, CONTROLS, BudgetExhausted, DeadlineReached, Evaluator, Target
+from ribomamba.design.search import (CONTROL_SETTINGS, CONTROLS, BudgetExhausted, DeadlineReached, Evaluator, Target,
+                                     TimeLimitReached)
 from ribomamba.eval.folding import DANGLES, TEMPERATURE_C
 from ribomamba.eval.protocol import git_commit
 
 TRACE_SCHEMA_VERSION = 2          # 2: model-call columns (Stage B)
 METHODS = {**CONTROLS, **BASELINES, **NEURAL, **MFE_METHODS}
 METHOD_SETTINGS = {**CONTROL_SETTINGS, **BASELINE_SETTINGS, **NEURAL_METHOD_SETTINGS, "mfe_repair": MFE_REPAIR_SETTINGS}
-TERMINAL = ("complete", "early_stop", "error")
+TERMINAL = ("complete", "early_stop", "error", "time_limit")
 CLOCK_GAP_S = 30.0
+EXTERNAL = {"rnainverse", "rnainverse_r64", "rnainverse_r256", "mfe_repair"}
+
+
+def self_scored(method: str) -> bool:
+    """SAMFEO-hosted variants and these baselines score candidates themselves (their own counted calls);
+    the harness's re-scoring of their candidates is measurement and is excluded from their time."""
+    return method in EXTERNAL or method.startswith("samfeo")
 
 
 def wall_limited(method: str) -> bool:
@@ -101,7 +109,7 @@ def unit_paths(run_dir: Path, key: str) -> tuple[Path, Path, Path]:
 
 
 def make_config(manifest: dict, subset: str, targets: list[dict], methods: list[str], seeds: list[int],
-                budget: int, settings_override: dict | None = None) -> dict:
+                budget: int, settings_override: dict | None = None, unit_time_limit_s: float | None = None) -> dict:
     unknown = set(methods) - set(METHODS)
     if unknown:
         raise ValueError(f"unknown methods {sorted(unknown)}; available {sorted(METHODS)}")
@@ -112,6 +120,11 @@ def make_config(manifest: dict, subset: str, targets: list[dict], methods: list[
         "seeds": list(seeds), "budget": budget, "oracle": ORACLE, "trace_schema_version": TRACE_SCHEMA_VERSION,
         "budget_unit": BUDGET_UNIT, "success_policies": list(SUCCESS_POLICIES), "primary_success": PRIMARY_SUCCESS,
     }
+    if unit_time_limit_s is not None:                 # only then part of the hash: older configs are unchanged
+        hashed["unit_time_limit_s"] = unit_time_limit_s
+        for m in methods:                             # tools that budget by their own clock get the same limit
+            if wall_limited(m):
+                settings[m]["time_limit_s"] = unit_time_limit_s
     return {**hashed, "config_hash": hashlib.sha256(canonical_json(hashed)).hexdigest()}
 
 
@@ -153,7 +166,7 @@ def validate_unit(run_dir: Path, key: str, config_hash: str, budget: int, retry_
     n = trace.height
     if n != status.get("n_rows") or trace["eval_index"].to_list() != list(range(n)):
         return "trace rows inconsistent"
-    if n > budget or (status["status"] == "complete" and n != budget):
+    if n > budget or (status["status"] == "complete" and n != budget) or (status["status"] == "time_limit" and n == 0):
         return "trace length does not match the budget"
     return None
 
@@ -168,7 +181,8 @@ def run_unit(job: dict) -> dict:
     trace_path, status_path, log_path = unit_paths(run_dir, key)
     trace_path.parent.mkdir(parents=True, exist_ok=True)
     target = Target(job["target"]["id"], job["target"]["structure"])
-    evaluate = Evaluator(target, job["budget"], job["deadline"])
+    evaluate = Evaluator(target, job["budget"], job["deadline"], job.get("unit_time_limit_s"),
+                         subtract_scoring=self_scored(job["method"]))
     started, reason = utc_now(), None
     with open(log_path, "w") as log:
         try:
@@ -178,6 +192,8 @@ def run_unit(job: dict) -> dict:
             status, reason = "early_stop", "the method stopped itself before the budget"
         except BudgetExhausted:
             status = "complete"
+        except TimeLimitReached:
+            status, reason = "time_limit", "the unit's method-time limit was reached"
         except DeadlineReached:
             status, reason = "capped", "run wall-clock cap reached mid-unit (partial trace)"
         except Exception:
@@ -244,6 +260,7 @@ def run(run_dir: Path, config: dict, targets: list[dict], workers: int = 4, max_
                     continue
                 jobs.append({"run_dir": str(run_dir), "key": key, "method": method, "target": by_id[target_id],
                              "seed": seed, "budget": config["budget"], "settings": config["methods"][method],
+                             "unit_time_limit_s": config.get("unit_time_limit_s"),
                              "config_hash": config["config_hash"], "deadline": deadline, "git_commit": commit})
     # Longest targets first, so the slowest units do not straggle at the end.
     jobs.sort(key=lambda j: -len(j["target"]["structure"]))

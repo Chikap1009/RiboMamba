@@ -54,6 +54,10 @@ class BudgetExhausted(Exception):
     """The unit has used its whole candidate budget."""
 
 
+class TimeLimitReached(Exception):
+    """The unit's own method-time limit (final protocol) is used up: a terminal outcome."""
+
+
 class DeadlineReached(Exception):
     """The run's wall-clock cap passed while this unit was running."""
 
@@ -97,8 +101,10 @@ class Candidate:
 class Evaluator:
     """Scores proposals for one unit; see the module docstring for the budget rule."""
 
-    def __init__(self, target: Target, budget: int, deadline: float = math.inf):
+    def __init__(self, target: Target, budget: int, deadline: float = math.inf, time_limit_s: float | None = None,
+                 subtract_scoring: bool = False):
         self.target, self.budget, self.deadline = target, budget, deadline
+        self.time_limit_s, self.subtract_scoring = time_limit_s, subtract_scoring
         self.oracle = Counters()          # the harness's own scoring calls (cache misses only)
         self.internal = Counters()        # calls an external baseline makes inside itself
         self.internal_available = True    # False when a baseline's internal calls cannot be counted
@@ -121,6 +127,13 @@ class Evaluator:
             raise BudgetExhausted
         if time.time() > self.deadline:
             raise DeadlineReached
+        if self.time_limit_s is not None and self.method_time() > self.time_limit_s:
+            raise TimeLimitReached
+
+    def method_time(self) -> float:
+        """Seconds of the method's own work so far (monotonic clock, so a machine suspend is excluded);
+        harness re-scoring is excluded for methods that score candidates themselves."""
+        return time.perf_counter() - self.t0 - (self.score_wall_s if self.subtract_scoring else 0.0)
 
     def __call__(self, sequence: str, parent: int = -1, objective: float | None = None,
                  method_time_s: float | None = None) -> Candidate:
