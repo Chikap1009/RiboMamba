@@ -125,3 +125,9 @@ units per method and refuses FINAL while any unit ended in `error` (implementati
 diagnosed; `--accept-errors` then counts them as unsolved and lists them) or while a zero-candidate
 unit has any status other than time_limit. The corrective pass supersedes by per-method fix time
 (scripts/final_v2/run_final_v2_retry.sh, 9d91eea). Methods, budgets and endpoints unchanged.
+Amendment 4d (2026-09-28 ~01:45 IST, report side only, fixed before any final outcome was read):
+a unit with no design within 128 s has no NED or P. Quality summaries (best NED, best log10 P) are
+means and medians over units WITH a design, reported with the number of units without one; paired NED
+comparisons use puzzles where both methods have a design in every seed (n reported); uMFE success is
+defined for every unit (no design = unsolved). EternaFold agreement is a rate over ALL units
+(no design = no match). Commits a9ea5b1 and the one adding this text.

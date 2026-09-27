@@ -98,6 +98,8 @@ def solved_counts(u: pl.DataFrame, wall: int) -> pl.DataFrame:
 
 
 def paired(u: pl.DataFrame, a: str, b: str, wall: int, metric: str) -> dict | None:
+    """Seeds averaged within puzzle, bootstrap over puzzles. For best_ned, a puzzle where either method
+    lacks a design in some seed (NaN) is excluded; n is reported (success_umfe is defined for every unit)."""
     x = u.filter(pl.col("wall_s") == wall)
     ta = x.filter(pl.col("method") == a).group_by("target_id").agg(pl.col(metric).cast(pl.Float64).mean())
     tb = x.filter(pl.col("method") == b).group_by("target_id").agg(pl.col(metric).cast(pl.Float64).mean())
@@ -173,9 +175,16 @@ def main() -> None:
         entry = {"solved_by_128s": solved_counts(u, 128).to_dicts(),
                  "curves": u.group_by(["method", "wall_s", "target_id"]).agg(pl.col("success_umfe").cast(pl.Float64).mean())
                  .group_by(["method", "wall_s"]).agg(pl.col("success_umfe").mean()).sort(["method", "wall_s"]).to_dicts(),
-                 "quality_128s": u.filter(pl.col("wall_s") == 128).group_by("method").agg(
-                     pl.col("best_ned").mean(), pl.col("best_log10_p").mean(), pl.col("evals_to_first").median(),
-                     pl.col("seconds_to_first").median()).sort("method").to_dicts(),
+                 # quality over units WITH a design within 128 s (a zero-candidate unit has no NED or P);
+                 # the count without one is reported next to it; first-success medians are over solved units
+                 "quality_128s": u.filter(pl.col("wall_s") == 128).with_columns(pl.col("best_ned").fill_nan(None))
+                 .group_by("method").agg(
+                     pl.col("best_ned").mean().alias("best_ned_mean"), pl.col("best_ned").median().alias("best_ned_median"),
+                     pl.col("best_log10_p").mean().alias("best_log10_p_mean"),
+                     pl.col("best_log10_p").median().alias("best_log10_p_median"),
+                     pl.len().alias("units"), pl.col("best_log10_p").null_count().alias("units_without_design"),
+                     pl.col("evals_to_first").median(), pl.col("seconds_to_first").median(),
+                     pl.col("seconds_to_first").is_not_null().sum().alias("solved_units")).sort("method").to_dicts(),
                  "paired": [r for a, b in PAIRS for w in (16, 128) for m in ("success_umfe", "best_ned")
                             if (r := paired(u, a, b, w, m)) is not None]}
         report["sets"][s] = entry
