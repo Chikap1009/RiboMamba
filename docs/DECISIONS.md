@@ -1186,3 +1186,20 @@ targets BEFORE freezing protocol v2, so it can enter the frozen method list only
 **Consequences.** Freezing waits for this development result. Whatever the outcome, the report
 separates: (1) the non-neural efficiency result, (2) the negative neural results, (3) the
 target-conditioned denoiser result.
+
+## D-027 — The target-conditioned denoiser works as a prior but not as a searcher; test it as SAMFEO's proposal model
+**Date:** 2026-09-27   **Status:** accepted
+
+**Context.** ew_dev_tcd_v1: conditioned sampling solves 42.7 % of hard development targets at
+1,024 samples versus 15.6 % for targeted random designs and 3.1 % for the unconditional model
+(pre-registered conditioning criterion met), but trails SAMFEO + energy by 15.6 pp and gives no
+gain as SAMFEO's initial designs.
+
+**Decision.** Record the conditioning result as the project's first positive MODEL result and
+state plainly that it is not a method-level improvement. Next, test the TCD where Stage B's
+unconditional model failed: as the proposal distribution inside SAMFEO (SAMFEO's structured
+mutation chooses the sites; the TCD, conditioned on the target and the rest of the sequence,
+chooses the letters), with and without the energy screen, at matched wall time.
+
+**Alternatives rejected.** Tuning sampling temperature/steps (no diagnosis points there);
+presenting TCD sampling as competitive (it is not).
