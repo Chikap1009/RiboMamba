@@ -37,17 +37,17 @@ Easy tier (rfam_val smoke): at ceiling; the shared start alone solves most.
 Trace finding: late in search only ~2 % of proposals improve; feedback edits waste
 ~33 % of late proposals on repeats. Defect-weighted site choice = random sites.
 
-## Exact next task (session 09, updated ~21:00 IST)
-Framing (D-026): method result so far = NON-NEURAL energy screen for SAMFEO (prior art INFO-RNA).
-Neural: unconditional diffusion proposals negative (D-020); learned critics / competition residual
-negative online (D-022, D-024); TARGET-CONDITIONED DENOISER (TCD, checkpoints/tcd_v1/tcd.pt)
-works as a design prior (42.7 % vs 15.6 % random, 3.1 % unconditional; D-027) but not yet as a
-method. Records: docs/experiments/2026-09-28-target-conditioned-denoiser.md, RESULTS.md,
-DECISIONS D-022..D-027, docs/logbook/2026-09-27-session-09.md.
-In flight: ew_dev_tcdprop_v1 (TCD as SAMFEO's proposal model, alone and energy-screened).
-Then: decide the frozen method list from ew_dev_frontier_v1 + ew_dev_tcdprop_v1; write and FREEZE
-docs/PROTOCOL_design_v2.md (final manifests exist; runs are refused until frozen); run the final
-benchmark with --unit-time-limit; EternaFold robustness check; report.
+## Exact next task (session 09, updated ~22:25 IST 2026-09-27)
+PROTOCOL v2 IS FROZEN (docs/PROTOCOL_design_v2.md, commit 35e0325, D-028). The FINAL benchmark
+is RUNNING: data/repair_pilot/run_final_v2.sh (nohup) runs, in order, final_v2_eterna100_v2
+(2,400 units), final_v2_eterna100_v1only, final_v2_rfam_taneda27; 8 methods x 3 seeds, 128 s
+method time per unit, 10 workers + GPU. Completion marker: data/repair_pilot/final_v2.done.
+If interrupted (sleep / WSL restart): rerun data/repair_pilot/run_final_v2.sh — finished units
+are skipped; wall-limited units that spanned a suspend are rerun automatically.
+Afterwards: `python scripts/final_report.py --eternafold` (frozen endpoints, V1 combination,
+EternaFold check), then write the technical report. Do NOT change methods, budgets or endpoints.
+Framing (D-026): Q1 non-neural energy screen; Q2 target-conditioned denoiser (conditioning
+criterion met on development; method criterion not met); negative neural results recorded.
 
 ## Execution environment
 WSL Ubuntu-24.04:
