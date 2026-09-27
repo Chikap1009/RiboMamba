@@ -37,23 +37,20 @@ Easy tier (rfam_val smoke): at ceiling; the shared start alone solves most.
 Trace finding: late in search only ~2 % of proposals improve; feedback edits waste
 ~33 % of late proposals on repeats. Defect-weighted site choice = random sites.
 
-## Exact next task (session 09, updated ~12:55 IST)
-Single implementing agent: Claude Code. Active experiment:
-docs/experiments/2026-09-27-competition-residual.md (spec + Amendment 1 + Results 1).
-Session log: docs/logbook/2026-09-27-session-09.md.
-Done and verified: confirmation look (energy filter K=8 only) and training-pool runs are
-complete (all units valid); critic_v1 trained; 5,600 sibling groups collected
-(data/repair_pilot/residual_siblings_v1/); diagnosis + scalar-model offline comparison.
-In flight:
-1. Sibling critics, sequential GPU jobs: `for v in generic norival rival; do python
-   scripts/repair_residual.py train-critic --variant $v --epochs 10; done`
-   (log data/repair_pilot/sibling_critics_v1.log; checkpoints/residual_v1/).
-2. ew_dev1024_kablation_v1 (energy filter K = 4/16/32/64, dev; resumable).
-Next: `python scripts/repair_residual.py compare --pairs sib_rival:sib_norival
-sib_norival:sib_generic sib_rival:critic_v1 sib_rival:energy`; then choose frozen
-variants by the spec's selection rule and run them ONLINE on development targets
-(repair_pilot.py run ... --methods samfeo_efilter samfeo_cfilter <frozen variants>
---gpu), with all costs counted. Do not use confirmation results to tune.
+## Exact next task (session 09, updated ~14:40 IST)
+Active record: docs/experiments/2026-09-27-competition-residual.md (Results 1-3, verdict).
+Decisions D-022..D-024. Log: docs/logbook/2026-09-27-session-09.md.
+Measured so far: energy pre-screening of SAMFEO's mutations (K = 8) is the best filter
+online (58 % uMFE vs SAMFEO 48 %, replicated 3x, confirmed once on sealed targets);
+learned critics (generic or competition-residual, with/without rivals) cut offline ranking
+regret ~70 % but do NOT beat the energy filter online. DesiRNA leads uMFE at 64 s only.
+In flight: ew_dev_desirna_filter_v1 (DesiRNA vs DesiRNA + energy pre-screen).
+Next: compare with `python scripts/repair_compare.py --runs ew_dev_desirna_filter_v1
+--name dev_desirna_filter --pairs desirna_efilter:desirna` plus wall-time pairs
+(summary.paired_wall). If the filter helps DesiRNA too, declare "host-agnostic energy
+pre-screen" as a revision, take one logged confirmation look, then write and FREEZE
+docs/PROTOCOL_design_v2.md and run the final benchmark. The K ablation run
+(ew_dev1024_kablation_v1) is paused at 77/384 units (resumable).
 
 ## Execution environment
 WSL Ubuntu-24.04:
