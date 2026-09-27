@@ -131,3 +131,28 @@ def test_cache_hits_spend_budget_but_no_oracle_calls():
     ev(seq)
     assert ev.rows[1]["cache_hit"] and ev.rows[1]["cum_oracle_pf"] == 1 and ev.rows[1]["cum_proposals"] == 2
     assert math.isclose(ev.rows[0]["ned"], ev.rows[1]["ned"])
+
+
+def test_mfe_repair_uses_only_its_own_cheap_calls_and_stops_when_solved():
+    from ribomamba.design.mfe_repair import mfe_repair
+    t = Target("toy:hairpin", "((((((....))))))")
+    ev = Evaluator(t, budget=200)
+    mfe_repair(t, 0, ev, {})                                     # returns by itself: solved
+    assert ev.rows[0]["sequence"] == shared_start(t, 0)
+    assert ev.rows[-1]["umfe"] and not any(r["umfe"] for r in ev.rows[:-1])
+    assert ev.internal.pf == 0 and ev.internal.mfe == len(ev.rows)   # one MFE fold per candidate, no pf
+    assert ev.internal.subopt >= 1
+
+
+def test_mfe_repair_second_site_is_the_wrong_partner():
+    from ribomamba.design.mfe_repair import pick_mfe_sites
+    t = Target("toy:hairpin", "((((....))))")
+    mfe_pt = list(t.pt)
+    mfe_pt[1], mfe_pt[10], mfe_pt[5] = 5, -1, 1                 # position 1 pairs with loop position 5 instead
+    rng = np.random.default_rng(0)
+    for _ in range(200):
+        sites = pick_mfe_sites(t, mfe_pt, rng)
+        wrong_sites = {int(t.site_of[p]) for p in (1, 5, 10)}
+        assert sites[0] in wrong_sites
+        if len(sites) == 2 and sites[0] == t.site_of[1] and sites[1] != t.site_of[5]:
+            assert sites[1] in {int(t.site_of[p]) for p in (0, 2, 9, 11)}   # fell back to a neighbour

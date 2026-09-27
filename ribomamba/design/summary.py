@@ -29,10 +29,10 @@ BUDGETS = (64, 256, 1024)
 LOG10E = math.log10(math.e)
 LOWER_IS_BETTER = {"best_ned", "evals_to_success", "elapsed_s", "cpu_s"}
 WALL_BUDGETS_S = (1, 2, 4, 8, 16, 32, 64, 128, 256)
-# Baselines whose own internal calls are their feedback: the harness's re-scoring of their
-# candidates is measurement overhead and is subtracted from their wall time. For every
-# other method the harness scoring IS the method's feedback, so it counts.
-EXTERNAL = {"samfeo", "rnainverse"}
+# Methods whose feedback comes from their OWN (counted) oracle calls: the harness's re-scoring
+# of their candidates is measurement overhead and is subtracted from their wall time. For
+# every other method the harness scoring IS the method's feedback, so it counts.
+EXTERNAL = {"samfeo", "rnainverse", "mfe_repair"}
 
 
 def load_run(run_dir: Path) -> tuple[dict, list[dict], pl.DataFrame]:
@@ -229,3 +229,23 @@ def markdown_table(summary: list[dict], budget: int) -> str:
                      f"{r.get('mean_cum_internal_pf', math.nan):.0f} | {r.get('mean_elapsed_s', math.nan):.2f} "
                      f"| {r['errors']} | {r['early_stops']} |")
     return "\n".join(lines)
+
+
+def wall_table(run_dir: Path, walls=WALL_BUDGETS_S) -> pl.DataFrame:
+    """Per (method, wall budget): target-level means (seeds averaged within target first)."""
+    _, statuses, traces = load_run(run_dir)
+    rows = []
+    for status in statuses:
+        if status["status"] not in TERMINAL:
+            continue
+        unit = traces.filter((pl.col("method") == status["method"]) & (pl.col("target_id") == status["target_id"])
+                             & (pl.col("seed") == status["seed"]))
+        rows.extend(wall_checkpoints(unit, status, walls))
+    cp = pl.DataFrame(rows)
+    per_target = cp.group_by(["method", "wall_s", "target_id"]).agg(
+        pl.col("success_umfe").cast(pl.Float64).mean(), pl.col("best_ned").mean(),
+        pl.col("truncated").cast(pl.Float64).mean(), pl.col("evals").mean())
+    return per_target.group_by(["method", "wall_s"]).agg(
+        pl.col("success_umfe").mean().alias("success_umfe"), pl.col("best_ned").mean().alias("best_ned"),
+        pl.col("truncated").mean().alias("truncated_share"), pl.col("evals").mean().alias("mean_evals"),
+        pl.len().alias("targets")).sort(["wall_s", "method"])

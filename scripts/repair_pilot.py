@@ -112,6 +112,15 @@ def cmd_summarize(args) -> None:
     md += [f"| {c['budget']} | {c['a']} | {c['b']} | {c['metric']} | {c['mean_diff']:.3f} "
            f"[{c['low']:.3f}, {c['high']:.3f}] | {c['a_better']} / {c['b_better']} / {c['ties']} |"
            for c in comparisons]
+    walls = summary.wall_table(run_dir)
+    out["wall_checkpoints"] = walls.to_dicts()
+    runner.atomic_write_json(run_dir / "summary.json", out)
+    md += ["", "## Success and best NED by method wall time per unit", "",
+           "Harness re-scoring is subtracted for external baselines. truncated = share of units whose "
+           "candidate budget ended before this wall time (they might have improved further).", "",
+           "| wall s | method | uMFE success | best NED | truncated | mean evals |", "|---|---|---|---|---|---|"]
+    md += [f"| {r['wall_s']} | {r['method']} | {100 * r['success_umfe']:.0f}% | {r['best_ned']:.4f} "
+           f"| {r['truncated_share']:.2f} | {r['mean_evals']:.0f} |" for r in walls.to_dicts()]
     md += ["", "## Runtime estimates (CPU only, 4 workers)", "", "```", json.dumps(estimates, indent=1), "```", "",
            "## Unit statuses", "", "```", json.dumps(status_counts, indent=1), "```"]
     (run_dir / "summary.md").write_text("\n".join(md) + "\n")

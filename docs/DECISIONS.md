@@ -949,3 +949,99 @@ pre-registration remains historical and unchanged; the new task needs a separate
 final protocol. No SOTA guarantee. Small validation experiments decide whether
 specialized training is justified. Documentation and implementation can proceed
 in Claude Code or Sol Medium; stronger-model review is reserved for milestones.
+
+## D-017 — Pilot scoring: explicit zero probability for unformable targets, uMFE as primary success, budget = proposals
+**Date:** 2026-09-27   **Phase:** repair pilot, Stage A   **Logbook:** logbook/2026-09-27-session-07.md
+**Status:** accepted
+
+**Context.** The old `check_target` raised on a candidate that cannot form the
+target, which would abort a run. Probing ViennaRNA 2.7.2 showed the opposite
+risk as well: for a target containing a G-A pair it returns a finite energy and
+a non-zero probability (GGGAAAACC vs `(((...)))`: 1.10 kcal/mol, p = 0.070).
+MFE success also depends on how ties are broken, and "a candidate evaluation"
+needed one meaning across methods.
+
+**Decision.** `ribomamba/design/scoring.py` never raises on a bad candidate.
+Unformable targets get p = 0, log p = -inf by our own check; NED is computed
+from the candidate's pair probabilities. Three MFE tie policies are recorded
+separately; the primary is **uMFE** (target is the unique optimal structure).
+The budget unit is one proposal scored, including the initial candidate and
+cache hits; oracle calls are counted by kind on cache misses, and a method's own
+internal calls are counted separately from the harness's measurement.
+
+**Alternatives rejected.**
+- Trusting `pr_structure` for every target: silently credits impossible targets.
+- Backtracked MFE as primary: depends on an implementation's tie-breaking; it is
+  still reported (Eterna/RNAfold convention), as is "any optimal structure"
+  (SAMFEO's MFE count).
+- Budget = oracle calls only: rewards methods that re-propose sequences without
+  paying anything; both axes are reported instead.
+
+**Consequences / trade-offs accepted.** uMFE is stricter than some published
+counts; 12 of 64 rfam_val natives tie at the MFE, so uMFE reachability is not
+proved by the native for those. Candidate evaluations are not equal compute
+across methods, so wall time and per-kind call counts are always reported.
+
+## D-018 — A hard development manifest from Eterna web player puzzles
+**Date:** 2026-09-27   **Phase:** repair pilot, Stage A   **Logbook:** logbook/2026-09-27-session-07.md
+**Status:** accepted (the rfam_val manifest is kept as an easy tier)
+
+**Context.** The planned validation targets were at ceiling: on the rfam_val
+smoke set the shared GC-stem/A-loop start alone solved 5-6 of 8 targets
+(uMFE) before any search, random designs 75 %, RNAinverse 100 %. bpRNA
+validation targets (start 75 %, RNAinverse 90 %) and MFE structures of random
+sequences (start 62 %, RNAinverse 96.5 %) were no harder. Methods cannot be
+told apart where no search is needed; standard hard benchmarks (Eterna100) are
+player-designed.
+
+**Decision.** Build `manifests/eternaweb_dev_v1.json` (64 targets: 32 dev,
+32 confirmation, 8 smoke) from the Eterna web puzzles released (MIT) with
+Gautam et al. 2026, after: structural eligibility (19-256 nt, pseudoknot-free,
+>= 4 pairs, hairpins >= 3); a leakage audit excluding Eterna100 puzzle ids and
+anything within normalized edit distance 0.2 of Eterna100 V1/V2,
+Rfam-Taneda-27/29 or RNAsolo-764; a method-free hardness probe (none of the
+three seeded shared starts is already a uMFE solution); 4 x 4 length x
+paired-fraction strata; no near-duplicates among selected targets.
+
+**Alternatives rejected.**
+- Tuning on Eterna100 or other public test sets: they are the final benchmark.
+- Scraping more Eterna puzzles: the Eterna API refuses scripted access (403);
+  not circumvented.
+- Selecting hard targets by a search method's failure (e.g. SAMFEO's): would
+  bias comparisons against that method. The probe uses only the shared start,
+  which every repair method receives.
+- Synthetic "hard" structure generators: relevance to real hard puzzles unknown.
+
+**Consequences / trade-offs accepted.** The dev set measures the hard regime,
+not average performance; the probe favours targets where search matters. The
+source authors' "MFE-designable" claim is not re-verified. The same puzzle
+pool trained the LM paper's RL stage (11 of our 64 are in its RL subset,
+flagged), so it must not be used to compare against that model. The remaining
+pool is a candidate Stage C training source only after a similarity audit.
+
+## D-019 — SAMFEO as the strong baseline, run unmodified through a counting proxy
+**Date:** 2026-09-27   **Phase:** repair pilot, Stage A   **Logbook:** logbook/2026-09-27-session-07.md
+**Status:** accepted
+
+**Context.** The plan requires SAMFEO or SamplingDesign with pinned source,
+settings and, where possible, faithful internal call counts. No C/C++ compiler
+is installed, and SamplingDesign is C++.
+
+**Decision.** SAMFEO main @ e78b4b5 (2026-08-29), cloned unmodified into
+`external/SAMFEO` (ignored by Git), imported and run with its defaults (pd
+objective, k = 10, T = 1, cg init, structured mutation). Its `RNA` module is
+replaced at run time by a proxy that forces this project's explicit model
+details and counts every mfe/pf/subopt/evaluation call. Its candidates are
+logged through the shared Evaluator; the harness re-scoring is measurement
+and is subtracted from its wall time.
+
+**Alternatives rejected.**
+- Reimplementing SAMFEO: not the authors' method.
+- Installing a compiler into the project environment for SamplingDesign now:
+  a separate toolchain environment is possible later; SAMFEO first.
+
+**Consequences / trade-offs accepted.** SAMFEO has **no license file** at this
+commit: local research comparison only, never vendored or redistributed;
+clarify with the authors before any code release. Its per-candidate cost is
+one zero-band subopt plus one partition function, which differs from our
+methods' calls; comparisons therefore also use wall time.

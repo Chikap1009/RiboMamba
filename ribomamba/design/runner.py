@@ -30,6 +30,7 @@ import polars as pl
 
 from ribomamba.design.baselines import BASELINE_SETTINGS, BASELINES, SAMFEO_COMMIT
 from ribomamba.design.manifest import LOOKS_PATH, canonical_json
+from ribomamba.design.mfe_repair import MFE_METHODS, MFE_REPAIR_SETTINGS
 from ribomamba.design.neural import NEURAL, NEURAL_METHOD_SETTINGS
 from ribomamba.design.scoring import PRIMARY_SUCCESS, SUCCESS_POLICIES
 from ribomamba.design.search import CONTROL_SETTINGS, CONTROLS, BudgetExhausted, DeadlineReached, Evaluator, Target
@@ -37,8 +38,8 @@ from ribomamba.eval.folding import DANGLES, TEMPERATURE_C
 from ribomamba.eval.protocol import git_commit
 
 TRACE_SCHEMA_VERSION = 2          # 2: model-call columns (Stage B)
-METHODS = {**CONTROLS, **BASELINES, **NEURAL}
-METHOD_SETTINGS = {**CONTROL_SETTINGS, **BASELINE_SETTINGS, **NEURAL_METHOD_SETTINGS}
+METHODS = {**CONTROLS, **BASELINES, **NEURAL, **MFE_METHODS}
+METHOD_SETTINGS = {**CONTROL_SETTINGS, **BASELINE_SETTINGS, **NEURAL_METHOD_SETTINGS, "mfe_repair": MFE_REPAIR_SETTINGS}
 TERMINAL = ("complete", "early_stop", "error")
 ORACLE = {"package": "ViennaRNA", "version": "2.7.2", "parameters": "Turner 2004", "temperature_c": TEMPERATURE_C,
           "dangles": DANGLES, "lonely_pairs": True}
