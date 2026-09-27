@@ -126,3 +126,23 @@ Reading: with identical mutation SITES, the conditioned denoiser's LETTERS causa
 ensemble quality per evaluation (NED, P) but not uMFE success, at ~3x wall time. Dominated by
 TCD + energy screen (NED 0.0495, log10 P -0.78, uMFE 54 %, 38 s model time), which is kept for the
 final benchmark; "proposals alone" is not (D-028).
+
+## Next model-adaptation question (drafted 2026-09-28 ~01:50 IST; PROPOSED, not run, not frozen)
+The adaptation result stands on its own: conditioning turned the diffusion model from a useless
+repair prior (3 % uMFE sampling) into a strong one (43 %), and its letters causally improve NED and
+P inside search. The open model question is whether that gain survives COST: every TCD proposal
+costs one GPU forward pass, so at matched wall time TCD arms trail the energy screen.
+Q1 (efficiency, primary): does amortising the denoiser (one batched forward pass scoring all
+    candidate letters at all K screened sites of a step, or reusing one pass's marginals across
+    several steps until the parent changes) put TCD + energy on or above SAMFEO + energy's
+    quality-time frontier at 16 and 64 s? Model passes, model time and GPU are reported per unit.
+Q2 (data): over-fitting began after ~1k steps on ~270 design puzzles; does training on the
+    700-puzzle training pool (SAMFEO trajectories already collected, leakage-audited) delay it and
+    improve held-out design NELBO and sampling uMFE?
+Q3 (target of learning): does fine-tuning on accepted-versus-rejected moves (search-aware) beat
+    NELBO fine-tuning? Prior art: RL for design (LEARNA), distillation of SAMFEO into language
+    models (Gautam et al. 2026), conditional RNA diffusion (RNA-MDLM 2026); no novelty is claimed.
+Constraints before any run: development puzzles only; a NEW, unused evaluation set is needed for
+any claim, because the confirmation set has had one look and the final sets are consumed by
+protocol v2; success criteria fixed in writing before the first run; the TCD stays framed as a
+development model-adaptation gain, not SOTA.
