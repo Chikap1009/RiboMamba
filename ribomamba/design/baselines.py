@@ -62,7 +62,8 @@ SAMFEO_SETTINGS = {"objective": "pd", "k": 10, "t": 1.0, "init": "cg", "structur
 SAMFEO_EFILTER_SETTINGS = {**SAMFEO_SETTINGS, "filter": "energy", "filter_k": 8}
 SAMFEO_CFILTER_SETTINGS = {**SAMFEO_SETTINGS, "filter": "critic", "filter_k": 8,
                            "critic_ckpt": "checkpoints/critic_v1/critic.pt"}
-RNAINVERSE_SETTINGS = {"mode": "mfe (RNA.inverse_fold)", "restart_start": "shared start, then targeted init"}
+RNAINVERSE_SETTINGS = {"mode": "mfe (RNA.inverse_fold)", "restart_start": "shared start, then targeted init",
+                       "max_restarts": None}
 
 
 class CountingFoldCompound:
@@ -277,7 +278,8 @@ def rnainverse(target: Target, seed: int, evaluate: Evaluator, settings: dict, l
     rng = rng_for("rnainverse", target.id, seed)
     RNA.init_rand(int(rng.integers(2**31 - 1)))
     start = shared_start(target, seed)
-    while True:
+    max_restarts = settings.get("max_restarts")
+    while max_restarts is None or evaluate.count < max_restarts:
         evaluate.check()
         designed, distance = RNA.inverse_fold(start, target.structure)
         evaluate(designed.upper(), objective=float(distance))
@@ -358,6 +360,8 @@ for _v in ("generic", "norival", "rival"):
     BASELINES[f"samfeo_sfilter_{_v}"] = samfeo_efilter
     BASELINE_SETTINGS[f"samfeo_sfilter_{_v}"] = {**SAMFEO_SETTINGS, "filter": "sibling", "filter_k": 8,
                                                  "residual_model": f"checkpoints/residual_v1/sibling_{_v}.pt"}
+BASELINES["rnainverse_r64"] = rnainverse
+BASELINE_SETTINGS["rnainverse_r64"] = {**RNAINVERSE_SETTINGS, "max_restarts": 64}
 BASELINES["samfeo_efilter_eps"] = samfeo_efilter
 BASELINE_SETTINGS["samfeo_efilter_eps"] = {**SAMFEO_EFILTER_SETTINGS, "epsilon": 0.125}
 

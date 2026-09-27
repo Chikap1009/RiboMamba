@@ -32,7 +32,7 @@ WALL_BUDGETS_S = (1, 2, 4, 8, 16, 32, 64, 128, 256)
 # Methods whose feedback comes from their OWN (counted) oracle calls: the harness's re-scoring
 # of their candidates is measurement overhead and is subtracted from their wall time. For
 # every other method the harness scoring IS the method's feedback, so it counts.
-EXTERNAL = {"rnainverse", "mfe_repair"}
+EXTERNAL = {"rnainverse", "rnainverse_r64", "mfe_repair"}
 
 
 def self_scored(method: str) -> bool:
