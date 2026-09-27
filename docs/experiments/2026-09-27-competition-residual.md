@@ -151,3 +151,26 @@ summaries fall far short of the per-position generic critic. Diagnosed limitatio
 coarse features. Next (variants 6/7 as specified): the critic architecture trained on the
 SAME sibling data three ways — y (generic), c without rivals, c with per-position rival
 channels — with epoch selection on a 60-puzzle validation split carved from train.
+
+## Results 2 (measured 2026-09-27): per-position critics on the same sibling data
+`python scripts/repair_residual.py train-critic --variant {generic,norival,rival}` (commit
+6861d46 code; same architecture ~0.83 M parameters, data, seed, 10 epochs, epoch chosen
+on 60 validation puzzles by best-of-8 regret; ~400 GPU-s each, peak 1.53 GB, inference
+~155 us per child in batches of 512). Held-out best-of-8 regret (ln P; 100 puzzles):
+critic_v1 0.283 [0.229, 0.342]; sibling rival 0.288 [0.232, 0.349]; sibling norival 0.301
+[0.238, 0.371]; sibling generic 0.307 [0.242, 0.378]; energy 1.004.
+Paired differences: rival - norival -0.013 [-0.052, +0.021]; norival - generic -0.006
+[-0.040, +0.025]; rival - generic -0.019 [-0.067, +0.020]; rival - critic_v1 +0.004
+[-0.022, +0.030]; every per-position critic - energy about -0.70 (intervals exclude 0).
+
+## Decision on the hypothesis (by the pre-registered failure criteria)
+The competition-aware residual MECHANISM is not supported as an improvement: rival
+physics alone increases regret (+0.34), and rival features / the exact energy
+decomposition add no measurable value to a per-position learned critic (differences
+~0, intervals include 0). Rival information does carry signal for scalar models
+(linear -0.139, significant), i.e. the per-position model appears to recover it from
+sequence context. What IS supported offline: a learned per-position critic reduces
+best-of-8 regret by ~70 % relative to target-energy screening. Next: the online test
+of whether that ranking gain survives inference cost and search dynamics (single
+development batch, all methods under the same load), with the rival variant kept as
+the online causal ablation.
