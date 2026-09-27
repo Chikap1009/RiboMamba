@@ -1142,3 +1142,27 @@ By method wall time: 31 vs 26 % @1 s, 38 vs 32 % @4 s, 43 vs 34 % @16 s. The dev
 effect (+10.4 pp) replicated (+9.4 pp) on unseen puzzles; confirmation targets are harder
 (SAMFEO 34 % vs 48 % on development). Still validation-style evidence on 32 puzzles, not a
 benchmark result; energy pre-screening is probably not novel.
+
+### Competition-aware residual experiment (training-side data only; offline) — session 09
+Spec and full numbers: docs/experiments/2026-09-27-competition-residual.md (Results 1-2).
+Data: 5,600 sibling groups x 16 fully scored SAMFEO children on 700 training-pool puzzles
+(89,600 children; 2,853 CPU-s). Held-out evaluation on 100 pool puzzles (800 groups);
+best-of-8 regret in ln P (lower better), puzzle bootstrap 95 % intervals.
+
+| scorer | best-of-8 regret | within-group Spearman |
+|---|---|---|
+| energy (target-energy screening) | 1.004 [0.873, 1.142] | 0.52 |
+| raw rival-bank physics | 1.341 [1.155, 1.543] | 0.55 |
+| linear residual, no rivals / rivals | 0.804 / 0.665 | 0.63 / 0.68 |
+| MLP residual, no rivals / rivals | 0.585 / 0.531 | 0.72 / 0.74 |
+| per-position critic: generic (sibling-trained) | 0.307 [0.242, 0.378] | 0.81 |
+| per-position residual, no rivals | 0.301 [0.238, 0.371] | 0.82 |
+| per-position residual + rival channels | 0.288 [0.232, 0.349] | 0.81 |
+| critic_v1 (generic, trajectory-trained) | 0.283 [0.229, 0.342] | 0.83 |
+
+Causal contrasts: rival - no-rival (per-position) -0.013 [-0.052, +0.021]; (linear)
+-0.139 [-0.205, -0.079]; raw bank - energy +0.338. Verdict (D-022): the
+competition-residual mechanism does not improve a per-position critic; learned critics
+reduce ranking regret ~70 % vs energy screening. critic_v1's epoch was chosen on the
+same held-out puzzles (small optimistic bias). Online development test: run
+ew_dev1024_online_v1 (in progress).
