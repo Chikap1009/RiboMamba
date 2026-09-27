@@ -97,3 +97,59 @@ class ResidualScorer:
         evaluate.model_calls += 1
         evaluate.model_wall_s += time.perf_counter() - start
         return list(-(a + c_hat))
+
+
+class SiblingScorer(ResidualScorer):
+    """Online scorer for the sibling-trained per-position critics (residual_critic.py).
+
+    generic: rank by y_hat; norival / rival: rank by a + c_hat. Rival banks are drawn only
+    for the rival variant (the others pay no bank cost). Encoding, GPU transfer and
+    inference time are counted in model_wall_s; folds and evaluations in evaluate.internal.
+    """
+
+    def __init__(self, path: str):
+        import torch
+
+        from ribomamba.design.critic import CriticConfig
+        from ribomamba.design.residual_critic import SiblingCritic
+        state = torch.load(path, map_location="cpu", weights_only=False)
+        self.variant = state["variant"]
+        self.device = "cuda" if torch.cuda.is_available() else "cpu"
+        self.model = SiblingCritic(CriticConfig(**state["config"]), use_rivals=self.variant == "rival")
+        self.model.load_state_dict(state["state"])
+        self.model = self.model.to(self.device).eval()
+        self.banks = OrderedDict()
+        self.pt_cache: dict = {}
+
+    def __call__(self, target, parent: str, children: list[str], defect_list, evaluate) -> list[float]:
+        import torch
+
+        from ribomamba.design.residual_critic import collate_sibling, encode_sibling
+        start = time.perf_counter()
+        md = model_details()
+        if self.variant == "rival":
+            rivals, pts, parent_rivals, e_parent = self._bank(target, parent, evaluate)
+        else:
+            rivals, pts, parent_rivals = [], [], np.zeros(0)
+            e_parent = RNA.fold_compound(parent, md).eval_structure(target.structure)
+            evaluate.internal.eval += 1
+        cached = evaluate.cache.get(parent)
+        parent_ln_p = cached.log_p_target if cached is not None else math.nan
+        rows, a_list = [], []
+        for child in children:
+            e_child = RNA.fold_compound(child, md).eval_structure(target.structure)
+            energies = rival_energies(child, rivals, pts) if rivals else np.zeros(0)
+            evaluate.internal.eval += 1 + len(rivals)
+            a = -(e_child - e_parent) / KT
+            a_list.append(a)
+            rows.append({"structure": target.structure, "parent": parent, "child": child,
+                         "parent_defect": list(defect_list), "target_energy": e_child, "parent_target_energy": e_parent,
+                         "parent_ln_p": parent_ln_p, "a": a, "rivals": rivals,
+                         "parent_rival_energy": list(parent_rivals), "rival_energy": list(energies)})
+        batch = collate_sibling([encode_sibling(r, self.variant, self.pt_cache) for r in rows], self.device)
+        with torch.no_grad(), torch.autocast("cuda", dtype=torch.bfloat16, enabled=self.device == "cuda"):
+            out = self.model(batch).float().cpu().numpy()
+        score = out if self.variant == "generic" else np.array(a_list) + out
+        evaluate.model_calls += 1
+        evaluate.model_wall_s += time.perf_counter() - start
+        return list(-score)

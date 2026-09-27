@@ -46,3 +46,22 @@ def test_scorer_interface_counts_its_work(tmp_path):
     scores = scorer(target, "GGGGAAAACCCC", ["GCGGAAAACCGC", "GGGGAAGACCCC"], [0.1] * 12, ev)
     assert len(scores) == 2 and all(np.isfinite(scores))
     assert ev.model_calls == 1 and ev.internal.eval == 3             # parent + 2 children energies
+
+
+def test_sibling_scorer_runs_every_variant_and_counts_work(tmp_path):
+    from ribomamba.design.residual_critic import SiblingCritic
+    from ribomamba.design.residual_filter import SiblingScorer
+    from ribomamba.design.scoring import score
+    target = Target("toy", "((((((....))))))..((((((....))))))")
+    parent = "GGGGGGAAAACCCCCCAAGGGGGGAAAACCCCCC"
+    kids = ["GGGCGGAAAACCGCCCAAGGGGGGAAAACCCCCC", "GGGGGGAAAACCCCCCAAGGAGGGAAAACCUCCC"]
+    for variant in ("generic", "norival", "rival"):
+        cfg = CriticConfig(d_model=32, n_layers=2, n_heads=2)
+        torch.save({"state": SiblingCritic(cfg, use_rivals=variant == "rival").state_dict(), "variant": variant,
+                    "config": cfg.__dict__}, tmp_path / f"{variant}.pt")
+        scorer = SiblingScorer(str(tmp_path / f"{variant}.pt"))
+        ev = Evaluator(target, budget=5)
+        ev(parent)                                                  # the parent's ln P, as SAMFEO would have it
+        s = scorer(target, parent, kids, list(score(parent, target.structure).defect), ev)
+        assert len(s) == 2 and all(np.isfinite(s)) and ev.model_calls == 1
+        assert ev.internal.pf == (1 if variant == "rival" else 0)  # only the rival variant draws a bank

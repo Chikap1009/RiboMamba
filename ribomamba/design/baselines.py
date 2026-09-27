@@ -244,12 +244,12 @@ _CRITICS: dict = {}
 
 def make_filter(settings: dict):
     """The scorer named by settings["filter"]; learned models are loaded once per process."""
-    if settings["filter"] == "residual":
-        from ribomamba.design.residual_filter import ResidualScorer
+    if settings["filter"] in ("residual", "sibling"):
+        from ribomamba.design.residual_filter import ResidualScorer, SiblingScorer
         from ribomamba.paths import REPO_ROOT
         path = str(REPO_ROOT / settings["residual_model"])
         if path not in _CRITICS:
-            _CRITICS[path] = ResidualScorer(path)
+            _CRITICS[path] = (SiblingScorer if settings["filter"] == "sibling" else ResidualScorer)(path)
         return _CRITICS[path]
     if settings["filter"] == "critic":
         from ribomamba.design.critic import CriticScorer
@@ -297,6 +297,10 @@ RESIDUAL_VARIANTS = {"samfeo_rfilter_linear": "checkpoints/residual_v1/linear_ri
 for _name, _path in RESIDUAL_VARIANTS.items():
     BASELINES[_name] = samfeo_efilter
     BASELINE_SETTINGS[_name] = {**SAMFEO_SETTINGS, "filter": "residual", "filter_k": 8, "residual_model": _path}
+for _v in ("generic", "norival", "rival"):
+    BASELINES[f"samfeo_sfilter_{_v}"] = samfeo_efilter
+    BASELINE_SETTINGS[f"samfeo_sfilter_{_v}"] = {**SAMFEO_SETTINGS, "filter": "sibling", "filter_k": 8,
+                                                 "residual_model": f"checkpoints/residual_v1/sibling_{_v}.pt"}
 BASELINES["samfeo_efilter_eps"] = samfeo_efilter
 BASELINE_SETTINGS["samfeo_efilter_eps"] = {**SAMFEO_EFILTER_SETTINGS, "epsilon": 0.125}
 
