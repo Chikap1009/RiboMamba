@@ -12,8 +12,9 @@ Why: DesiRNA writes its trajectory only at the end and checks its time limit onl
 rounds, so a nominal 128 s run can last ~240 s; stamping candidates by step fraction credited
 post-deadline work (review of 2026-09-28). Here each round's replica states are logged when they
 exist, and the parent kills the process group at the deadline, counting only rows logged by then.
-The patch wraps remc.replica_exchange (called once per round in the parent process, after the
-replicas' Monte Carlo moves); nothing else in DesiRNA changes.
+The patch wraps remc.mutate_sequence_re (logs the states entering each round; the first call logs the
+initial population) and remc.replica_exchange (logs the states after each round), both called in the
+parent process; nothing else in DesiRNA changes.
 """
 
 import os
@@ -47,6 +48,21 @@ def _timed_exchange(seq_score_list, stats_obj, sim_options):
 
 
 remc.replica_exchange = _timed_exchange
+
+_original_round = remc.mutate_sequence_re
+
+
+def _timed_round(lst_seq_obj, nt_list, stats_obj, sim_options, input_file):
+    """Log the states ENTERING each round (the first call logs DesiRNA's initial population, which
+    exists from start-up and is part of its own trajectory), then run the round unchanged."""
+    now = time.monotonic() - T0
+    for s in lst_seq_obj:
+        LOG.write(f"{now:.4f}\t{s.replica_num}\t{stats_obj.step}\t{s.scoring_function}\t{s.sequence}\n")
+    LOG.flush()
+    return _original_round(lst_seq_obj, nt_list, stats_obj, sim_options, input_file)
+
+
+remc.mutate_sequence_re = _timed_round
 
 K = int(os.environ.get("DESIRNA_FILTER_K", "0") or 0)
 if K > 1:
