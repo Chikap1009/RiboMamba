@@ -436,6 +436,13 @@ for _v in ("generic", "norival", "rival"):
                                                  "residual_model": f"checkpoints/residual_v1/sibling_{_v}.pt"}
 BASELINES["desirna_efilter"] = desirna
 BASELINE_SETTINGS["desirna_efilter"] = {**DESIRNA_SETTINGS, "filter_k": 8}
+for _t in (256,):
+    BASELINES[f"desirna_t{_t}"] = desirna
+    BASELINE_SETTINGS[f"desirna_t{_t}"] = {**DESIRNA_SETTINGS, "time_limit_s": _t}
+    BASELINES[f"samplingdesign_t{_t}"] = samplingdesign
+    BASELINE_SETTINGS[f"samplingdesign_t{_t}"] = {**SAMPLINGDESIGN_SETTINGS, "time_limit_s": _t}
+BASELINES["rnainverse_r256"] = rnainverse
+BASELINE_SETTINGS["rnainverse_r256"] = {**RNAINVERSE_SETTINGS, "max_restarts": 256}
 BASELINES["rnainverse_r64"] = rnainverse
 BASELINE_SETTINGS["rnainverse_r64"] = {**RNAINVERSE_SETTINGS, "max_restarts": 64}
 BASELINES["samfeo_efilter_eps"] = samfeo_efilter

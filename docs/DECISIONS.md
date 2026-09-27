@@ -1147,3 +1147,22 @@ generality is known.
 **Consequences.** The candidate contribution is an empirical one — a cheap, general proposal
 screen with measured quality/time gains — not a new learned model; novelty is modest and must
 be checked against best-of-K / multiple-try proposal schemes.
+
+## D-025 — Energy pre-screening is not a host-agnostic uMFE accelerator; extend the frontier before freezing
+**Date:** 2026-09-27   **Status:** accepted
+
+**Context.** Applied to DesiRNA, the K = 8 target-energy screen improved NED and P(target) but
+cut uMFE at 64 s by 8 pp (paired interval excludes 0) while slightly helping at 4-16 s.
+On development data SAMFEO + energy leads at short budgets and on NED; DesiRNA leads uMFE by
+64 s. INFO-RNA (2006) already orders neighbours by target-energy improvement, so the screen
+itself is prior art; any contribution is empirical.
+
+**Decision.** Do not claim generality for uMFE. Before freezing the final protocol, measure
+the quality-time frontier at adequate budgets on development targets in one batch: SAMFEO and
+SAMFEO + energy at 5,010 evaluations (SAMFEO's published setting), DesiRNA and SamplingDesign
+at 256 s one core, RNAinverse 256 restarts. The frozen method list and endpoints follow from
+that frontier, not from a preferred story.
+
+**Consequences.** The likely honest claim is narrow: a cheap screen that improves SAMFEO's
+quality per time and ensemble quality of two hosts, with DesiRNA remaining strongest on uMFE at
+longer budgets unless the longer-budget runs say otherwise.

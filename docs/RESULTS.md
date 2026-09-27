@@ -1166,3 +1166,16 @@ competition-residual mechanism does not improve a per-position critic; learned c
 reduce ranking regret ~70 % vs energy screening. critic_v1's epoch was chosen on the
 same held-out puzzles (small optimistic bias). Online development test: run
 ew_dev1024_online_v1 (in progress).
+
+### Online development results (session 09) — learned filters and host generality
+Run ew_dev1024_online_v1 (10 methods, 960/960 units, one batch): uMFE @1024 evals — SAMFEO
+47.9 %, SAMFEO + energy filter 58.3 % (third replication; +0.104 [0.031, 0.188] vs SAMFEO),
+critic_v1 filter 52.1 % (-0.062 [-0.146, 0.000] vs energy), sibling critics 53-55 %, linear
+residual 54.2 % (-0.042 [-0.083, -0.010]), energy + epsilon 53.1 %, DesiRNA (64 s) 65.6 %,
+RNAinverse (64 restarts) 59.4 %. No learned filter beats the energy filter (D-024).
+Run ew_dev_desirna_filter_v1 (192/192 units; 64 s, one dedicated core each): DesiRNA vs DesiRNA
++ energy pre-screen (K = 8): uMFE 69.8 vs 61.5 % at 64 s (paired -0.083 [-0.177, -0.010],
+0/4/28); +0.021 at 4 s and 16 s (CIs include 0); NED better with the screen at 4 s (-0.0085
+[-0.0155, -0.0032]) and 16 s (-0.0118 [-0.0203, -0.0038]); best log10 P -0.74 vs -0.86.
+The screen reduces DesiRNA's steps (119 vs 166 candidates by 64 s). Energy pre-screening
+improves ensemble quality in both hosts but improves uMFE only in SAMFEO (D-025).
