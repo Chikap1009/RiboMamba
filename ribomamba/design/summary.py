@@ -28,6 +28,11 @@ from ribomamba.eval.stats import bootstrap_ci
 BUDGETS = (64, 256, 1024)
 LOG10E = math.log10(math.e)
 LOWER_IS_BETTER = {"best_ned", "evals_to_success", "elapsed_s", "cpu_s"}
+WALL_BUDGETS_S = (1, 2, 4, 8, 16, 32, 64, 128, 256)
+# Baselines whose own internal calls are their feedback: the harness's re-scoring of their
+# candidates is measurement overhead and is subtracted from their wall time. For every
+# other method the harness scoring IS the method's feedback, so it counts.
+EXTERNAL = {"samfeo", "rnainverse"}
 
 
 def load_run(run_dir: Path) -> tuple[dict, list[dict], pl.DataFrame]:
@@ -76,6 +81,7 @@ def unit_checkpoints(trace: pl.DataFrame, status: dict, budgets=BUDGETS) -> list
         last = prefix.row(-1, named=True)
         row.update({k: last[k] for k in last if k.startswith("cum_")})
         row.update({"elapsed_s": last["elapsed_s"], "cpu_s": last["cpu_s"], "score_wall_s": last["score_wall_s"],
+                    "cum_model_calls": last.get("cum_model_calls"), "model_wall_s": last.get("model_wall_s"),
                     "invalid_or_error": int((~prefix["valid"] | prefix["error"].is_not_null()).sum()),
                     "infeasible_proposals": int((~prefix["target_feasible"]).sum()),
                     "distinct_fraction": prefix["sequence"].n_unique() / prefix.height})
@@ -83,6 +89,35 @@ def unit_checkpoints(trace: pl.DataFrame, status: dict, budgets=BUDGETS) -> list
             seq = best["sequence"]
             row["best_gc"] = (seq.count("G") + seq.count("C")) / len(seq)
             row["best_max_homopolymer"] = max_homopolymer(seq)
+        out.append(row)
+    return out
+
+
+def method_wall(trace: pl.DataFrame, method: str) -> pl.Series:
+    """Cumulative wall seconds attributable to the method (see EXTERNAL)."""
+    wall = trace["elapsed_s"]
+    return wall - trace["score_wall_s"] if method in EXTERNAL else wall
+
+
+def wall_checkpoints(trace: pl.DataFrame, status: dict, walls=WALL_BUDGETS_S) -> list[dict]:
+    """Best-so-far endpoints by wall-clock seconds, for comparisons across unlike 'candidates'.
+
+    A unit that finished (complete or early_stop) before a wall budget keeps its final
+    values there; a unit whose trace ends earlier only because its candidate budget ran
+    out is marked truncated=True at larger wall budgets (it might have improved further).
+    """
+    trace = trace.sort("eval_index").with_columns(method_wall(trace.sort("eval_index"), status["method"])
+                                                  .alias("method_wall_s"))
+    out = []
+    for w in walls:
+        prefix = trace.filter(pl.col("method_wall_s") <= w)
+        row = {"method": status["method"], "target_id": status["target_id"], "seed": status["seed"], "wall_s": w,
+               "truncated": status["status"] == "complete" and trace.height and float(trace["method_wall_s"][-1]) < w,
+               "evals": prefix.height}
+        for p in SUCCESS_POLICIES:
+            row[f"success_{p}"] = bool(prefix[p].any()) if prefix.height else False
+        defined = prefix.filter(pl.col("ned").is_not_nan() & pl.col("valid"))
+        row["best_ned"] = float(defined["ned"].min()) if defined.height else math.nan
         out.append(row)
     return out
 
@@ -120,7 +155,7 @@ def aggregate(cp: pl.DataFrame, metrics=None, seed: int = 0) -> list[dict]:
                 row[metric] = {"mean": est, "low": low, "high": high, "n_targets": len(values)}
         for cost in ("cum_cache_misses", "cum_oracle_mfe", "cum_oracle_pf", "cum_oracle_subopt",
                      "cum_internal_mfe", "cum_internal_pf", "cum_internal_subopt", "elapsed_s", "cpu_s",
-                     "score_wall_s"):
+                     "score_wall_s", "cum_model_calls", "model_wall_s"):
             if cost in sub.columns and sub[cost].null_count() < sub.height:
                 row[f"mean_{cost}"] = float(sub[cost].cast(pl.Float64).mean())
         row["errors"] = int((sub["status"] == "error").sum())

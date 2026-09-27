@@ -107,6 +107,8 @@ class Evaluator:
         self.rows: list[dict] = []
         self.cache_misses = 0
         self.score_wall_s = 0.0
+        self.model_calls = 0              # neural proposal forward passes (Stage B)
+        self.model_wall_s = 0.0
         self.t0, self.c0 = time.perf_counter(), time.process_time()
 
     @property
@@ -143,7 +145,7 @@ class Evaluator:
             **self.oracle.as_dict("cum_oracle_"),
             **{k: (v if self.internal_available else None) for k, v in self.internal.as_dict("cum_internal_").items()},
             "elapsed_s": time.perf_counter() - self.t0, "cpu_s": time.process_time() - self.c0,
-            "score_wall_s": self.score_wall_s,
+            "score_wall_s": self.score_wall_s, "cum_model_calls": self.model_calls, "model_wall_s": self.model_wall_s,
         })
         return Candidate(index, sequence, result)
 

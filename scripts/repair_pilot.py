@@ -11,7 +11,8 @@
   python scripts/repair_pilot.py summarize --run smoke64
       writes summary.json and summary.md into the run directory
 
-CPU only: CUDA is hidden, workers are capped at 4 and one OpenMP thread each.
+CPU only unless --gpu (Stage B neural proposals): CUDA is otherwise hidden; workers are
+capped at 4 and one OpenMP thread each.
 """
 
 import argparse
@@ -19,7 +20,8 @@ import json
 import os
 import sys
 
-os.environ["CUDA_VISIBLE_DEVICES"] = ""
+if "--gpu" not in sys.argv:
+    os.environ["CUDA_VISIBLE_DEVICES"] = ""
 os.environ.setdefault("OMP_NUM_THREADS", "1")
 
 from ribomamba.design import manifest as mf                       # noqa: E402
@@ -132,6 +134,7 @@ def main() -> None:
     r.add_argument("--workers", type=int, default=MAX_WORKERS)
     r.add_argument("--max-hours", type=float, default=8.0)
     r.add_argument("--retry-errors", action="store_true")
+    r.add_argument("--gpu", action="store_true", help="let neural proposal methods use the GPU")
     r.add_argument("--confirmation-look", default="", help="declared candidate revision (required for confirmation)")
     s = sub.add_parser("summarize")
     s.add_argument("--run", required=True)

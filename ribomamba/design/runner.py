@@ -30,14 +30,15 @@ import polars as pl
 
 from ribomamba.design.baselines import BASELINE_SETTINGS, BASELINES, SAMFEO_COMMIT
 from ribomamba.design.manifest import LOOKS_PATH, canonical_json
+from ribomamba.design.neural import NEURAL, NEURAL_METHOD_SETTINGS
 from ribomamba.design.scoring import PRIMARY_SUCCESS, SUCCESS_POLICIES
 from ribomamba.design.search import CONTROL_SETTINGS, CONTROLS, BudgetExhausted, DeadlineReached, Evaluator, Target
 from ribomamba.eval.folding import DANGLES, TEMPERATURE_C
 from ribomamba.eval.protocol import git_commit
 
-TRACE_SCHEMA_VERSION = 1
-METHODS = {**CONTROLS, **BASELINES}
-METHOD_SETTINGS = {**CONTROL_SETTINGS, **BASELINE_SETTINGS}
+TRACE_SCHEMA_VERSION = 2          # 2: model-call columns (Stage B)
+METHODS = {**CONTROLS, **BASELINES, **NEURAL}
+METHOD_SETTINGS = {**CONTROL_SETTINGS, **BASELINE_SETTINGS, **NEURAL_METHOD_SETTINGS}
 TERMINAL = ("complete", "early_stop", "error")
 ORACLE = {"package": "ViennaRNA", "version": "2.7.2", "parameters": "Turner 2004", "temperature_c": TEMPERATURE_C,
           "dangles": DANGLES, "lonely_pairs": True}
@@ -56,6 +57,7 @@ SCHEMA = {
     "cum_proposals": pl.Int64, "cum_cache_misses": pl.Int64,
     **{f"cum_oracle_{k}": pl.Int64 for k in _COUNTS}, **{f"cum_internal_{k}": pl.Int64 for k in _COUNTS},
     "elapsed_s": pl.Float64, "cpu_s": pl.Float64, "score_wall_s": pl.Float64,
+    "cum_model_calls": pl.Int64, "model_wall_s": pl.Float64,
 }
 
 
@@ -174,6 +176,7 @@ def run_unit(job: dict) -> dict:
               "sha256": hashlib.sha256(trace_path.read_bytes()).hexdigest(),
               "wall_s": time.perf_counter() - evaluate.t0, "cpu_s": time.process_time() - evaluate.c0,
               "score_wall_s": evaluate.score_wall_s, "cache_misses": evaluate.cache_misses,
+              "model_calls": evaluate.model_calls, "model_wall_s": evaluate.model_wall_s,
               "oracle_calls": evaluate.oracle.as_dict(),
               "internal_calls": evaluate.internal.as_dict() if evaluate.internal_available else None,
               "started_utc": started, "finished_utc": utc_now(), "git_commit": job["git_commit"],
