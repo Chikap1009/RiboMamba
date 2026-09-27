@@ -50,6 +50,15 @@ search and (ii) a non-neural filter (best of K by target-structure energy).
   included) by >= 10 points uMFE or >= 3x fewer partition-function
   evaluations at comparable quality; otherwise record the negative result.
 
+## Measured before training (2026-09-27, ~12:05 IST)
+- Data: trainpool_samfeo_v1 (700 pool puzzles x 400 SAMFEO evals, seed 0,
+  2,253 s + 918 s before the WSL restart); 273,000 transitions (234,000 train /
+  39,000 held-out puzzles' transitions), 62,811 distinct parents (defects
+  recomputed in 189 s on 8 workers). Base rate of improvement: 8.3 %.
+- Critic: 825,602 parameters. Peak GPU memory at the worst-case shape
+  (L = 256), training step with AdamW and bf16 autocast: 1,522 MiB at batch 256,
+  3,010 MiB at batch 512 (RTX 4060 Laptop, 8 GB). Batch 256 chosen.
+
 ## Prior art to check before any novelty claim
 Learned mutation/move policies (EternaBrain player moves; LEARNA / Meta-LEARNA
 RL), surrogate-assisted and learned-filter local search, NUPACK defect-weighted

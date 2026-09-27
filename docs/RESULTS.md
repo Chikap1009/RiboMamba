@@ -1123,3 +1123,22 @@ partition-function evaluations at comparable quality. By method wall time
 58 vs 48 % @64 s; RNAinverse 46 / 54 / 56 / 59 % with worse NED (0.071).
 Development evidence only; confirmation targets untouched; novelty unverified
 (energy-based screening of design moves is a simple, likely-precedented idea).
+
+### CONFIRMATION look rev-efilter-v1: SAMFEO vs SAMFEO + energy filter, 32 confirmation targets x 3 seeds
+Declared and logged BEFORE any confirmation data existed (manifests/confirmation_looks.jsonl;
+a first launch at 07:28 IST produced no units before a WSL restart and was resumed at 11:17
+IST under the same run name and configuration hash d2e1f7a7 — one look, two log lines).
+Run ew_conf1024_efilter_v1, commit 2312740 code, 2 workers, 2,599 s, 192/192 units, 0 errors,
+3 early stops (filter reached P > 0.99). K = 8, untuned.
+
+| method | uMFE @64 | @256 | @1024 | best NED @1024 | best log10 P @1024 |
+|---|---|---|---|---|---|
+| SAMFEO | 20 % [8, 33] | 30 % [16, 46] | 34 % [19, 51] | 0.117 | -4.37 |
+| SAMFEO + energy filter | 26 % [12, 41] | 38 % [22, 53] | 44 % [28, 60] | 0.099 | -2.51 |
+
+Paired (filter - SAMFEO) @1024: uMFE +0.094 [0.010, 0.198] (4 better / 0 worse / 28 tied);
+best NED -0.0178 [-0.0275, -0.0095] (29/2/1); best log10 P +1.86 [0.74, 3.26] (29/3).
+By method wall time: 31 vs 26 % @1 s, 38 vs 32 % @4 s, 43 vs 34 % @16 s. The development
+effect (+10.4 pp) replicated (+9.4 pp) on unseen puzzles; confirmation targets are harder
+(SAMFEO 34 % vs 48 % on development). Still validation-style evidence on 32 puzzles, not a
+benchmark result; energy pre-screening is probably not novel.

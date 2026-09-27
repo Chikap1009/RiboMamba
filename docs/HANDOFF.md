@@ -9,7 +9,7 @@ the pilot compute caps (2026-09-27 ~11:20 IST): local CPU/GPU use is not capped.
 WSL restarted ~07:30 IST and killed two runs; both were resumed at 11:17 IST.
 
 ## Where things stand (measured, not planned)
-Stage A is BUILT and RUN. Stage B probe is IN PROGRESS (see log for status).
+Stage A is BUILT and RUN. Stage B is DONE and NEGATIVE.
 Commits (local, not pushed): ec95f5c pivot docs; 8f3c81b Stage A harness;
 19a8bee Stage B neural probe; e90fc09 MFE-repair control + comparisons.
 
@@ -18,8 +18,7 @@ Commits (local, not pushed): ec95f5c pivot docs; 8f3c81b Stage A harness;
   scripts/repair_compare.py. Tests: tests/test_design_*.py (53 pass, CPU).
 - Manifests (in Git): manifests/repair_pilot_val_v1.json (rfam_val, EASY tier,
   sha 58df4ac1...) and manifests/eternaweb_dev_v1.json (HARD Eterna web puzzles,
-  sha 19f16b01...; 32 dev / 32 confirmation / 8 smoke). Confirmation targets
-  have NOT been looked at (manifests/confirmation_looks.jsonl absent).
+  sha 19f16b01...; 32 dev / 32 confirmation / 8 smoke). Confirmation evaluation has started; see manifests/confirmation_looks.jsonl.
 - External: external/SAMFEO at e78b4b5 (no license file: local use only);
   data/raw/eternaweb_rnadesignlm/ (MIT data from arXiv:2602.12470 + audit copies).
 - Raw traces: data/repair_pilot/<run>/ (ignored by Git; summary.md per run,
@@ -39,23 +38,17 @@ Trace finding: late in search only ~2 % of proposals improve; feedback edits was
 ~33 % of late proposals on repeats. Defect-weighted site choice = random sites.
 
 ## Exact next task
-Stage B is DONE and NEGATIVE (D-020; RESULTS.md). In flight since 07:08 IST
-(check `ls data/repair_pilot/<run>/units/*/*.json | wc -l`; resume = rerun the
-same command, finished units are skipped):
-1. ew_dev1024_efilter_v1: SAMFEO with its mutations pre-screened by target
-   energy (best of 8), 32 dev targets x 3 seeds x 1024, 2 workers. Then:
-   `python scripts/repair_compare.py --runs ew_dev1024_v1 ew_dev1024_efilter_v1
-   ew_dev64_rnainverse_v1 --name dev_efilter --pairs samfeo_efilter:samfeo`.
-2. trainpool_samfeo_v1: unfiltered SAMFEO on the 700-puzzle training pool
-   (manifests/eternaweb_trainpool_v1.json), budget 400, seed 0, 2 workers.
-   Then `python scripts/repair_critic.py data --run trainpool_samfeo_v1` and
-   `python scripts/repair_critic.py train --data trainpool_samfeo_v1` (GPU,
-   <= 30 min), then a dev run of method samfeo_cfilter (--gpu).
-Decision rule: docs/experiments/2026-09-27-stageC-repair-critic.md. The critic
-must beat BOTH SAMFEO and the energy filter at comparable wall time.
-SamplingDesign (f0283c49, Apache-2.0) is cloned and BUILT in external/ with a
-separate toolchain env `rmtools` (g++); no adapter yet; its defaults (2,500
-LinearPartition samples per step, 2,000 steps) are far above laptop budgets.
+Done since the last update: the energy filter's CONFIRMATION look replicated
+(+9.4 pp uMFE [1.0, 19.8], better NED on 29/32, RESULTS.md). Critic training
+data built (273,000 transitions). Critic training launched ~12:07 IST:
+`python scripts/repair_critic.py train --data trainpool_samfeo_v1 --out
+checkpoints/critic_v1` (log data/repair_pilot/critic_v1_train.log).
+Next: evaluate the frozen critic on dev with `python scripts/repair_pilot.py run
+--run ew_dev1024_cfilter_v1 --manifest eternaweb_dev_v1 --subset development
+--budget 1024 --seeds 0 1 2 --methods samfeo_cfilter --workers 4 --gpu`, then
+compare with ew_dev1024_efilter_v1 (decision rule in the Stage C record).
+After that: scale-up and a newly frozen final protocol (Eterna100 V1/V2,
+Rfam-Taneda, RNAsolo) with all baselines re-run under matched settings.
 
 ## Execution environment
 WSL Ubuntu-24.04:
@@ -64,8 +57,7 @@ cd /home/chirag/projects/RiboMamba
 source /home/chirag/miniforge3/etc/profile.d/conda.sh
 conda activate ribomamba
 ```
-rg is unavailable; use find/grep. GPU RTX 4060 Laptop 8 GB. No C/C++ compiler
-(SamplingDesign needs one; not installed). Do not reinstall the environment.
+rg is unavailable; use find/grep. GPU RTX 4060 Laptop 8 GB. SamplingDesign was built using the separate rmtools compiler environment. Do not reinstall the environment.
 Use `python -u` for long runs (stdout is block-buffered under nohup).
 Waiting on a run: never `pgrep -f`/`pkill -f` a pattern that also matches the
 waiting shell's own command line.
@@ -83,9 +75,22 @@ GPU ~0.62 h (Stage B). In flight: efilter (2 workers) + training data (2 workers
 
 ## Scientific cautions
 - No SOTA, novelty or generalisation claim exists. Dev results are development
-  evidence on 32 hard puzzles; confirmation and final tests are untouched.
+  evidence on 32 hard puzzles; confirmation is in progress; final tests remain unscored in this review.
 - The ~1.9 unconditional bound is not a floor; conditional losses differ.
 - RNAinverse's candidates are whole adaptive walks (internal calls uncountable);
   compare it on wall time only. SAMFEO's wall excludes harness re-scoring.
 - Paired edits, defect-weighted mutation (NUPACK), hierarchical decomposition
   (RNAinverse, NUPACK), remasking, search distillation and RL are prior art.
+
+## 2026-09-27 Codex review — read before continuing
+The user reaffirmed uncapped local compute and asked for original, SOTA-directed
+research on this laptop. Read docs/CODEX_TO_CLAUDE_2026-09-27.md for the prepared
+reply, novelty map, and competition-aware residual repair proposal. This is a
+recommendation, not an achieved result or frozen new experiment.
+Correction to earlier status: confirmation HAS been launched; see the two records
+in manifests/confirmation_looks.jsonl (same configuration). At review it remained
+in progress along with trainpool_samfeo_v1. Do not call confirmation untouched.
+Runner now defaults to no wall cap; CLI no longer enforces four workers maximum.
+Live processes still retain their explicit launch timeouts; resume without those
+if needed. No live Claude message/read receipt is claimed; this is shared-file
+handoff. Do not start concurrent implementing agents.

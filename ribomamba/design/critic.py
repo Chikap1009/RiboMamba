@@ -49,15 +49,15 @@ def encode_example(structure: str, parent: str, child: str, defect: np.ndarray, 
     pt = pt if pt is not None else pair_table(structure)
     L = len(structure)
     partner = np.asarray(pt)
-    p = np.array([NT[c] for c in parent], dtype=np.int64)
-    c = np.array([NT[x] for x in child], dtype=np.int64)
+    p = np.array([NT[c] for c in parent], dtype=np.int8)            # int8: ~0.7 GB for 273K examples, not ~4 GB
+    c = np.array([NT[x] for x in child], dtype=np.int8)
     paired = partner >= 0
-    p_partner = np.full(L, 4, dtype=np.int64)
-    c_partner = np.full(L, 4, dtype=np.int64)
+    p_partner = np.full(L, 4, dtype=np.int8)
+    c_partner = np.full(L, 4, dtype=np.int8)
     p_partner[paired] = p[partner[paired]]
     c_partner[paired] = c[partner[paired]]
-    return {"parent": p, "child": c, "bracket": np.array([BRACKET[x] for x in structure], dtype=np.int64),
-            "changed": (p != c).astype(np.int64), "p_partner": p_partner, "c_partner": c_partner,
+    return {"parent": p, "child": c, "bracket": np.array([BRACKET[x] for x in structure], dtype=np.int8),
+            "changed": (p != c).astype(np.int8), "p_partner": p_partner, "c_partner": c_partner,
             "defect": np.asarray(defect, dtype=np.float32), "delta_e": np.float32(delta_e),
             "length": np.float32(L / MAX_LEN)}
 
@@ -72,7 +72,7 @@ def collate(examples: list[dict], device) -> dict:
     for b, e in enumerate(examples):
         n = len(e["parent"])
         for k in ("parent", "child", "bracket", "changed", "p_partner", "c_partner"):
-            out[k][b, :n] = torch.from_numpy(e[k])
+            out[k][b, :n] = torch.from_numpy(e[k]).long()
         out["defect"][b, :n] = torch.from_numpy(e["defect"])
         out["mask"][b, :n + 1] = True                              # +1: the global token (position 0)
     out["globals"] = torch.tensor([[e["delta_e"], e["length"]] for e in examples], dtype=torch.float32)
