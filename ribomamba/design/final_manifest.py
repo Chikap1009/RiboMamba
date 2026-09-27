@@ -18,7 +18,7 @@ from ribomamba.paths import EXTERNAL_DIR, MANIFESTS_DIR, RAW_DIR, REPO_ROOT
 PROTOCOL = REPO_ROOT / "docs" / "PROTOCOL_design_v2.md"
 ETERNA_TSV = RAW_DIR / "eterna100" / "eterna100_puzzles.tsv"
 RF27 = EXTERNAL_DIR / "SAMFEO" / "data" / "Rfam" / "rf27.txt"
-NAMES = ("final_eterna100_v2", "final_eterna100_v1", "final_rfam_taneda27")
+NAMES = ("final_eterna100_v2", "final_eterna100_v1", "final_rfam_taneda27", "final_eterna100_v1only")
 
 
 def require_protocol_frozen() -> str:
@@ -38,13 +38,22 @@ def _check(structure: str) -> None:
 
 
 def build(name: str) -> dict:
-    if name.startswith("final_eterna100"):
+    if name in ("final_eterna100_v2", "final_eterna100_v1"):
         version = name[-2:].upper()
         t = pl.read_csv(ETERNA_TSV, separator="\t")
         rows = [{"id": f"eterna100_{version.lower()}:{int(r['Puzzle #'])}", "name": r["Puzzle Name"],
                  "structure": r[f"Secondary Structure {version}"]} for r in t.iter_rows(named=True)]
         source = {"path": str(ETERNA_TSV.relative_to(REPO_ROOT)), "sha256": sha256_file(ETERNA_TSV),
                   "column": f"Secondary Structure {version}"}
+    elif name == "final_eterna100_v1only":
+        # The 19 puzzles whose V1 structure differs from V2. V1 results = V2 results on the 81 shared
+        # (identical) structures + results on these 19 (protocol v2), so no puzzle is designed twice.
+        t = pl.read_csv(ETERNA_TSV, separator="\t")
+        rows = [{"id": f"eterna100_v1:{int(r['Puzzle #'])}", "name": r["Puzzle Name"],
+                 "structure": r["Secondary Structure V1"]} for r in t.iter_rows(named=True)
+                if r["Secondary Structure V1"] != r["Secondary Structure V2"]]
+        source = {"path": str(ETERNA_TSV.relative_to(REPO_ROOT)), "sha256": sha256_file(ETERNA_TSV),
+                  "column": "Secondary Structure V1", "rule": "only rows whose V1 structure differs from V2"}
     elif name == "final_rfam_taneda27":
         structures = [line.strip() for line in open(RF27) if line.strip()]
         rows = [{"id": f"rfam_taneda27:{k + 1}", "name": f"Rfam-Taneda {k + 1}", "structure": s}
