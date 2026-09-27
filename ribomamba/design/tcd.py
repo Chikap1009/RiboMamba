@@ -136,3 +136,50 @@ TCD_SETTINGS = {"checkpoint": TCD_CHECKPOINT, "steps": 32, "batch": 32, "tempera
                 "pair_rule": "product of conditional marginals restricted to canonical pairs"}
 TCD_METHODS = {"tcd_sample": tcd_sample, "uncond_sample": uncond_sample}
 TCD_METHOD_SETTINGS = {"tcd_sample": TCD_SETTINGS, "uncond_sample": {**TCD_SETTINGS, "checkpoint": "base"}}
+
+
+@torch.no_grad()
+def infill(model: ConditionedDenoiser, device: str, structure: str, pt: list[int], parent: str,
+           masks: list[list[int]], rng: np.random.Generator) -> list[str]:
+    """Refill each mask's positions of `parent` with the TCD (one batched forward pass).
+
+    A target pair with either end masked is refilled as a unit (both ends masked, drawn from the
+    canonical-restricted product of the two conditional marginals); unpaired positions are drawn
+    from their marginal. Everything outside the mask is clamped to the parent.
+    """
+    L, W = len(structure), len(structure) + 2
+    full = []
+    for m in masks:
+        s = set(m)
+        s |= {pt[p] for p in m if pt[p] >= 0}
+        full.append(sorted(s))
+    base = torch.tensor([BOS_ID, *[FIRST_NUCLEOTIDE_ID + NUCLEOTIDES.index(c) for c in parent], EOS_ID],
+                        device=device)
+    ids = base.repeat(len(masks), 1)
+    for b, m in enumerate(full):
+        ids[b, [p + 1 for p in m]] = MASK_ID
+    attn = torch.ones_like(ids, dtype=torch.bool)
+    bracket, partner = structure_inputs([structure] * len(masks), W, device)
+    with torch.autocast("cuda", dtype=torch.bfloat16, enabled=device == "cuda"):
+        logits = model(ids, attn, bracket, partner)
+    probs = torch.softmax(logits[..., FIRST_NUCLEOTIDE_ID:].double(), dim=-1).cpu().numpy()   # (B, W, 4)
+    canon = CANON16.numpy().reshape(4, 4)
+    out = []
+    for b, m in enumerate(full):
+        seq, done = list(parent), set()
+        for p in m:
+            if p in done:
+                continue
+            q = pt[p]
+            if q >= 0:
+                i, j = min(p, q), max(p, q)
+                joint = np.outer(probs[b, i + 1], probs[b, j + 1]) * canon
+                k = int(rng.choice(16, p=(joint / joint.sum()).ravel()))
+                seq[i], seq[j] = NUCLEOTIDES[k // 4], NUCLEOTIDES[k % 4]
+                done |= {i, j}
+            else:
+                pr = probs[b, p + 1]
+                seq[p] = NUCLEOTIDES[int(rng.choice(4, p=pr / pr.sum()))]
+                done.add(p)
+        out.append("".join(seq))
+    return out

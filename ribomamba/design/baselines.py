@@ -43,6 +43,7 @@ import importlib.util
 import multiprocessing
 import subprocess
 import sys
+import time
 import types
 from pathlib import Path
 
@@ -213,11 +214,36 @@ def samfeo(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=N
         return wrapped
 
     module.position_ed_pd_mfe = evaluated
-    if s.get("init_model"):                          # SAMFEO's k initial designs drawn from a model instead
+    if s.get("proposal_model"):                      # SAMFEO picks the sites, the TCD picks the letters
+        from ribomamba.design import tcd as _tcd
+        tcd_model, tcd_device = _tcd.load(s["proposal_model"])
+        tcd_rng = rng_for("tcd_proposal", target.id, seed)
+        k_prop = int(s.get("filter_k", 1)) if s.get("filter") else 1
+        scorer = make_filter(s) if s.get("filter") else None
+
+        def tcd_mutation(sequence, pairs, defect_list, *args, **kwargs):
+            start = time.perf_counter()
+            drafts = [originals["mutate_structured"](sequence, pairs, defect_list, *args, **kwargs) for _ in range(k_prop)]
+            masks = [[i for i, (x, y) in enumerate(zip(sequence, d)) if x != y] or [int(tcd_rng.integers(len(sequence)))]
+                     for d in drafts]
+            children = _tcd.infill(tcd_model, tcd_device, target.structure, target.pt, sequence, masks, tcd_rng)
+            evaluate.model_calls += 1
+            evaluate.model_wall_s += time.perf_counter() - start
+            fresh = [c for c in dict.fromkeys(children) if c not in evaluate.first_index]
+            if scorer is not None and len(fresh) > 1:
+                child = fresh[int(np.argmin(scorer(target, sequence, fresh, defect_list, evaluate)))]
+            else:
+                child = fresh[0] if fresh else children[0]
+            parents[child] = sequence
+            return child
+        module.mutate_structured = tcd_mutation
+    elif s.get("init_model"):                          # SAMFEO's k initial designs drawn from a model instead
         from ribomamba.design.tcd import tcd_initial_designs
         module.init_k = lambda target_ss, pos_pairs, k: tcd_initial_designs(
             target, seed, k, evaluate, {"checkpoint": s["init_model"]})
-    if s.get("filter"):
+    if s.get("proposal_model"):
+        pass                                          # handled above (the filter, if any, is applied inside)
+    elif s.get("filter"):
         scorer = make_filter(s)
         module.mutate_structured = filtered_mutation(originals["mutate_structured"], scorer, s["filter_k"])
         module.mutate_tradition = filtered_mutation(originals["mutate_tradition"], scorer, s["filter_k"])
@@ -451,6 +477,10 @@ BASELINES["rnainverse_r64"] = rnainverse
 BASELINE_SETTINGS["rnainverse_r64"] = {**RNAINVERSE_SETTINGS, "max_restarts": 64}
 BASELINES["samfeo_efilter_tcdinit"] = samfeo_efilter
 BASELINE_SETTINGS["samfeo_efilter_tcdinit"] = {**SAMFEO_EFILTER_SETTINGS, "init_model": "checkpoints/tcd_v1/tcd.pt"}
+BASELINES["samfeo_tcdprop"] = samfeo_efilter
+BASELINE_SETTINGS["samfeo_tcdprop"] = {**SAMFEO_SETTINGS, "proposal_model": "checkpoints/tcd_v1/tcd.pt"}
+BASELINES["samfeo_tcdprop_efilter"] = samfeo_efilter
+BASELINE_SETTINGS["samfeo_tcdprop_efilter"] = {**SAMFEO_EFILTER_SETTINGS, "proposal_model": "checkpoints/tcd_v1/tcd.pt"}
 BASELINES["samfeo_efilter_eps"] = samfeo_efilter
 BASELINE_SETTINGS["samfeo_efilter_eps"] = {**SAMFEO_EFILTER_SETTINGS, "epsilon": 0.125}
 

@@ -60,3 +60,38 @@ def test_sampler_satisfies_every_target_pair_and_is_seeded():
     assert a == b and all(len(s) == len(target) and set(s) <= set("ACGU") for s in a)
     pt = pair_table(target)
     assert all(s[i] + s[j] in CANONICAL_PAIRS for s in a for i, j in enumerate(pt) if j > i)
+
+
+def test_infill_changes_only_masked_units_and_keeps_pairs_canonical():
+    import numpy as np
+
+    from ribomamba.design.tcd import infill
+    from ribomamba.eval.folding import CANONICAL_PAIRS, pair_table
+    torch.manual_seed(0)
+    model = ConditionedDenoiser(TransformerConfig(d_model=32, n_layers=2, n_heads=2)).eval()
+    target = "((((....))))..(((...)))"
+    pt = pair_table(target)
+    parent = "GGGGAAAACCCCAAGGGAAACCC"
+    masks = [[1], [5], [14, 20]]                                  # a pair end, a loop base, two pair ends
+    kids = infill(model, "cpu", target, pt, parent, masks, np.random.default_rng(0))
+    allowed = [{1, 10}, {5}, {14, 22, 20, 16}]
+    for kid, ok in zip(kids, allowed):
+        assert all(kid[i] == parent[i] for i in range(len(parent)) if i not in ok)
+        assert all(kid[i] + kid[j] in CANONICAL_PAIRS for i, j in enumerate(pt) if j > i)
+
+
+def test_tcd_proposals_run_inside_samfeo_and_are_counted():
+    import pytest
+
+    from ribomamba.design import baselines
+    from ribomamba.design.search import BudgetExhausted, Evaluator, Target
+    from ribomamba.design.tcd import TCD_CHECKPOINT
+    from ribomamba.paths import REPO_ROOT
+    if baselines.samfeo_checkout_problem() or not (REPO_ROOT / TCD_CHECKPOINT).exists():
+        pytest.skip("SAMFEO or TCD checkpoint absent")
+    target = Target("toy", "((((((....))))))..((((((....))))))")
+    for name in ("samfeo_tcdprop", "samfeo_tcdprop_efilter"):
+        ev = Evaluator(target, budget=30)
+        with pytest.raises(BudgetExhausted):
+            baselines.samfeo(target, 0, ev, baselines.BASELINE_SETTINGS[name])
+        assert len(ev.rows) == 30 and ev.model_calls > 0 and ev.internal.pf == 30
