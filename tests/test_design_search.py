@@ -156,3 +156,14 @@ def test_mfe_repair_second_site_is_the_wrong_partner():
         assert sites[0] in wrong_sites
         if len(sites) == 2 and sites[0] == t.site_of[1] and sites[1] != t.site_of[5]:
             assert sites[1] in {int(t.site_of[p]) for p in (0, 2, 9, 11)}   # fell back to a neighbour
+
+
+def test_replayed_candidates_are_judged_on_their_own_method_time():
+    ev = Evaluator(TARGET, budget=10, time_limit_s=5.0)
+    ev.t0 -= 100.0                                   # the harness clock says 100 s have passed (external run)
+    ev("A" * len(TARGET), method_time_s=1.0)         # but this candidate existed at 1 s of method time
+    assert ev.count == 1 and ev.rows[0]["elapsed_s"] == 1.0
+    with pytest.raises(search.TimeLimitReached):
+        ev("C" * len(TARGET), method_time_s=6.0)
+    with pytest.raises(search.TimeLimitReached):
+        ev("G" * len(TARGET))                        # a native candidate: harness clock applies

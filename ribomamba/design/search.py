@@ -121,14 +121,21 @@ class Evaluator:
     def count(self) -> int:
         return len(self.rows)
 
-    def check(self) -> None:
-        """Raise before any more work if the budget or the deadline is used up."""
+    def check(self, method_time_s: float | None = None) -> None:
+        """Raise before any more work if the budget or the deadline is used up.
+
+        method_time_s: for candidates replayed from an external run (DesiRNA, SamplingDesign), the
+        method's own time for that candidate; the unit time limit is judged on it, not on the
+        harness clock (which already includes the whole external run by the time of the replay).
+        """
         if self.count >= self.budget:
             raise BudgetExhausted
         if time.time() > self.deadline:
             raise DeadlineReached
-        if self.time_limit_s is not None and self.method_time() > self.time_limit_s:
-            raise TimeLimitReached
+        if self.time_limit_s is not None:
+            used = self.method_time() if method_time_s is None else method_time_s
+            if used > self.time_limit_s:
+                raise TimeLimitReached
 
     def method_time(self) -> float:
         """Seconds of the method's own work so far (monotonic clock, so a machine suspend is excluded);
@@ -139,7 +146,7 @@ class Evaluator:
                  method_time_s: float | None = None) -> Candidate:
         """Score one proposal. method_time_s: for replayed external runs (DesiRNA), the method's own
         time at which this candidate existed; recorded as elapsed_s instead of the harness clock."""
-        self.check()
+        self.check(method_time_s)
         hit = sequence in self.cache
         if not hit:
             result = score(sequence, self.target.structure, self.target.pt, self.oracle)
