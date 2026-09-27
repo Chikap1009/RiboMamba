@@ -155,6 +155,19 @@ def test_unit_time_limit_is_a_terminal_outcome(tmp_path, monkeypatch):
     assert runner.validate_unit(tmp_path, key, cfg["config_hash"], 500) is None     # terminal: not rerun
 
 
+def test_zero_candidate_time_limit_is_a_valid_outcome(tmp_path, monkeypatch):
+    def first_step_outlasts_budget(target, seed, evaluate, settings):
+        time.sleep(0.4)
+        evaluate("A" * len(target))                  # too late: the unit's time limit has passed
+    monkeypatch.setitem(runner.METHODS, "slowstart", first_step_outlasts_budget)
+    monkeypatch.setitem(runner.METHOD_SETTINGS, "slowstart", {})
+    cfg = runner.make_config(MANIFEST, "toy", TARGETS, ["slowstart"], [0], 50, unit_time_limit_s=0.2)
+    assert runner.run(tmp_path, cfg, TARGETS, workers=1, progress=quiet) == {"skipped_complete": 0, "time_limit": 2}
+    key = runner.unit_key("slowstart", "toy:a", 0)
+    assert json.loads(runner.unit_paths(tmp_path, key)[1].read_text())["n_rows"] == 0
+    assert runner.validate_unit(tmp_path, key, cfg["config_hash"], 50) is None      # not rerun
+
+
 def test_wall_limited_tools_inherit_the_unit_time_limit():
     cfg = runner.make_config(MANIFEST, "toy", TARGETS, ["desirna", "samfeo"], [0], 100, unit_time_limit_s=90)
     assert cfg["methods"]["desirna"]["time_limit_s"] == 90 and "time_limit_s" not in cfg["methods"]["samfeo"]

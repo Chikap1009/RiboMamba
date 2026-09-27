@@ -325,59 +325,103 @@ DESIRNA_SETTINGS = {"commit": DESIRNA_COMMIT, "param": 2004, "replicas": 10, "ti
                     "conda_env": "desirna", "stop_when_solved": "off"}
 
 
-def desirna(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=None) -> None:
-    """DesiRNA (Apache-2.0; pinned DESIRNA_COMMIT) run as a subprocess in its own env (ViennaRNA 2.7.2).
+def run_external(cmd: list[str], limit_s: float, cwd, env: dict, stdin_text: str | None, log) -> dict:
+    """Run an external designer in its own process group; kill the whole group at limit_s.
 
-    It runs for time_limit_s of wall time (Turner 2004, `replicas` replicas; with one_core the
-    whole process tree is pinned to one CPU so replicas time-share, for per-core fairness).
-    Its trajectory file (every replica's state at every exchange) is then replayed: each new
-    distinct sequence is scored by the harness (measurement) and stamped with the method time
-    time_limit_s * step / last_step (an approximation: DesiRNA logs steps, not times).
-    Internal calls are not countable. Child CPU seconds go to the unit log.
+    stdout lines are read as they arrive and stamped with seconds since launch (monotonic clock,
+    which excludes suspend). Returns {"lines": [(t, line)], "killed": bool, "returncode", "stderr",
+    "t0"}; the raw stdout/stderr (truncated) go to the unit log.
     """
-    import csv
     import os
-    import resource
+    import signal
+    import threading
+    t0 = time.monotonic()
+    env = {**env, "EXTERNAL_T0": repr(t0)}
+    proc = subprocess.Popen(cmd, cwd=cwd, env=env, stdin=subprocess.PIPE if stdin_text is not None else subprocess.DEVNULL,
+                            stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, bufsize=1, start_new_session=True)
+    lines, err = [], []
+    readers = [threading.Thread(target=lambda: [lines.append((time.monotonic() - t0, l.rstrip("\n"))) for l in proc.stdout],
+                                daemon=True),
+               threading.Thread(target=lambda: [err.append(l) for l in proc.stderr], daemon=True)]
+    for th in readers:
+        th.start()
+    if stdin_text is not None:
+        proc.stdin.write(stdin_text)
+        proc.stdin.close()
+    killed = False
+    try:
+        proc.wait(timeout=max(0.0, limit_s - (time.monotonic() - t0)))
+    except subprocess.TimeoutExpired:
+        killed = True
+        try:
+            os.killpg(proc.pid, signal.SIGKILL)
+        except ProcessLookupError:
+            pass
+        proc.wait()
+    for th in readers:
+        th.join(timeout=5)
+    if log is not None:
+        log.write(f"cmd: {' '.join(map(str, cmd))}\n"
+                  f"{'KILLED at the time limit' if killed else f'exited {proc.returncode}'} after "
+                  f"{time.monotonic() - t0:.1f} s; stdout lines {len(lines)}\n")
+        log.write("---- stdout (t_s, line), last 400 lines ----\n")
+        log.writelines(f"{t:.2f}\t{l}\n" for t, l in lines[-400:])
+        log.write("---- stderr (last 100 lines) ----\n" + "".join(err[-100:]))
+    return {"lines": lines, "killed": killed, "returncode": proc.returncode, "stderr": "".join(err[-100:]), "t0": t0}
+
+
+def desirna(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=None) -> None:
+    """DesiRNA (Apache-2.0; pinned DESIRNA_COMMIT) in its own env (ViennaRNA 2.7.2), with REAL timing.
+
+    Run through scripts/external/desirna_wrapped.py, which logs every replica's state after every
+    replica-exchange round with seconds since launch (DesiRNA itself writes its trajectory only at
+    the end and checks its limit only between rounds, so a nominal 128 s run could last ~240 s:
+    review of 2026-09-28). The whole process group is killed at time_limit_s; only rows logged by
+    then are replayed, each stamped with its real time. A kill at the limit is status time_limit;
+    a voluntary finish is early_stop. one_core pins the group to one CPU (replicas time-share).
+    Internal calls are not countable.
+    """
+    import math
+    import os
     import shutil
     import tempfile
+    from ribomamba.design.search import TimeLimitReached
     s = {**DESIRNA_SETTINGS, **settings}
     evaluate.internal_available = False
+    limit = float(s["time_limit_s"])
     work = Path(tempfile.mkdtemp(prefix="desirna_"))
     try:
         (work / "in.txt").write_text(f">name\nt\n>sec_struct\n{target.structure}\n>seq_restr\n{'N' * len(target)}\n")
+        timelog = work / "timelog.tsv"
         conda_python = Path(os.environ.get("CONDA_EXE", "/home/chirag/miniforge3/bin/conda")).parent.parent / "envs" / \
             s["conda_env"] / "bin" / "python"
-        entry = DESIRNA_DIR / "DesiRNA.py"
-        env = dict(os.environ)
-        if s.get("filter_k"):                       # energy pre-screen of DesiRNA's own proposals
-            entry = Path(__file__).resolve().parents[2] / "scripts" / "external" / "desirna_filtered.py"
-            env.update(DESIRNA_DIR=str(DESIRNA_DIR), DESIRNA_FILTER_K=str(s["filter_k"]))
-        cmd = [str(conda_python), str(entry), "-f", "in.txt", "-t", str(int(round(float(s["time_limit_s"])))),
-               "-p", str(s["param"]), "-R", str(s["replicas"]), "-seed", str(seed + 1), "-sws", s["stop_when_solved"],
-               "-od", "out"]
+        entry = Path(__file__).resolve().parents[2] / "scripts" / "external" / "desirna_wrapped.py"
+        cmd = [str(conda_python), str(entry), "-f", "in.txt", "-t", str(int(math.ceil(limit))), "-p", str(s["param"]),
+               "-R", str(s["replicas"]), "-seed", str(seed + 1), "-sws", s["stop_when_solved"], "-od", "out"]
         if s["one_core"]:
-            # One distinct core per pool worker (its 1-based identity), so pinned runs never share a core.
             ident = (multiprocessing.current_process()._identity or (os.getpid(),))[0]
             cmd = ["taskset", "-c", str((ident - 1) % (os.cpu_count() or 1))] + cmd
-        before = resource.getrusage(resource.RUSAGE_CHILDREN)
-        proc = subprocess.run(cmd, cwd=work, capture_output=True, text=True, env=env)
-        after = resource.getrusage(resource.RUSAGE_CHILDREN)
+        env = {**os.environ, "DESIRNA_DIR": str(DESIRNA_DIR), "DESIRNA_TIMELOG": str(timelog),
+               "DESIRNA_FILTER_K": str(s.get("filter_k") or 0)}
+        # desirna_wrapped.py reads DESIRNA_T0; run_external provides the launch time as EXTERNAL_T0.
+        env["DESIRNA_T0_FROM"] = "EXTERNAL_T0"
+        res = run_external(cmd, limit, work, env, None, log)
+        rows = []
+        if timelog.exists():
+            for line in timelog.read_text().splitlines():
+                t, replica, step, score, seq = line.split("\t")
+                rows.append((float(t), int(replica), int(step), float(score), seq))
         if log is not None:
-            log.write(f"cmd: {' '.join(cmd)}\nexit {proc.returncode}; child cpu s "
-                      f"{after.ru_utime + after.ru_stime - before.ru_utime - before.ru_stime:.1f}\n{proc.stderr[-2000:]}\n")
-        if proc.returncode != 0:
-            raise RuntimeError(f"DesiRNA exited {proc.returncode}: {proc.stderr[-500:]}")
-        traj = next(work.glob("out*/trajectory_files/*_traj.csv"))
-        rows = list(csv.DictReader(open(traj)))
-        last = max(int(r["sim_step"]) for r in rows) or 1
+            log.write(f"timelog rows {len(rows)}, within limit {sum(r[0] <= limit for r in rows)}\n")
+        if not res["killed"] and res["returncode"] != 0:
+            raise RuntimeError(f"DesiRNA exited {res['returncode']}: {res['stderr'][-500:]}")
         seen = set()
-        for r in sorted(rows, key=lambda r: (int(r["sim_step"]), int(r["replica_num"]))):
-            seq = r["sequence"]
-            if seq in seen:
-                continue
-            seen.add(seq)
-            evaluate(seq, objective=float(r["scoring_function"]),
-                     method_time_s=s["time_limit_s"] * int(r["sim_step"]) / last)
+        for t, replica, step, score, seq in sorted(r for r in rows if r[0] <= limit):
+            if seq not in seen:
+                seen.add(seq)
+                evaluate(seq, objective=score, method_time_s=t)
+        if res["killed"]:
+            raise TimeLimitReached
     finally:
         shutil.rmtree(work, ignore_errors=True)
 
@@ -396,46 +440,40 @@ SAMPLINGDESIGN_SETTINGS = {"commit": SAMPLINGDESIGN_COMMIT, "time_limit_s": 64, 
 
 
 def samplingdesign(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=None) -> None:
-    """SamplingDesign (Apache-2.0; pinned f0283c49; built with the separate rmtools g++) under a wall limit.
+    """SamplingDesign (Apache-2.0; pinned f0283c49; built with the separate rmtools g++), REAL timing.
 
-    bin/main is called directly with the upstream wrapper's defaults (so a timeout kill cannot
-    orphan it), num_threads = 1, seed = seed + 1, and killed after time_limit_s if still running
-    (upstream stops earlier on its own convergence rule). Every step prints its elapsed time,
+    bin/main is run line-buffered (stdbuf -oL, so nothing is lost when the group is killed at the
+    limit) with the upstream wrapper's defaults, num_threads = 1, seed = seed + 1. Each step prints
     the distribution's most probable sequence and the step's best sample; both are replayed as
-    candidates stamped with the CUMULATIVE reported step time (upstream prints per-step durations). Its objective uses LinearPartition
-    (beam 250, Turner 2004) internally; the harness re-scores every candidate with ViennaRNA 2.7.2.
-    Internal calls (sample_size LinearPartition runs per step) are not counted individually.
+    candidates stamped with the time their line ARRIVED (seconds since launch), and only lines that
+    arrived within time_limit_s count. At its defaults (2,500 LinearPartition samples per step) one
+    step takes ~2 min on one thread for ~180 nt on this machine (measured 2026-09-28), so on long
+    puzzles no step may finish within the limit: that is recorded as a time_limit unit with zero
+    candidates, not as an adapter failure. A voluntary finish (its own convergence rule) is early_stop.
     """
+    import os
     import re
+    from ribomamba.design.search import TimeLimitReached
     s = {**SAMPLINGDESIGN_SETTINGS, **settings}
     evaluate.internal_available = False
+    limit = float(s["time_limit_s"])
     order = ["mode", "objective", "init", "eps", "softmax", "adam", "nesterov", "beta_1", "beta_2", "lr", "lr_decay",
              "lr_decay_rate", "adaptive_lr", "k_ma_lr", "lr_decay_step", "num_steps", "early_stop", "k_ma", "beamsize",
              "sharpturn", "is_lazy", "sample_size", "best_k", "importance", "mismatch", "trimismatch"]
-    cmd = [str(SAMPLINGDESIGN_DIR / "bin" / "main")] + [str(s[k]) for k in order] + \
+    cmd = ["stdbuf", "-oL", "-eL", str(SAMPLINGDESIGN_DIR / "bin" / "main")] + [str(s[k]) for k in order] + \
         [str(seed + 1), str(s["verbose"]), str(s["num_threads"]), str(s["boxplot"])]
-    env = {**__import__("os").environ, "OMP_NUM_THREADS": str(s["num_threads"])}
-    try:
-        proc = subprocess.run(cmd, input=target.structure + "\n", capture_output=True, text=True,
-                              timeout=s["time_limit_s"], env=env)
-        out, status = proc.stdout, f"exit {proc.returncode}"
-    except subprocess.TimeoutExpired as e:
-        out = e.stdout.decode() if isinstance(e.stdout, bytes) else (e.stdout or "")
-        status = "killed at the time limit"
-    if log is not None:
-        log.write(f"cmd: {' '.join(cmd)}\n{status}\n")
-    step_time, best_next, elapsed = None, False, 0.0
-    for line in out.splitlines():
-        m = re.match(r"step: (\d+), .*time: ([0-9.eE+-]+)", line)
-        if m:
-            elapsed += float(m.group(2))          # upstream prints each step's own duration
-            step_time = elapsed
-            continue
-        if step_time is None:
-            continue
+    env = {**os.environ, "OMP_NUM_THREADS": str(s["num_threads"])}
+    res = run_external(cmd, limit, None, env, target.structure + "\n", log)
+    if not res["killed"] and res["returncode"] != 0:
+        raise RuntimeError(f"SamplingDesign exited {res['returncode']}: {res['stderr'][-500:]}")
+    best_next = False
+    for t, line in res["lines"]:
+        if t > limit:
+            break
         m = re.match(r"max-probability solution: ([ACGU]+) ", line)
-        if m and m.group(1) not in evaluate.cache:
-            evaluate(m.group(1), method_time_s=step_time)
+        if m:
+            if m.group(1) not in evaluate.cache:
+                evaluate(m.group(1), method_time_s=t)
             continue
         if line.startswith("best samples"):
             best_next = True
@@ -444,7 +482,9 @@ def samplingdesign(target: Target, seed: int, evaluate: Evaluator, settings: dic
             best_next = False
             seq = line.split()[0] if line.split() else ""
             if re.fullmatch(r"[ACGU]+", seq) and seq not in evaluate.cache:
-                evaluate(seq, method_time_s=step_time)
+                evaluate(seq, method_time_s=t)
+    if res["killed"]:
+        raise TimeLimitReached
 
 
 BASELINES = {"samfeo": samfeo, "rnainverse": rnainverse, "samfeo_efilter": samfeo_efilter, "desirna": desirna,

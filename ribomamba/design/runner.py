@@ -166,7 +166,9 @@ def validate_unit(run_dir: Path, key: str, config_hash: str, budget: int, retry_
     n = trace.height
     if n != status.get("n_rows") or trace["eval_index"].to_list() != list(range(n)):
         return "trace rows inconsistent"
-    if n > budget or (status["status"] == "complete" and n != budget) or (status["status"] == "time_limit" and n == 0):
+    # A time_limit unit with zero candidates is a LEGITIMATE outcome (the method's first operation
+    # outlasted the budget: e.g. RNAinverse on a 400-nt target), recorded as unsolved, not rerun.
+    if n > budget or (status["status"] == "complete" and n != budget):
         return "trace length does not match the budget"
     return None
 

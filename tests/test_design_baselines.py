@@ -110,24 +110,30 @@ def test_zero_residual_model_ranks_like_the_energy_filter():
 
 
 @pytest.mark.skipif(not (baselines.DESIRNA_DIR / "DesiRNA.py").exists(), reason="DesiRNA checkout absent")
-def test_desirna_adapter_replays_its_trajectory_with_method_times():
+def test_desirna_adapter_uses_real_times_and_stops_at_the_limit():
+    from ribomamba.design.search import TimeLimitReached
     target = Target("toy", "((((((....))))))..((((((....))))))")
     ev = Evaluator(target, budget=500)
-    baselines.desirna(target, 0, ev, {"time_limit_s": 3, "replicas": 2})
+    with pytest.raises(TimeLimitReached):                 # killed at the limit -> status time_limit
+        baselines.desirna(target, 0, ev, {"time_limit_s": 4, "replicas": 2})
     assert ev.rows and ev.internal_available is False
     times = [r["elapsed_s"] for r in ev.rows]
-    assert times == sorted(times) and 0 <= times[0] and times[-1] <= 3.0
+    assert times == sorted(times) and 0 < times[0] and times[-1] <= 4.0
     assert len({r["sequence"] for r in ev.rows}) == len(ev.rows)
 
 
 @pytest.mark.skipif(not (baselines.SAMPLINGDESIGN_DIR / "bin" / "main").exists(), reason="SamplingDesign not built")
-def test_samplingdesign_adapter_replays_steps_with_cumulative_times():
+def test_samplingdesign_adapter_uses_arrival_times_and_stops_at_the_limit():
+    from ribomamba.design.search import TimeLimitReached
     target = Target("toy", "((((((....))))))..((((((....))))))")
     ev = Evaluator(target, budget=5000)
-    baselines.samplingdesign(target, 0, ev, {"time_limit_s": 6, "sample_size": 200})
+    try:
+        baselines.samplingdesign(target, 0, ev, {"time_limit_s": 6, "sample_size": 200, "early_stop": 0})
+    except TimeLimitReached:
+        pass
     assert ev.rows and ev.internal_available is False
     times = [r["elapsed_s"] for r in ev.rows]
-    assert times == sorted(times) and times[-1] <= 6.5
+    assert times == sorted(times) and times[-1] <= 6.0
 
 
 def test_effective_samfeo_settings_match_the_registered_intent():
@@ -152,7 +158,9 @@ def test_effective_samfeo_settings_match_the_registered_intent():
 @pytest.mark.skipif(not (baselines.DESIRNA_DIR / "DesiRNA.py").exists(), reason="DesiRNA checkout absent")
 def test_desirna_accepts_a_float_time_limit():
     # The final runner passes unit_time_limit_s as a float (e.g. 128.0); DesiRNA's -t needs an int.
+    from ribomamba.design.search import TimeLimitReached
     target = Target("toy", "((((((....))))))..((((((....))))))")
     ev = Evaluator(target, budget=500)
-    baselines.desirna(target, 0, ev, {"time_limit_s": 3.0, "replicas": 2})
+    with pytest.raises(TimeLimitReached):
+        baselines.desirna(target, 0, ev, {"time_limit_s": 3.0, "replicas": 2})
     assert ev.rows
