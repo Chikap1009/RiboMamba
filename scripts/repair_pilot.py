@@ -39,6 +39,10 @@ def manifest_path(name: str):
 
 
 def cmd_manifest(args) -> None:
+    if args.which == "final":
+        from ribomamba.design.final_manifest import build_all
+        print(json.dumps(build_all(), indent=1))
+        return
     if args.which == "eternaweb":
         hm.check_source()
         manifest = hm.build(workers=args.workers)
@@ -63,9 +67,13 @@ def cmd_run(args) -> None:
         raise SystemExit("--workers must be positive")
     if "samfeo" in args.methods and (problem := samfeo_checkout_problem()):
         raise SystemExit(problem)
+    if args.manifest.startswith("final_"):
+        from ribomamba.design.final_manifest import require_protocol_frozen
+        print(f"protocol frozen on {require_protocol_frozen()}; final manifest {args.manifest}", flush=True)
     manifest = mf.load_manifest(manifest_path(args.manifest))
     targets = mf.select(manifest, args.subset)
-    config = runner.make_config(manifest, args.subset, targets, args.methods, args.seeds, args.budget)
+    config = runner.make_config(manifest, args.subset, targets, args.methods, args.seeds, args.budget,
+                                unit_time_limit_s=args.unit_time_limit)
     if any(t["subset"] == "confirmation" for t in targets):
         runner.log_confirmation_look(args.run, args.subset, args.confirmation_look, config)
     design_targets = [{"id": t["id"], "structure": t["structure"]} for t in targets]    # no native sequences
@@ -131,11 +139,14 @@ def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="command", required=True)
     m = sub.add_parser("manifest")
-    m.add_argument("--which", choices=["rfam", "eternaweb"], default="rfam")
+    m.add_argument("--which", choices=["rfam", "eternaweb", "final"], default="rfam")
     m.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
     r = sub.add_parser("run")
     r.add_argument("--run", required=True, help="run directory name under data/repair_pilot/")
-    r.add_argument("--manifest", default=hm.NAME, choices=[mf.MANIFEST_NAME, hm.NAME, "eternaweb_trainpool_v1"])
+    r.add_argument("--manifest", default=hm.NAME,
+                   choices=sorted(p.stem for p in MANIFESTS_DIR.glob("*.json") if p.stem != "confirmation_looks"))
+    r.add_argument("--unit-time-limit", type=float, default=None,
+                   help="per-unit method-time limit in seconds (final protocol); omitted = none")
     r.add_argument("--subset", required=True, choices=mf.SUBSETS)
     r.add_argument("--budget", type=int, default=64)
     r.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])

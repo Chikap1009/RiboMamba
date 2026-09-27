@@ -92,3 +92,21 @@ def test_equal_bins_are_deterministic_and_balanced():
     bins = mf._equal_bins([5, 1, 5, 3, 5, 2, 4, 5], list("abcdefgh"), 4)
     assert Counter(bins) == {0: 2, 1: 2, 2: 2, 3: 2}
     assert bins == mf._equal_bins([5, 1, 5, 3, 5, 2, 4, 5], list("abcdefgh"), 4)
+
+
+def test_final_runs_are_locked_until_the_new_protocol_is_frozen(tmp_path, monkeypatch):
+    from ribomamba.design import final_manifest as fm
+    draft = tmp_path / "PROTOCOL.md"
+    draft.write_text("# protocol\n\n**Status: DRAFT — not frozen.**\n")
+    monkeypatch.setattr(fm, "PROTOCOL", draft)
+    with pytest.raises(PermissionError):
+        fm.require_protocol_frozen()
+    draft.write_text("# protocol\n\n**Status: FROZEN on 2026-09-28**\n")
+    assert fm.require_protocol_frozen() == "2026-09-28"
+
+
+@pytest.mark.skipif(not (mf.REPO_ROOT / "manifests" / "final_eterna100_v2.json").exists(), reason="not built")
+def test_final_manifests_rebuild_identically():
+    from ribomamba.design import final_manifest as fm
+    for name in fm.NAMES:
+        assert fm.build(name)["content_sha256"] == mf.load_manifest(mf.MANIFESTS_DIR / f"{name}.json")["content_sha256"]
