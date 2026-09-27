@@ -99,3 +99,19 @@ Next (D-027): the TCD as SAMFEO's PROPOSAL distribution (SAMFEO chooses the site
 letters), alone and with the energy screen, against SAMFEO and SAMFEO + energy; plus more
 training-side design data if the proposal test shows the over-fitting seen in validation
 limits it.
+
+## Results 3 (measured 2026-09-27): TCD as SAMFEO's proposal model — run ew_dev_tcdprop_v1
+384/384 units valid. IMPLEMENTATION SLIP (found in the analysis, fixed in 63631c0): the arm named
+samfeo_tcdprop was registered through samfeo_efilter, whose defaults silently added the energy
+screen, so BOTH TCD arms ran "TCD proposals + energy screen (K = 8)" and are identical on every
+target (0/0/32 ties); the run config under-reports that arm's settings. Valid comparisons:
+TCD+energy vs SAMFEO and vs SAMFEO+energy (same batch). uMFE @1024: SAMFEO 47.9 %,
+SAMFEO+energy 58.3 %, TCD+energy 54.2 %. Best NED: 0.0685 / 0.0551 / 0.0495; best log10 P:
+-1.20 / -0.81 / -0.78. Model time ~38 s per unit (1,024 evaluations).
+Paired @1024: TCD+energy - SAMFEO+energy uMFE -0.042 [-0.094, 0.000] (0/3/29), NED -0.006
+[-0.010, -0.001] (21/11), log10 P +0.025 [-0.087, +0.138]; at wall time -0.104 @16 s,
+-0.052 @64 s (slower). TCD+energy - SAMFEO: uMFE +0.063 [-0.021, +0.146], NED -0.019
+[-0.028, -0.011] (30/2), log10 P +0.415 [0.172, 0.706].
+Reading: conditioned-model proposals give the best ensemble quality measured so far (NED,
+P) but do not beat the energy screen on uMFE or at matched wall time. The clean "TCD
+proposals alone vs SAMFEO" contrast is rerun as ew_dev_tcdprop_v2 (samfeo_tcdprop_only).
