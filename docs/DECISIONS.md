@@ -1074,3 +1074,19 @@ a small learned critic only as a controlled Stage C candidate.
 yet neural. If neither filter helps, the honest outcome is a non-neural or
 negative result; RNAinverse (for uMFE per second) and SAMFEO (for P(target))
 remain the strongest development baselines.
+
+## D-021 — Uncapped local compute; competition-residual research candidate
+**Date:** 2026-09-27. **Status:** compute correction accepted by user instruction;
+research mechanism proposed, untested.
+
+The user reaffirmed that no CPU/GPU-hour caps were requested and wants original,
+SOTA-directed work feasible on this system. Remove policy caps while retaining
+explicit experimental budgets and honest cost accounting. Runner/CLI correction
+is recorded in 2b3ad74. No paid compute or data/checkpoint deletion is implied.
+
+Recommended next hypothesis: learn mutation-induced ensemble competition after
+subtracting exact target-energy contribution; compare rival-aware residual inputs
+against energy-only and generic critics. Rival bounds and negative design are
+prior art, not our novelty. Details, alternatives and unresolved novelty checks:
+CODEX_TO_CLAUDE_2026-09-27.md. This does not replace a frozen evaluation protocol
+or authorize interpreting incomplete confirmation as a positive result.

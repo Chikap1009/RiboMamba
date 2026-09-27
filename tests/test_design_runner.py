@@ -36,6 +36,7 @@ def test_run_writes_valid_units_and_resume_skips_them(tmp_path):
     assert runner.run(tmp_path, cfg, TARGETS, workers=1, progress=quiet) == {"skipped_complete": 8}
     events = [json.loads(line) for line in (tmp_path / "events.jsonl").read_text().splitlines()]
     assert [e["event"] for e in events] == ["start", "stop", "start", "stop"]
+    assert events[0]["max_hours"] is None  # no implicit user compute cap
 
 
 def test_a_damaged_unit_is_detected_and_only_it_reruns(tmp_path):
