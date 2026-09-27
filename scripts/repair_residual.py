@@ -155,13 +155,7 @@ def cmd_offline(args) -> None:
 
     from ribomamba.design import residual_models as rm
     df = load_all()
-    train = df.filter(pl.col("split") == "train")
-    hold = df.filter(pl.col("split") == "train_holdout")
-    puzzles = sorted(train["puzzle"].unique().to_list())
-    rng = np.random.default_rng(0)
-    val_puzzles = set(rng.choice(puzzles, size=len(puzzles) // 10, replace=False).tolist())
-    fit = train.filter(~pl.col("puzzle").is_in(list(val_puzzles)))
-    val = train.filter(pl.col("puzzle").is_in(list(val_puzzles)))
+    fit, val, hold = splits(df)
     X = lambda d, cols: d.select(cols).to_numpy().astype(float)
     no_rival = [f for f in rm.FEATURES if f not in ("c_bank_filled", "bank_missing", "c_lin", "broken_weight")]
     scores = {"energy": hold["a"].to_numpy(), "bank": (hold["a"] + hold["c_bank_filled"]).to_numpy(),
@@ -208,6 +202,8 @@ def cmd_offline(args) -> None:
             preds.append(critic.model(collate(batch, critic.device)).float()[:, 0].cpu().numpy())
     scores["critic_v1"] = np.concatenate(preds)
     timing["critic_v1_predict_us_per_child"] = (time.perf_counter() - t1) / hold.height * 1e6
+    hold.select("puzzle", "group", "phase", "child", "y", "a", "c").with_columns(
+        [pl.Series(f"score_{k}", v) for k, v in scores.items()]).write_parquet(OUT / "holdout_scores.parquet")
     results, per_group = {}, {}
     for name, s in scores.items():
         g = rm.group_metrics(hold.with_columns(pl.Series("score", s)), "score")
@@ -236,6 +232,123 @@ def cmd_offline(args) -> None:
     print(json.dumps(report, indent=1))
 
 
+def splits(df: pl.DataFrame):
+    """The fixed puzzle-level split: fit / val (10 % of train puzzles, seed 0) / held-out."""
+    train = df.filter(pl.col("split") == "train")
+    hold = df.filter(pl.col("split") == "train_holdout")
+    puzzles = sorted(train["puzzle"].unique().to_list())
+    val_puzzles = set(np.random.default_rng(0).choice(puzzles, size=len(puzzles) // 10, replace=False).tolist())
+    fit = train.filter(~pl.col("puzzle").is_in(list(val_puzzles)))
+    val = train.filter(pl.col("puzzle").is_in(list(val_puzzles)))
+    return fit, val, hold
+
+
+def cmd_train_critic(args) -> None:
+    import torch
+
+    from ribomamba.design import residual_models as rm
+    from ribomamba.design.critic import CriticConfig
+    from ribomamba.design.residual_critic import SiblingCritic, collate_sibling, encode_sibling
+    torch.manual_seed(args.seed)
+    device = "cuda" if torch.cuda.is_available() else "cpu"
+    fit, val, hold = splits(load_all())
+    label = "y" if args.variant == "generic" else "c"
+    cache = {}
+    enc = lambda d: [encode_sibling(r, args.variant, cache) for r in d.iter_rows(named=True)]
+    t0 = time.time()
+    fit_x, val_x, hold_x = enc(fit), enc(val), enc(hold)
+    fit_t = torch.tensor(fit[label].to_numpy(), dtype=torch.float32)
+    encode_s = time.time() - t0
+    model = SiblingCritic(CriticConfig(), use_rivals=args.variant == "rival").to(device)
+    n_params = sum(p.numel() for p in model.parameters())
+    opt = torch.optim.AdamW(model.parameters(), lr=args.lr, weight_decay=0.01)
+    steps = (len(fit_x) + args.batch - 1) // args.batch
+    sched = torch.optim.lr_scheduler.OneCycleLR(opt, max_lr=args.lr, total_steps=steps * args.epochs, pct_start=0.05)
+
+    def predict(xs):
+        model.eval()
+        out = []
+        with torch.no_grad():
+            for i in range(0, len(xs), 512):
+                with torch.autocast("cuda", dtype=torch.bfloat16, enabled=device == "cuda"):
+                    out.append(model(collate_sibling(xs[i:i + 512], device)).float().cpu().numpy())
+        return np.concatenate(out)
+
+    def task_score(d, pred):
+        return pred if args.variant == "generic" else d["a"].to_numpy() + pred
+
+    rng = np.random.default_rng(args.seed)
+    best, log = None, []
+    torch.cuda.reset_peak_memory_stats() if device == "cuda" else None
+    train_t0 = time.time()
+    for epoch in range(args.epochs):
+        model.train()
+        order = rng.permutation(len(fit_x))
+        losses = []
+        for i in range(steps):
+            idx = order[i * args.batch:(i + 1) * args.batch]
+            batch = collate_sibling([fit_x[k] for k in idx], device)
+            with torch.autocast("cuda", dtype=torch.bfloat16, enabled=device == "cuda"):
+                out = model(batch).float()
+            loss = torch.nn.functional.huber_loss(out, fit_t[idx].to(device))
+            opt.zero_grad(set_to_none=True)
+            loss.backward()
+            torch.nn.utils.clip_grad_norm_(model.parameters(), 1.0)
+            opt.step()
+            sched.step()
+            losses.append(loss.item())
+        vs = task_score(val, predict(val_x))
+        vg = rm.group_metrics(val.with_columns(pl.Series("score", vs)), "score")
+        entry = {"epoch": epoch, "train_huber": float(np.mean(losses)), "val_best_of_8_regret": float(vg["regret_k"].mean()),
+                 "val_spearman": float(vg["spearman"].drop_nans().median()), "elapsed_s": time.time() - train_t0}
+        log.append(entry)
+        print(json.dumps(entry), flush=True)
+        if best is None or entry["val_best_of_8_regret"] < best[0]:
+            best = (entry["val_best_of_8_regret"], {k: v.detach().clone() for k, v in model.state_dict().items()}, epoch)
+    model.load_state_dict(best[1])
+    t1 = time.time()
+    hs = task_score(hold, predict(hold_x))
+    predict_us = (time.time() - t1) / len(hold_x) * 1e6
+    out_dir = REPO / "checkpoints" / "residual_v1"
+    out_dir.mkdir(parents=True, exist_ok=True)
+    torch.save({"state": model.state_dict(), "variant": args.variant, "config": CriticConfig().__dict__,
+                "epoch": best[2], "n_params": n_params, "label": label}, out_dir / f"sibling_{args.variant}.pt")
+    scores = pl.read_parquet(OUT / "holdout_scores.parquet")
+    assert scores["child"].to_list() == hold["child"].to_list()
+    scores.with_columns(pl.Series(f"score_sib_{args.variant}", hs)).write_parquet(OUT / "holdout_scores.parquet")
+    info = {"variant": args.variant, "label": label, "n_params": n_params, "fit": len(fit_x), "val": len(val_x),
+            "holdout": len(hold_x), "best_epoch": best[2], "encode_s": encode_s, "train_s": time.time() - train_t0,
+            "predict_us_per_child": predict_us, "device": device, "log": log,
+            "peak_gpu_mib": torch.cuda.max_memory_allocated() / 2**20 if device == "cuda" else None}
+    (out_dir / f"sibling_{args.variant}.json").write_text(json.dumps(info, indent=1))
+    print(json.dumps({k: v for k, v in info.items() if k != "log"}, indent=1))
+
+
+def cmd_compare(args) -> None:
+    from ribomamba.design import residual_models as rm
+    scores = pl.read_parquet(OUT / "holdout_scores.parquet")
+    names = [c[len("score_"):] for c in scores.columns if c.startswith("score_")]
+    per, table = {}, {}
+    for n in names:
+        g = rm.group_metrics(scores.with_columns(pl.col(f"score_{n}").alias("score")), "score")
+        per[n] = g.group_by("puzzle").agg(pl.col("regret_k").mean())
+        m, lo, hi = rm.puzzle_bootstrap(dict(per[n].rows()))
+        table[n] = {"best_of_8_regret": [m, lo, hi], "spearman_median": float(g["spearman"].drop_nans().median()),
+                    "top1_best": float(g["top1_best"].mean()), "share_regret_gt_ln2": float((g["regret"] > math.log(2)).mean())}
+    diffs = {}
+    for pair in args.pairs:
+        a_, b_ = pair.split(":")
+        j = per[a_].join(per[b_], on="puzzle", suffix="_b")
+        diffs[pair] = rm.puzzle_bootstrap(dict(zip(j["puzzle"], (j["regret_k"] - j["regret_k_b"]).to_list())))
+    out = {"table": table, "differences (a - b; negative = a better)": diffs}
+    (OUT / "compare.json").write_text(json.dumps(out, indent=1))
+    for n, r in sorted(table.items(), key=lambda kv: kv[1]["best_of_8_regret"][0]):
+        b = r["best_of_8_regret"]
+        print(f"{n:18s} best-of-8 regret {b[0]:.3f} [{b[1]:.3f}, {b[2]:.3f}]  spearman {r['spearman_median']:.3f}  top1 {r['top1_best']:.3f}")
+    for k, v in diffs.items():
+        print(f"  {k:40s} {v[0]:+.3f} [{v[1]:+.3f}, {v[2]:+.3f}]")
+
+
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     sub = p.add_subparsers(dest="command", required=True)
@@ -243,8 +356,17 @@ def main() -> None:
     c.add_argument("--workers", type=int, default=8)
     sub.add_parser("diagnose")
     sub.add_parser("offline")
+    t = sub.add_parser("train-critic")
+    t.add_argument("--variant", required=True, choices=["generic", "norival", "rival"])
+    t.add_argument("--epochs", type=int, default=10)
+    t.add_argument("--batch", type=int, default=256)
+    t.add_argument("--lr", type=float, default=1e-3)
+    t.add_argument("--seed", type=int, default=0)
+    c = sub.add_parser("compare")
+    c.add_argument("--pairs", nargs="*", default=[])
     args = p.parse_args()
-    {"collect": cmd_collect, "diagnose": cmd_diagnose, "offline": cmd_offline}[args.command](args)
+    {"collect": cmd_collect, "diagnose": cmd_diagnose, "offline": cmd_offline, "train-critic": cmd_train_critic,
+     "compare": cmd_compare}[args.command](args)
 
 
 if __name__ == "__main__":
