@@ -1,4 +1,4 @@
-# Current handoff — 2026-09-27 (sessions 07-09)
+# Current handoff — 2026-09-28 (sessions 07-09)
 
 ## User decision
 The user approved the research pivot and, on 2026-09-27, standing approval to
@@ -37,20 +37,27 @@ Easy tier (rfam_val smoke): at ceiling; the shared start alone solves most.
 Trace finding: late in search only ~2 % of proposals improve; feedback edits waste
 ~33 % of late proposals on repeats. Defect-weighted site choice = random sites.
 
-## Exact next task (updated 2026-09-28 ~01:10 IST)
-PROTOCOL v2 FROZEN (docs/PROTOCOL_design_v2.md; amendments 1-4 are operational/measurement fixes).
-FINAL benchmark RUNNING: data/repair_pilot/run_final_v2.sh (V2 -> V1-only -> Rfam-Taneda-27).
-After it ends (marker data/repair_pilot/final_v2.done): run data/repair_pilot/run_final_v2_retry.sh
-(moves DesiRNA/SamplingDesign units started before the real-timing fix to units_superseded/ and
-reruns them plus any errored units; marker final_v2_retry.done). Then
-`python scripts/final_report.py --eternafold` (it REFUSES unless coverage is complete and the retry is
-done), fill docs/REPORT_repair_v2.md section 4, update RESULTS/DECISIONS/logbook.
-Review fixes (2026-09-28, commit 74ec5f1, 047750e): DesiRNA real per-round timing + group kill;
-SamplingDesign line-buffered + arrival times (its empty traces were genuine: ~2 min per default
-step at 180 nt on one thread); kills labelled time_limit; zero-candidate time limits valid;
-report selects best designs/first successes within 128 s. Development DesiRNA timings are
-optimistic (RESULTS correction). Framing unchanged (D-026): TCD = development model-adaptation gain,
-not SOTA; energy screen = non-neural; negative neural results recorded.
+## Exact next task (updated 2026-09-28 ~01:35 IST)
+PROTOCOL v2 FROZEN (docs/PROTOCOL_design_v2.md; amendments 1-4b are operational/measurement fixes).
+FINAL benchmark RUNNING: data/repair_pilot/run_final_v2.sh (V2 -> V1-only -> Rfam-Taneda-27;
+copy in scripts/final_v2/). At 01:17 IST V2 was at 440/2355 units after 10,019 s (~23 s per unit
+with 8 workers), so the chain needs roughly 15-20 more hours, plus the corrective pass.
+1. After data/repair_pilot/final_v2.done: `bash data/repair_pilot/run_final_v2_retry.sh` (wrapper for
+   scripts/final_v2/run_final_v2_retry.sh): moves desirna units started before bda4884 and
+   samplingdesign units started before 74ec5f1 (+60 s) to units_superseded/, reruns them and the 15
+   errored units; marker final_v2_retry.done.
+2. `python scripts/final_report.py --eternafold`. It REFUSES unless every unit is valid, the retry is
+   done, no error units remain (diagnose any; --accept-errors only after diagnosis), and every
+   zero-candidate unit is a time_limit. Zero-candidate time_limit units are legitimate unsolved
+   outcomes (e.g. RNAinverse's first design on 358-400 nt puzzles takes 132-676 s).
+3. Fill docs/REPORT_repair_v2.md section 4; update RESULTS/DECISIONS/logbook/INTERVIEW_PREP.
+Review fixes (2026-09-28): 74ec5f1 (real timing), bda4884 (DesiRNA initial population, verified:
+initial design ~4 s, first round ~115-121 s on puzzle 38), 047750e and 035c439 (report coverage,
+128 s prefix selection, error/zero-candidate handling). Development DesiRNA timings are optimistic
+(RESULTS correction). Framing unchanged (D-026): TCD = development model-adaptation gain, not SOTA;
+energy screen = non-neural; negative neural results recorded. The K ablation stays paused (77/384).
+While the benchmark runs: no GPU training (TCD units use the GPU) and no heavy CPU work (it would
+perturb method-time budgets); documentation and cheap checks only.
 
 ## Execution environment
 WSL Ubuntu-24.04:

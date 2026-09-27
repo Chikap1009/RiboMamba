@@ -120,3 +120,8 @@ Amendment 4b (2026-09-27T19:45:05+00:00 UTC): the DesiRNA wrapper also logs the 
 initial population (present from start-up, step 0 of its own trajectory) is counted even when the
 first round outlasts 128 s (e.g. 337-400 nt with 10 replicas on one core). The fix time for
 superseding DesiRNA/SamplingDesign units moves to this commit (bda4884).
+Amendment 4c (2026-09-28 ~01:30 IST, report side only; 035c439): final_report.py lists zero-candidate
+units per method and refuses FINAL while any unit ended in `error` (implementation failures until
+diagnosed; `--accept-errors` then counts them as unsolved and lists them) or while a zero-candidate
+unit has any status other than time_limit. The corrective pass supersedes by per-method fix time
+(scripts/final_v2/run_final_v2_retry.sh, 9d91eea). Methods, budgets and endpoints unchanged.
