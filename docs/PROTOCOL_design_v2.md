@@ -131,3 +131,10 @@ means and medians over units WITH a design, reported with the number of units wi
 comparisons use puzzles where both methods have a design in every seed (n reported); uMFE success is
 defined for every unit (no design = unsolved). EternaFold agreement is a rate over ALL units
 (no design = no match). Commits a9ea5b1 and the one adding this text.
+Amendment 4e (2026-09-28, report side only; correction from a review): 4c said error units accepted
+with --accept-errors count as unsolved, but success curves were still derived from their partial
+traces, so an errored unit with a successful partial trace would have been credited. Now
+final_report.per_unit applies the policy to every figure (success under all tie policies, best NED,
+best P/design, first success, paired comparisons, EternaFold): an `error` unit is unsolved with no
+design at every wall budget (apply_error_policy; tests/test_final_report.py, which fails without it).
+The default FINAL path still refuses while error units remain.

@@ -13,7 +13,8 @@ V1 = V2 results on the 81 identical structures + final_eterna100_v1only (19 puzz
 Every error / time-limit / early-stop outcome is counted. Zero-candidate time_limit units (the method's first
 design came after 128 s) are legitimate unsolved outcomes and are listed per method; units that ended in
 `error` are implementation failures until diagnosed, so FINAL refuses while any remain unless
---accept-errors is given (they then count as unsolved and are listed). Writes
+--accept-errors is given (they are listed, and count as unsolved with no design in EVERY figure, whatever
+their partial traces hold: see per_unit). Writes
 data/repair_pilot/final_v2_report.json and prints a markdown summary.
 """
 
@@ -67,12 +68,17 @@ def audit(s: str) -> dict:
             "methods": sorted(cfg["methods"]), "n_targets": len(cfg["target_ids"])}
 
 
-def per_unit(s: str) -> pl.DataFrame:
-    """One row per (method, target, seed, wall budget) with success/NED, plus the unit's best-P design
-    and first uMFE success, both chosen ONLY among candidates within LIMIT_S of method time (the same
-    eligibility rule as the success curves; review of 2026-09-28)."""
-    units = summary.wall_unit_table(run_dir(s), walls=WALLS)
-    _, statuses, traces = summary.load_run(run_dir(s))
+def per_unit(d) -> pl.DataFrame:
+    """One row per (method, target, seed, wall budget) of the run in directory d, with success/NED, plus the
+    unit's best-P design and first uMFE success, both chosen ONLY among candidates within LIMIT_S of method
+    time (the same eligibility rule as the success curves; review of 2026-09-28).
+
+    A unit whose status is `error` counts as UNSOLVED WITH NO DESIGN at every wall budget, whatever its
+    partial trace holds (success False, best NED NaN, no best design, no first success). Every success,
+    quality, paired and EternaFold figure is derived from this table, so the policy holds throughout.
+    """
+    units = summary.wall_unit_table(d, walls=WALLS)
+    _, statuses, traces = summary.load_run(d)
     frames = []
     for (method,), t in traces.group_by(["method"]):
         t = t.sort(["target_id", "seed", "eval_index"])
@@ -84,8 +90,24 @@ def per_unit(s: str) -> pl.DataFrame:
     first = (eligible.filter(pl.col("umfe")).group_by(["method", "target_id", "seed"])
              .agg((pl.col("eval_index").min() + 1).alias("evals_to_first"),
                   pl.col("method_wall_s").min().alias("seconds_to_first")))
-    return units.join(best, on=["method", "target_id", "seed"], how="left").join(
+    u = units.join(best, on=["method", "target_id", "seed"], how="left").join(
         first, on=["method", "target_id", "seed"], how="left")
+    return apply_error_policy(u, [(x["method"], x["target_id"], x["seed"]) for x in statuses if x["status"] == "error"])
+
+
+def apply_error_policy(u: pl.DataFrame, errored: list[tuple]) -> pl.DataFrame:
+    """Error units: unsolved under every success policy, no NED, no design, no first success."""
+    keys = pl.DataFrame({"method": [m for m, _, _ in errored], "target_id": [t for _, t, _ in errored],
+                         "seed": [s for _, _, s in errored]},
+                        schema={"method": u.schema["method"], "target_id": u.schema["target_id"], "seed": u.schema["seed"]})
+    u = u.join(keys.with_columns(pl.lit(True).alias("errored")), on=["method", "target_id", "seed"], how="left")
+    u = u.with_columns(pl.col("errored").fill_null(False))
+    err = pl.col("errored")
+    return u.with_columns(
+        *[pl.when(err).then(False).otherwise(pl.col(c)).alias(c) for c in u.columns if c.startswith("success_")],
+        pl.when(err).then(float("nan")).otherwise(pl.col("best_ned")).alias("best_ned"),
+        *[pl.when(err).then(pl.lit(None, dtype=u.schema[c])).otherwise(pl.col(c)).alias(c)
+          for c in ("best_log10_p", "sequence", "evals_to_first", "seconds_to_first")])
 
 
 def solved_counts(u: pl.DataFrame, wall: int) -> pl.DataFrame:
@@ -170,7 +192,7 @@ def main() -> None:
     for s in SETS:
         if s not in report["audit"]:
             continue
-        u = per_unit(s)
+        u = per_unit(run_dir(s))
         frames[s] = u
         entry = {"solved_by_128s": solved_counts(u, 128).to_dicts(),
                  "curves": u.group_by(["method", "wall_s", "target_id"]).agg(pl.col("success_umfe").cast(pl.Float64).mean())
