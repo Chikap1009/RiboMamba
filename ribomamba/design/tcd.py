@@ -1,0 +1,138 @@
+"""Sampling designs from the target-conditioned denoiser, and harness methods that use it.
+
+docs/experiments/2026-09-28-target-conditioned-denoiser.md, evaluation parts A and B.
+
+Sampler: Phase 2's monotone unmasking, conditioned on the target structure. Units are single
+unpaired positions and target PAIRS; at each step every still-masked unit is revealed with
+probability (t - s) / t (all remaining at the last step). A pair (i, j) is drawn from
+p_i(a) p_j(b) restricted to canonical pairs and renormalised: the product of the two conditional
+marginals from the same forward pass, an approximation to their joint (stated, not hidden).
+Every design therefore satisfies all target pairs canonically.
+
+Methods (harness):
+  tcd_sample      conditioned samples until the candidate budget is spent (each scored)
+  uncond_sample   identical sampler on the BASE model (adapters zero, structure ignored)
+  samfeo_efilter_tcdinit  SAMFEO + energy screen whose k = 10 initial designs are TCD samples
+Model forward passes and time are counted (model_calls, model_wall_s).
+"""
+
+import time
+
+import numpy as np
+import torch
+
+from ribomamba.data.tokenizer import BOS_ID, EOS_ID, FIRST_NUCLEOTIDE_ID, MASK_ID, NUCLEOTIDES
+from ribomamba.design.search import Evaluator, Target, rng_for
+from ribomamba.eval.folding import CANONICAL_PAIRS
+from ribomamba.models.conditioned import ConditionedDenoiser, structure_inputs
+from ribomamba.paths import REPO_ROOT
+
+TCD_CHECKPOINT = "checkpoints/tcd_v1/tcd.pt"
+BASE_CHECKPOINT = REPO_ROOT / "checkpoints" / "tf_M_do0" / "best.pt"
+CANON16 = torch.tensor([[1.0 if a + b in CANONICAL_PAIRS else 0.0 for b in NUCLEOTIDES] for a in NUCLEOTIDES]).flatten()
+_MODELS: dict = {}
+
+
+def load(which: str, device: str | None = None) -> tuple[ConditionedDenoiser, str]:
+    """'base' = the unconditional model with zero adapters; otherwise a TCD checkpoint path."""
+    device = device or ("cuda" if torch.cuda.is_available() else "cpu")
+    if which not in _MODELS:
+        from ribomamba.models.checkpoint import load_model
+        base, _ = load_model(BASE_CHECKPOINT, weights="ema", device="cpu")
+        model = ConditionedDenoiser.from_unconditional(base)
+        if which != "base":
+            state = torch.load(REPO_ROOT / which, map_location="cpu", weights_only=False)
+            model.load_state_dict(state["state"])
+        _MODELS[which] = model.to(device).eval()
+    return _MODELS[which], device
+
+
+@torch.no_grad()
+def sample_designs(model: ConditionedDenoiser, structure: str, n: int, steps: int, generator: torch.Generator,
+                   device: str, temperature: float = 1.0) -> list[str]:
+    from ribomamba.eval.folding import pair_table
+    L, W = len(structure), len(structure) + 2
+    ids = torch.full((n, W), MASK_ID, dtype=torch.long, device=device)
+    ids[:, 0], ids[:, L + 1] = BOS_ID, EOS_ID
+    attn = torch.ones((n, W), dtype=torch.bool, device=device)
+    bracket, partner = structure_inputs([structure] * n, W, device)
+    pt = pair_table(structure)
+    singles = torch.tensor([i + 1 for i, j in enumerate(pt) if j < 0], dtype=torch.long, device=device)
+    pi = torch.tensor([i + 1 for i, j in enumerate(pt) if j > i], dtype=torch.long, device=device)
+    pj = torch.tensor([j + 1 for i, j in enumerate(pt) if j > i], dtype=torch.long, device=device)
+    s_open = torch.ones((n, len(singles)), dtype=torch.bool, device=device)
+    p_open = torch.ones((n, len(pi)), dtype=torch.bool, device=device)
+    canon = CANON16.to(device)
+    times = torch.linspace(1.0, 0.0, steps + 1).tolist()
+    for t, s in zip(times[:-1], times[1:]):
+        with torch.autocast("cuda", dtype=torch.bfloat16, enabled=device == "cuda"):
+            logits = model(ids, attn, bracket, partner)
+        probs = torch.softmax(logits[..., FIRST_NUCLEOTIDE_ID:].double() / temperature, dim=-1)   # (n, W, 4)
+        frac = 1.0 if s <= 0 else (t - s) / t
+        if len(singles):
+            reveal = s_open & (torch.rand(s_open.shape, device=device, generator=generator) < frac)
+            draw = torch.multinomial(probs[:, singles].reshape(-1, 4), 1, generator=generator).view(n, -1)
+            cur = ids[:, singles]
+            ids[:, singles] = torch.where(reveal, draw + FIRST_NUCLEOTIDE_ID, cur)
+            s_open &= ~reveal
+        if len(pi):
+            reveal = p_open & (torch.rand(p_open.shape, device=device, generator=generator) < frac)
+            joint = (probs[:, pi, :, None] * probs[:, pj, None, :]).reshape(n, len(pi), 16) * canon
+            joint = joint / joint.sum(-1, keepdim=True)
+            k = torch.multinomial(joint.reshape(-1, 16), 1, generator=generator).view(n, -1)
+            a, b = k // 4 + FIRST_NUCLEOTIDE_ID, k % 4 + FIRST_NUCLEOTIDE_ID
+            ids[:, pi] = torch.where(reveal, a, ids[:, pi])
+            ids[:, pj] = torch.where(reveal, b, ids[:, pj])
+            p_open &= ~reveal
+    letters = np.array(list("????ACGU"))
+    return ["".join(letters[row[1:L + 1].cpu().numpy()]) for row in ids]
+
+
+def _generator(target: Target, seed: int, device: str, tag: str) -> torch.Generator:
+    g = torch.Generator(device=device)
+    g.manual_seed(int(rng_for(tag, target.id, seed).integers(2**62)))
+    return g
+
+
+def _sample_loop(which: str, target: Target, seed: int, evaluate: Evaluator, settings: dict, tag: str) -> None:
+    model, device = load(which)
+    gen = _generator(target, seed, device, tag)
+    while True:
+        evaluate.check()
+        start = time.perf_counter()
+        batch = sample_designs(model, target.structure, settings.get("batch", 32), settings.get("steps", 32), gen,
+                               device, settings.get("temperature", 1.0))
+        evaluate.model_calls += settings.get("steps", 32)
+        evaluate.model_wall_s += time.perf_counter() - start
+        for seq in batch:
+            evaluate(seq)
+
+
+def tcd_sample(target: Target, seed: int, evaluate: Evaluator, settings: dict) -> None:
+    _sample_loop(settings.get("checkpoint", TCD_CHECKPOINT), target, seed, evaluate, settings, "tcd_sample")
+
+
+def uncond_sample(target: Target, seed: int, evaluate: Evaluator, settings: dict) -> None:
+    _sample_loop("base", target, seed, evaluate, settings, "uncond_sample")
+
+
+def tcd_initial_designs(target: Target, seed: int, k: int, evaluate: Evaluator, settings: dict) -> list[str]:
+    """k distinct TCD samples for SAMFEO's initial frontier (sampling cost charged to the method)."""
+    model, device = load(settings.get("checkpoint", TCD_CHECKPOINT))
+    gen = _generator(target, seed, device, "tcd_init")
+    out, start = [], time.perf_counter()
+    for _ in range(8):
+        for seq in sample_designs(model, target.structure, 2 * k, settings.get("steps", 32), gen, device):
+            if seq not in out:
+                out.append(seq)
+        evaluate.model_calls += settings.get("steps", 32)
+        if len(out) >= k:
+            break
+    evaluate.model_wall_s += time.perf_counter() - start
+    return out[:k]
+
+
+TCD_SETTINGS = {"checkpoint": TCD_CHECKPOINT, "steps": 32, "batch": 32, "temperature": 1.0,
+                "pair_rule": "product of conditional marginals restricted to canonical pairs"}
+TCD_METHODS = {"tcd_sample": tcd_sample, "uncond_sample": uncond_sample}
+TCD_METHOD_SETTINGS = {"tcd_sample": TCD_SETTINGS, "uncond_sample": {**TCD_SETTINGS, "checkpoint": "base"}}

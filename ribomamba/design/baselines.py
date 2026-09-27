@@ -165,7 +165,7 @@ def samfeo(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=N
     module.name_pair = s["init"]
     module.STAY = s["stay"]
     originals = {name: getattr(module, name) for name in ("position_ed_pd_mfe", "mutate_structured",
-                                                          "mutate_tradition")}
+                                                          "mutate_tradition", "init_k")}
     parents: dict[str, str] = {}
 
     def evaluated(sequence, structure):
@@ -213,6 +213,10 @@ def samfeo(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=N
         return wrapped
 
     module.position_ed_pd_mfe = evaluated
+    if s.get("init_model"):                          # SAMFEO's k initial designs drawn from a model instead
+        from ribomamba.design.tcd import tcd_initial_designs
+        module.init_k = lambda target_ss, pos_pairs, k: tcd_initial_designs(
+            target, seed, k, evaluate, {"checkpoint": s["init_model"]})
     if s.get("filter"):
         scorer = make_filter(s)
         module.mutate_structured = filtered_mutation(originals["mutate_structured"], scorer, s["filter_k"])
@@ -445,6 +449,8 @@ BASELINES["rnainverse_r256"] = rnainverse
 BASELINE_SETTINGS["rnainverse_r256"] = {**RNAINVERSE_SETTINGS, "max_restarts": 256}
 BASELINES["rnainverse_r64"] = rnainverse
 BASELINE_SETTINGS["rnainverse_r64"] = {**RNAINVERSE_SETTINGS, "max_restarts": 64}
+BASELINES["samfeo_efilter_tcdinit"] = samfeo_efilter
+BASELINE_SETTINGS["samfeo_efilter_tcdinit"] = {**SAMFEO_EFILTER_SETTINGS, "init_model": "checkpoints/tcd_v1/tcd.pt"}
 BASELINES["samfeo_efilter_eps"] = samfeo_efilter
 BASELINE_SETTINGS["samfeo_efilter_eps"] = {**SAMFEO_EFILTER_SETTINGS, "epsilon": 0.125}
 

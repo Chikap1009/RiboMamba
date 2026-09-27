@@ -46,3 +46,17 @@ def test_pair_messages_make_a_position_depend_on_its_partner():
     assert not torch.allclose(a, cond(ids, mask, bracket, none))
     loss, stats = conditioned_nelbo(cond.train(), ids, mask, bracket, partner)
     assert torch.isfinite(loss) and loss.item() > 0
+
+
+def test_sampler_satisfies_every_target_pair_and_is_seeded():
+    from ribomamba.design.tcd import sample_designs
+    from ribomamba.eval.folding import CANONICAL_PAIRS, pair_table
+    torch.manual_seed(0)
+    model = ConditionedDenoiser(TransformerConfig(d_model=32, n_layers=2, n_heads=2)).eval()
+    target = "((((....))))..(((...)))"
+    g1 = torch.Generator().manual_seed(5)
+    a = sample_designs(model, target, 6, 8, g1, "cpu")
+    b = sample_designs(model, target, 6, 8, torch.Generator().manual_seed(5), "cpu")
+    assert a == b and all(len(s) == len(target) and set(s) <= set("ACGU") for s in a)
+    pt = pair_table(target)
+    assert all(s[i] + s[j] in CANONICAL_PAIRS for s in a for i, j in enumerate(pt) if j > i)
