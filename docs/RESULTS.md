@@ -1048,3 +1048,58 @@ Distinguish construction/auditing from final model testing.
 The new development plan is RESEARCH_PLAN.md. It will need a separately dated
 freeze before final tests. Do not mix its repair/design numbers with the old
 unconditional likelihood study. No repair performance numbers exist yet.
+
+## Repair pilot — development results (NOT a frozen protocol; not final tests)
+Recorded 2026-09-27, session 07. Validation/development data only. Oracle:
+ViennaRNA 2.7.2, Turner 2004, 37 C, dangles 2. Success = unique MFE (uMFE; D-017).
+Means over targets with seeds averaged within target first; 95 % bootstrap
+intervals over targets. Hardware: i7-13650HX laptop (WSL2), 4 CPU workers,
+1 OpenMP thread each; RTX 4060 Laptop only for neural proposals.
+
+### Easy tier: repair_pilot_val_v1 smoke (8 rfam_val targets, 3 seeds, 64 evals) — run smoke64_v1
+uMFE: random_pairs 75 % [38, 100], random_pair_edits 92 % [75, 100],
+feedback_pair_edits 79 % [50, 100], SAMFEO 88 % [62, 100], RNAinverse 100 %.
+The shared start alone was a uMFE solution for 5-6 of 8 targets. Ceiling: this
+tier cannot separate methods (D-018). Commit 8f3c81b.
+
+### Hard tier: eternaweb_dev_v1, 32 development targets x seeds 0-2
+Commands: `python scripts/repair_pilot.py run --run ew_dev1024_v1 --manifest eternaweb_dev_v1
+--subset development --budget 1024 --seeds 0 1 2 --methods random_pairs random_pair_edits
+feedback_pair_edits samfeo --workers 4` (commit 8f3c81b, 1,229 s wall, 384/384 units, 0 errors);
+mfe_repair run ew_dev1024_mfe_v1 and RNAinverse run ew_dev64_rnainverse_v1 (commit e90fc09).
+
+| method | uMFE @64 | uMFE @256 | uMFE @1024 | best NED @1024 | best log10 P @1024 |
+|---|---|---|---|---|---|
+| random_pairs | 14 % [3, 26] | 16 % [3, 28] | 16 % [3, 28] | 0.090 | -2.43 |
+| random_pair_edits | 14 % [5, 24] | 29 % [16, 44] | 42 % [25, 58] | 0.064 | -2.08 |
+| feedback_pair_edits | 12 % [4, 23] | 28 % [16, 42] | 43 % [27, 58] | 0.069 | -2.03 |
+| SAMFEO e78b4b5 defaults | 21 % [9, 33] | 35 % [21, 50] | 48 % [32, 64] | 0.068 | -1.20 |
+| mfe_repair (stops at uMFE) | — | — | 31 % | 0.099 | — |
+
+Wall-time view (method's own seconds per unit; harness re-scoring subtracted
+for self-scored methods): uMFE by 1 s — RNAinverse 46 %, SAMFEO 35 %,
+random_pair_edits 30 %, mfe_repair 30 %, feedback 25 %, random_pairs 14 %;
+by 64 s — RNAinverse 59 % (<= 64 restarts), SAMFEO 48 %, edits 42-43 %.
+Paired (per target): feedback vs random sites, uMFE @1024 difference ~0
+(no benefit from defect-weighted site choice). Late-search proposals improve
+the objective only ~2 % of the time; feedback edits repeat sequences in ~33 %
+of late proposals (cache hits).
+
+### Stage B probe (unconditional Transformer proposals), same 32 dev targets x 3 seeds
+Run ew_dev1024_neural_v1 (commit e90fc09, `--gpu`, 2,220 s wall, 192/192 units,
+0 errors; GPU ~0.62 h). Identical shared starts, site rules, objective (NED)
+and acceptance as the matching controls; only the choice among legal moves
+comes from checkpoints/tf_M_do0/best.pt (EMA), decoded by the chain rule.
+
+| method | uMFE @64 | @256 | @1024 | best NED @1024 | wall s/unit @1024 |
+|---|---|---|---|---|---|
+| neural_feedback_edits | 19 % | 29 % | 39 % [24, 54] | 0.067 | 48.7 |
+| feedback_pair_edits (control) | 12 % | 28 % | 43 % [27, 58] | 0.069 | 9.6 |
+| neural_random_edits | 18 % | 31 % | 44 % [28, 60] | 0.061 | 45.7 |
+| random_pair_edits (control) | 14 % | 29 % | 42 % [25, 58] | 0.064 | 11.7 |
+
+Paired per-target differences @1024 (a - b): neural_feedback - feedback uMFE
+-0.042 [-0.115, 0.031]; neural_random - random +0.021 [-0.042, 0.083];
+best NED -0.002 / -0.004 (intervals include 0). By equal wall time the neural
+variants are worse (16 s: 30-32 % vs 38-40 %). DECISION (D-020): the
+unconditional model adds no measurable value; Stage B is negative.

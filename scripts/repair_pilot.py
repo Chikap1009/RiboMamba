@@ -135,7 +135,7 @@ def main() -> None:
     m.add_argument("--workers", type=int, default=MAX_WORKERS)
     r = sub.add_parser("run")
     r.add_argument("--run", required=True, help="run directory name under data/repair_pilot/")
-    r.add_argument("--manifest", default=hm.NAME, choices=[mf.MANIFEST_NAME, hm.NAME])
+    r.add_argument("--manifest", default=hm.NAME, choices=[mf.MANIFEST_NAME, hm.NAME, "eternaweb_trainpool_v1"])
     r.add_argument("--subset", required=True, choices=mf.SUBSETS)
     r.add_argument("--budget", type=int, default=64)
     r.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])

@@ -54,3 +54,20 @@ def test_rnainverse_is_recorded_without_internal_counts():
         baselines.rnainverse(target, 0, ev, {})
     assert len(ev.rows) == 3 and all(r["cum_internal_pf"] is None for r in ev.rows)
     assert np.isfinite(ev.rows[0]["ned"])
+
+
+@needs_samfeo
+def test_energy_filtered_samfeo_picks_the_most_stable_child_and_counts_it():
+    target = Target("toy:hairpin", "(((((......)))))")
+    ev = Evaluator(target, budget=40)
+    with pytest.raises(BudgetExhausted):
+        baselines.samfeo_efilter(target, 0, ev, {})
+    assert len(ev.rows) == 40 and len({r["sequence"] for r in ev.rows}) == 40
+    assert (ev.internal.subopt, ev.internal.pf) == (40, 40)            # still one SAMFEO evaluation each
+    assert ev.internal.eval >= 40 + 30                                 # + filter evaluations for 30 mutations
+    # On average, filtered children stabilise the target more than unfiltered SAMFEO's children do:
+    unfiltered = Evaluator(target, budget=40)
+    with pytest.raises(BudgetExhausted):
+        baselines.samfeo(target, 0, unfiltered, {})
+    e = lambda rows: np.mean([r["target_energy"] for r in rows[10:]])
+    assert e(ev.rows) < e(unfiltered.rows)

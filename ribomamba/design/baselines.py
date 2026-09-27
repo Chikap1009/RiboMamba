@@ -59,6 +59,9 @@ SAMFEO_COMMIT = "e78b4b5dc6082b0e832e0ed388f18d78e4bf7a5d"
 SAMFEO_DIR = EXTERNAL_DIR / "SAMFEO"
 SAMFEO_SETTINGS = {"objective": "pd", "k": 10, "t": 1.0, "init": "cg", "structured_mutation": True,
                    "check_mfe": True, "stay": 2000, "commit": SAMFEO_COMMIT}
+SAMFEO_EFILTER_SETTINGS = {**SAMFEO_SETTINGS, "filter": "energy", "filter_k": 8}
+SAMFEO_CFILTER_SETTINGS = {**SAMFEO_SETTINGS, "filter": "critic", "filter_k": 8,
+                           "critic_ckpt": "checkpoints/critic_v1/critic.pt"}
 RNAINVERSE_SETTINGS = {"mode": "mfe (RNA.inverse_fold)", "restart_start": "shared start, then targeted init"}
 
 
@@ -180,9 +183,35 @@ def samfeo(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=N
             return child
         return wrapped
 
+    def filtered_mutation(mutate, scorer, k):
+        """Draw k children with SAMFEO's own mutation; keep the one the scorer ranks best (lowest).
+
+        Children already evaluated are skipped (SAMFEO would reject them anyway); if every
+        draw was already evaluated, the last is returned and SAMFEO's own retry loop runs.
+        """
+        def wrapped(sequence, pairs, defect_list, *args, **kwargs):
+            children, child = [], None
+            for _ in range(k):
+                child = mutate(sequence, pairs, defect_list, *args, **kwargs)
+                if child not in evaluate.first_index and child not in children:
+                    children.append(child)
+            if not children:
+                parents[child] = sequence
+                return child
+            scores = scorer(target, sequence, children, defect_list, evaluate)
+            best = children[int(np.argmin(scores))]
+            parents[best] = sequence
+            return best
+        return wrapped
+
     module.position_ed_pd_mfe = evaluated
-    module.mutate_structured = logging_mutation(originals["mutate_structured"])
-    module.mutate_tradition = logging_mutation(originals["mutate_tradition"])
+    if s.get("filter"):
+        scorer = make_filter(s)
+        module.mutate_structured = filtered_mutation(originals["mutate_structured"], scorer, s["filter_k"])
+        module.mutate_tradition = filtered_mutation(originals["mutate_tradition"], scorer, s["filter_k"])
+    else:
+        module.mutate_structured = logging_mutation(originals["mutate_structured"])
+        module.mutate_tradition = logging_mutation(originals["mutate_tradition"])
     try:
         with contextlib.redirect_stdout(log if log is not None else open("/dev/null", "w")):
             module.samfeo(target.structure, evaluate.budget, k=s["k"], t=s["t"], check_mfe=s["check_mfe"],
@@ -190,6 +219,42 @@ def samfeo(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=N
     finally:
         for name, fn in originals.items():
             setattr(module, name, fn)
+
+
+def energy_scores(target: Target, parent: str, children: list[str], defect_list, evaluate: Evaluator) -> list[float]:
+    """Non-neural filter: E(target structure) of each child, kcal/mol (lower = target more stable).
+
+    One O(n) structure evaluation per child, counted as the method's own eval calls.
+    """
+    md = model_details()
+    evaluate.internal.eval += len(children)
+    return [RNA.fold_compound(c, md).eval_structure(target.structure) for c in children]
+
+
+FILTERS = {"energy": energy_scores}
+_CRITICS: dict = {}
+
+
+def make_filter(settings: dict):
+    """The scorer named by settings["filter"]; a learned critic is loaded once per process."""
+    if settings["filter"] == "critic":
+        from ribomamba.design.critic import CriticScorer
+        from ribomamba.paths import REPO_ROOT
+        path = str(REPO_ROOT / settings["critic_ckpt"])
+        if path not in _CRITICS:
+            _CRITICS[path] = CriticScorer(path)
+        return _CRITICS[path]
+    return FILTERS[settings["filter"]]
+
+
+def samfeo_cfilter(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=None) -> None:
+    """SAMFEO with its mutations pre-screened by the learned critic (best of filter_k)."""
+    samfeo(target, seed, evaluate, {**SAMFEO_CFILTER_SETTINGS, **settings}, log)
+
+
+def samfeo_efilter(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=None) -> None:
+    """SAMFEO with its mutations pre-screened by target energy (best of filter_k); otherwise unchanged."""
+    samfeo(target, seed, evaluate, {**SAMFEO_EFILTER_SETTINGS, **settings}, log)
 
 
 def rnainverse(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=None) -> None:
@@ -205,6 +270,8 @@ def rnainverse(target: Target, seed: int, evaluate: Evaluator, settings: dict, l
         start = random_design(target, rng)
 
 
-BASELINES = {"samfeo": samfeo, "rnainverse": rnainverse}
-BASELINE_SETTINGS = {"samfeo": SAMFEO_SETTINGS, "rnainverse": RNAINVERSE_SETTINGS}
+BASELINES = {"samfeo": samfeo, "rnainverse": rnainverse, "samfeo_efilter": samfeo_efilter,
+             "samfeo_cfilter": samfeo_cfilter}
+BASELINE_SETTINGS = {"samfeo": SAMFEO_SETTINGS, "rnainverse": RNAINVERSE_SETTINGS,
+                     "samfeo_efilter": SAMFEO_EFILTER_SETTINGS, "samfeo_cfilter": SAMFEO_CFILTER_SETTINGS}
 __all__ = ["BASELINES", "BASELINE_SETTINGS", "BudgetExhausted", "load_samfeo", "samfeo_checkout_problem"]
