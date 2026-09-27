@@ -1166,3 +1166,23 @@ that frontier, not from a preferred story.
 **Consequences.** The likely honest claim is narrow: a cheap screen that improves SAMFEO's
 quality per time and ensemble quality of two hosts, with DesiRNA remaining strongest on uMFE at
 longer budgets unless the longer-budget runs say otherwise.
+
+## D-026 — Frame current results honestly; make the target-conditioned denoiser the explicit next model question
+**Date:** 2026-09-27   **Status:** accepted (user direction)
+
+**Context.** The project is heading toward a final benchmark whose best method so far is a
+non-neural target-energy pre-screen (prior art: INFO-RNA). The neural results so far are
+negative or null: unconditional diffusion proposals (Stage B, D-020), learned critics and the
+competition residual (D-022, D-024). The user's interview emphasis is diffusion/foundation
+models; the critic and energy filter must not be presented as a diffusion contribution.
+
+**Decision.** Preserve all findings as they are. State the next model-adaptation question
+explicitly: does a TARGET-CONDITIONED masked-diffusion denoiser, initialised from the Phase 2
+Transformer and adapted on training-side (structure, design) pairs, generate or repair designs
+better than the non-neural methods at matched compute? Specify it before training
+(docs/experiments/2026-09-28-target-conditioned-denoiser.md) and test it on development
+targets BEFORE freezing protocol v2, so it can enter the frozen method list only if it earns it.
+
+**Consequences.** Freezing waits for this development result. Whatever the outcome, the report
+separates: (1) the non-neural efficiency result, (2) the negative neural results, (3) the
+target-conditioned denoiser result.

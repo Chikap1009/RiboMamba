@@ -37,17 +37,17 @@ Easy tier (rfam_val smoke): at ceiling; the shared start alone solves most.
 Trace finding: late in search only ~2 % of proposals improve; feedback edits waste
 ~33 % of late proposals on repeats. Defect-weighted site choice = random sites.
 
-## Exact next task (session 09, updated ~15:00 IST)
-Records: docs/experiments/2026-09-27-competition-residual.md; D-022..D-025; RESULTS.md;
-docs/logbook/2026-09-27-session-09.md.
-Measured: SAMFEO + energy pre-screen (K = 8) is the best SAMFEO filter (58 vs 48 % uMFE,
-replicated 3x, confirmed once); learned critics do not beat it online; the screen improves
-DesiRNA's NED/P but lowers its uMFE at 64 s (D-025). DesiRNA leads uMFE at 64 s (66-70 %).
-In flight: ew_dev_frontier_v1 (long budgets, dev only). Then: summarise the quality-time
-frontier (repair_compare.py + summary.paired_wall), decide the frozen method list and
-endpoints, FREEZE docs/PROTOCOL_design_v2.md (add "**Status: FROZEN on <date>**" and a code
-guard for final manifests), build the Eterna100 V1/V2 + Rfam-Taneda + RNAsolo manifests, and
-run the final benchmark. The K ablation (ew_dev1024_kablation_v1) remains paused.
+## Exact next task (session 09, updated ~19:20 IST)
+Framing (D-026): current method result = NON-NEURAL energy pre-screen for SAMFEO (prior art
+INFO-RNA; ~+10 pp uMFE, replicated, confirmed once). Neural results so far are negative or null
+(unconditional diffusion proposals D-020; learned critics / competition residual D-022, D-024).
+Do NOT present the critic or energy filter as a diffusion contribution.
+Next model question: target-conditioned masked-diffusion denoiser
+(docs/experiments/2026-09-28-target-conditioned-denoiser.md) on development targets, BEFORE
+freezing docs/PROTOCOL_design_v2.md.
+In flight: ew_dev_frontier_v1 (long budgets; resume the same command afterwards to rerun the 6
+units invalidated by a laptop suspend). Final manifests are built (manifests/final_*.json) and
+runs on them are refused until the protocol is frozen.
 
 ## Execution environment
 WSL Ubuntu-24.04:
