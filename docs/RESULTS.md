@@ -1195,3 +1195,14 @@ DesiRNA 0.067. Paired uMFE: energy - SAMFEO +0.094 [0.021, 0.177] @16 s, +0.083 
 SamplingDesign is under-budgeted at one thread (its published runs use 64 cores); reported as
 such, not as its capability. No method dominates: SAMFEO + energy has the best ensemble quality
 at every budget; RNAinverse is fastest to first uMFE solutions; DesiRNA leads uMFE at 256 s.
+
+### CORRECTION (2026-09-28) — development DesiRNA / SamplingDesign timings
+An independent review found that the DesiRNA adapter stamped candidates by step fraction of the
+nominal limit while DesiRNA checks its limit only between replica-exchange rounds (nominal 128 s runs
+lasted ~240 s). Every DESIRNA wall-time number above (ew_dev1024_online_v1 at 64 s,
+ew_dev_desirna_filter_v1, ew_dev_frontier_v1 at 256 s) is therefore OPTIMISTIC for DesiRNA by an
+unmeasured factor (up to ~2x time); treat "DesiRNA leads uMFE at 64-256 s" as unverified. The
+SamplingDesign development numbers used its own per-step durations but block-buffered output could
+be lost at the kill, so they may be PESSIMISTIC. Both adapters now use real per-candidate timestamps
+and hard deadlines (commit 74ec5f1; protocol v2 amendment 4); the final benchmark reruns every
+affected unit. Development SAMFEO / energy-screen / TCD numbers are unaffected (in-process timing).
