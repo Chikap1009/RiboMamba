@@ -1090,3 +1090,40 @@ against energy-only and generic critics. Rival bounds and negative design are
 prior art, not our novelty. Details, alternatives and unresolved novelty checks:
 CODEX_TO_CLAUDE_2026-09-27.md. This does not replace a frozen evaluation protocol
 or authorize interpreting incomplete confirmation as a positive result.
+
+## D-022 — The competition-aware residual mechanism is not supported; keep the learned critic as the candidate
+**Date:** 2026-09-27   **Phase:** repair research, residual experiment   **Logbook:** logbook/2026-09-27-session-09.md
+**Status:** accepted (offline); online test in progress
+
+**Context.** docs/experiments/2026-09-27-competition-residual.md specified that ranking
+SAMFEO's sibling mutations by a + c_hat (exact target-energy term plus a learned,
+rival-conditioned competition term) should beat energy screening and the generic
+critic, with pre-registered failure criteria. Amendment 1 replaced r = -Delta ln Z by
+the rival-only c = -Delta ln Z_rest (r -> -a mechanically as P -> 1).
+
+**Decision.** Record the mechanism as unsupported: raw rival physics raises held-out
+best-of-8 regret (+0.34); rival features help scalar models (linear -0.14) but not a
+per-position critic (rival - no-rival -0.013 [-0.052, +0.021]); the exact decomposition
+does not help either. Carry forward the supported finding: learned per-position critics
+cut ranking regret ~70 % versus energy. Test it online before any further modelling.
+
+**Alternatives rejected.** Bigger residual models or more rival channels: no diagnosed
+limitation points there (the per-position models already match each other within
+noise). Calling the generic critic "competition-aware": it is not; the ablation shows it.
+
+**Consequences.** The project's candidate contribution is now a learned proposal
+critic for a strong search host, whose value must be shown online against the energy
+filter, SAMFEO, RNAinverse and DesiRNA at matched wall time, then on a frozen final
+protocol. Prior art on learned surrogates/filters (FMQA, EternaBrain, LEARNA) makes the
+novelty modest; the contribution would rest on measured efficiency, not on the idea.
+
+## D-023 — Reproduce baselines locally in separate environments; DesiRNA adapter
+**Date:** 2026-09-27   **Status:** accepted
+
+DesiRNA (Apache-2.0, pinned bdb4908) runs in its own conda env `desirna` (Python 3.12,
+ViennaRNA 2.7.2, multiprocess), Turner 2004, for a wall-time limit, optionally pinned to
+one core so its replicas time-share; its trajectory is replayed as candidates stamped
+with approximate method times. SamplingDesign (f0283c49) is built with the separate
+`rmtools` toolchain. Montparnasse has no public code found: published numbers only,
+reported separately with their different settings (V1, Turner 1999, 50 threads).
+The project env `ribomamba` is unchanged.
