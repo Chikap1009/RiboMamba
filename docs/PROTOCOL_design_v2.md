@@ -1,56 +1,64 @@
 # Final design-benchmark protocol v2 (repair project)
 
-**Status: DRAFT — not frozen.** Nothing below has been run on a final benchmark.
-The old Phase 3/4 protocol in RESULTS.md is a different study and is not modified.
-When frozen, a line `**Status: FROZEN on YYYY-MM-DD**` replaces the one above and
-the final-run code refuses to start without it. After freezing, only additions
-recorded as dated amendments are allowed; no method, budget or endpoint changes.
+**Status: DRAFT — not frozen.**
+The old Phase 3/4 protocol in RESULTS.md is a different study and is not modified. Once frozen
+(a `**Status: FROZEN on YYYY-MM-DD**` line replaces the one above), `scripts/repair_pilot.py run`
+accepts the final manifests; before that it refuses them (ribomamba/design/final_manifest.py).
+After freezing only dated amendments are allowed; no method, budget, seed or endpoint changes.
 
-## Question
-Does SAMFEO with pre-screened mutations (energy filter, and the learned critic if
-it passed its development criterion) solve more hard RNA design puzzles, or reach
-the same quality with fewer expensive evaluations / less wall time, than
-unmodified SAMFEO and the other baselines, under identical oracle and budgets?
+## Questions (each answered separately; no single headline)
+Q1 (non-neural method): does pre-screening SAMFEO's mutations by target energy (K = 8) improve
+    uMFE success and ensemble quality per unit of method time over unmodified SAMFEO, and where
+    does it sit relative to DesiRNA, RNAinverse and SamplingDesign on the quality-time frontier?
+Q2 (model adaptation): does the target-conditioned masked-diffusion denoiser (TCD) generate
+    designs that solve more puzzles than targeted random designs at matched sample count
+    (conditioning), and do TCD proposals inside SAMFEO change quality at matched time?
+Neither is presented as a diffusion contribution unless Q2's own endpoints show it.
 
 ## Oracle (fixed)
-ViennaRNA 2.7.2, Turner 2004, 37 C, dangles = 2, lonely pairs allowed;
-ribomamba/design/scoring.py (D-017). Success = unique MFE (uMFE); also report
-MFE (any tie) and backtracked MFE.
+ViennaRNA 2.7.2, Turner 2004, 37 C, dangles 2, lonely pairs allowed; ribomamba/design/scoring.py.
+Success = unique MFE (uMFE, primary); MFE-any and backtracked MFE also reported.
+Independent robustness check (never used for any choice): EternaFold on each method's best-P
+design per puzzle and seed (ribomamba/eval/eternafold.py), reported separately.
 
-## Benchmarks (final test; untouched until the freeze)
-1. Eterna100 V2, all 100 puzzles (19-400 nt) — PRIMARY (the version adapted to ViennaRNA 2).
-2. Eterna100 V1, all 100 puzzles — secondary, for comparison with SAMFEO's
-   published 77 MFE / 74 uMFE and Gautam et al.'s 75 / 73 (both ViennaRNA 2).
-3. Rfam-Taneda-27 and RNAsolo-100 (the LM paper's copies) — secondary natural sets.
-Leakage: every development and training puzzle is > 0.2 normalized edit distance
-from all of these (hard_manifest.py, training_pool.py), and no Eterna100 id was
-used. The critic never saw any of them.
+## Benchmarks (built, hashed in manifests/; never used for development)
+- final_eterna100_v2 — all 100 Eterna100 V2 puzzles (19-400 nt). PRIMARY.
+- final_eterna100_v1only — the 19 puzzles whose V1 structure differs from V2. V1 results =
+  V2 results on the 81 identical structures + these 19 (no puzzle designed twice).
+- final_rfam_taneda27 — Rfam-Taneda-27 (natural; possible family overlap with Rfam TRAIN data
+  used by the TCD, disclosed; secondary).
+Leakage: every development, training and TCD training structure is > 0.2 normalized edit distance
+from all of these (hard_manifest.py, training_pool.py, scripts/tcd_data.py).
 
-## Methods (fixed list; settings chosen on development data only)
-- SAMFEO (pinned e78b4b5, defaults)                     [strong baseline]
-- SAMFEO + energy filter, K = <chosen on dev, recorded here before freeze>
-- SAMFEO + learned critic, K = 8 — ONLY if it met the Stage C decision rule on dev
-- RNAinverse restarts (ViennaRNA 2.7.2)                [fast-MFE baseline]
-- SamplingDesign (f0283c49, defaults except a wall-time cap equal to the
-  median SAMFEO wall time per puzzle at the same budget)   [second strong baseline]
-- random_pair_edits                                   [simple control]
+## Methods (fixed; settings chosen on development data only; commit recorded per run)
+1. samfeo — SAMFEO e78b4b5 defaults (baseline).
+2. samfeo_efilter — SAMFEO + target-energy pre-screen, K = 8 (Q1 method).
+3. samfeo_tcdprop_efilter — SAMFEO sites, TCD letters, energy screen K = 8 (Q2).
+4. <samfeo_tcdprop_only — included only if ew_dev_tcdprop_v2 shows it is not dominated> (Q2).
+5. tcd_sample — TCD sampling, 32 steps, batch 32 (Q2).
+6. random_pairs — targeted random designs (Q2 control).
+7. desirna — DesiRNA bdb4908, Turner 2004, 10 replicas pinned to one core.
+8. rnainverse — ViennaRNA RNAinverse restarts (shared start, then targeted init).
+9. samplingdesign — SamplingDesign f0283c49 defaults, 1 thread (disclosed as under-budgeted
+   relative to its published 64-core runs).
 
 ## Budgets
-Per puzzle and seed: nested checkpoints at 256, 1,024 and 5,010 candidate
-evaluations (5,010 = SAMFEO's published setting: 10 initial + 5,000 steps).
-Wall-time checkpoints 1, 4, 16, 64, 256 s of method time. Seeds 0-4.
-Hardware and concurrency disclosed; all compared methods run in the same batch
-of jobs so machine load is comparable.
+Every unit (method x puzzle x seed): method-time limit 128 s on one core
+(--unit-time-limit 128; harness re-scoring excluded for self-scoring methods; wall-clock tools
+inherit the limit; units that span a machine suspend are rerun) and at most 5,010 candidates
+(SAMFEO's published step budget). Seeds 0, 1, 2. GPU shared by the TCD methods; hardware,
+concurrency and all model-time/oracle counts disclosed.
 
 ## Endpoints and statistics
-Primary: number of Eterna100 V2 puzzles solved (uMFE) at 5,010 evaluations,
-(a) by any of the 5 seeds (union) and (b) mean over seeds. Secondary: counts at
-other budgets and wall times; mean best NED; mean best log10 P(target);
-evaluations to first solve. Paired per puzzle (method vs SAMFEO): solved-by-one
-counts and bootstrap 95 % intervals over puzzles (seeds averaged within puzzle).
-Report every error, timeout and early stop; nothing is dropped.
+Primary (V2): puzzles solved (uMFE) by 128 s — (a) by any of the 3 seeds, (b) mean over seeds.
+Secondary: uMFE at 1/4/16/64/128 s method time; best NED; best log10 P; evaluations to first
+solution; V1 and Rfam-Taneda-27 counts; EternaFold agreement of best designs.
+Paired per puzzle (method vs samfeo; method vs samfeo_efilter; tcd_sample vs random_pairs):
+seeds averaged within puzzle, bootstrap 95 % intervals over puzzles; every error, timeout,
+early stop and time-limit outcome reported.
 
 ## Claims allowed
-Only what these numbers show under this oracle. No wet-lab, generalisation or
-"state of the art" wording unless a method beats every re-run baseline AND the
-published numbers under matching settings, with the budgets stated beside it.
+Only what these numbers show under this oracle and budget. Published numbers of other methods
+(SamplingDesign 79/78, DesiRNA 97/100 V2 in 24 h, Montparnasse 100/100 V1 with Turner 1999)
+are quoted separately with their settings, never mixed with ours. No SOTA, wet-lab,
+generalisation or speed claim beyond the measured frontier.
