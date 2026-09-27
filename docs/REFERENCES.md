@@ -154,3 +154,20 @@ Assistant choice reference (not RNA science):
 https://developers.openai.com/api/docs/guides/model-selection opened 2026-09-27.
 Sol Medium is suggested for everyday coding/research and Luna for lighter work.
 This does not establish exact Codex subscription-limit savings or Claude pricing.
+
+## Repair pilot sources and baselines — 2026-09-27 (session 07)
+Checked from primary pages this session; notes are what was read, not a novelty exclusion.
+
+| reference | relevance | verified |
+|---|---|---|
+| Zhou, T., Dai, N., Li, S., Ward, M., Mathews, D.H., Huang, L. (2023). RNA design via structure-aware multifrontier ensemble optimization (SAMFEO). *Bioinformatics* 39(S1):i563. Code https://github.com/shanry/SAMFEO | strong ensemble-objective baseline; structured (coordinated) mutations; pinned main@e78b4b5; NO license file (GitHub API: none) — local use only | 2026-09-27, repository cloned, code read, own test reproduced |
+| Hofacker, I.L. et al. (1994). Fast folding and comparison of RNA secondary structures. *Monatsh. Chem.* 125:167 (RNAinverse) | MFE adaptive walk with hierarchical decomposition; the strongest uMFE-per-second method on our hard dev set | 2026-09-27, ViennaRNA 2.7.2 binary and Python API used; paper not re-read |
+| Zadeh, J.N., Wolfe, B.R., Pierce, N.A. (2011). Nucleic acid sequence design via efficient ensemble defect optimization. *J. Comput. Chem.* 32:439 (NUPACK design) | defect-weighted mutation + hierarchical decomposition: prior art for feedback-directed edits | from memory; to re-read before any comparison |
+| Gautam, M., Dai, N., Zhou, T., Xie, B., Mathews, D., Huang, L. (2026). Designing RNAs with Language Models. arXiv:2602.12470. Code/data https://github.com/KuNyaa/RNA-Design-LM (MIT); HF Milanmg/LLM-RNA-Design-2026 rev 609f573b | Qwen2.5-0.5B, SL on 10M SAMFEO designs + RL on Eterna web puzzles (~113 H100-h); Eterna100 MFE/uMFE 75/73; best-of-10^4 mean P 0.586 vs SAMFEO 0.580. Source of our Eterna web puzzles (YRL_raw, 18,364) and audit copies of Eterna100/v2, Rfam27, RNAsolo-764 | 2026-09-27, arXiv HTML + repo + HF file listing |
+| The Montparnasse Algorithm for RNA Design (2026). arXiv:2606.07562 | GNRPA + structural prior; Eterna100 V1 (Turner 1999): 81 @10 s, 99 @10,240 s, 100 @81,920 s with 50 threads on a 256-core server; DesiRNA 25/96/100 | 2026-09-27, arXiv HTML |
+| Tang, W.Y., Dai, N., Zhou, T., Mathews, D.H., Huang, L. SamplingDesign. https://github.com/weiyutang1010/SamplingDesign (Apache-2.0) | sampling-based continuous optimisation; defaults 2,000 steps x 2,500 LinearPartition-V samples; cloned f0283c49 and built (separate g++ env), not yet run | 2026-09-27, repository README + build |
+| Koodli, R.V. et al. (2019). EternaBrain. *PLoS Comput. Biol.* 15:e1007059; https://github.com/eternagame/EternaBrain (MIT) | learning player moves (repairs) — prior art for learned move policies | 2026-09-27, repository listing |
+| Runge, F. et al. (2019). Learning to Design RNA (LEARNA). *ICLR 2019* | RL design; Rfam-Learn sets | from memory |
+| Factorization Machine with Quadratic-Optimization Annealing for RNA Inverse Folding (2026). arXiv:2602.16643 | surrogate-assisted black-box optimisation to cut expensive evaluations: prior art for filtering/surrogates | 2026-09-27, search result only; to read |
+| Struct2SeQ: RNA inverse folding with Deep Q-Learning (2026). bioRxiv 10.64898/2026.01.16.700031 | learned RL policy for design | 2026-09-27, search result only |
+| RIFT-VAE: grammar-conditioned pretraining and latent-space optimization for RNA inverse folding (2026). bioRxiv 10.64898/2026.08.12.744415 | latent-space optimisation for design | 2026-09-27, search result only |

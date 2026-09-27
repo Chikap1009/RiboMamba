@@ -140,3 +140,11 @@ merely because software runs.
   novelty. The indexed abstract is insufficient for a detailed exclusion.
 - Check targeted remasking, RNA negative design, dependency-aware local search,
   and learned search/repair. The initial review did not settle these overlaps.
+
+## Amendment — 2026-09-27 (user instruction, session 07)
+The user lifted the pilot compute caps ("use as much of both as you want") and
+asked for the strongest achievable results. Local CPU/GPU use is no longer
+capped at 8 CPU-hours / 2 GPU-hours or 4 workers. Unchanged: zero paid compute
+or services, validation/development before a newly frozen protocol, no final
+test scoring before that freeze, honest reporting of budgets and failures.
+Budgets used must still be disclosed with every comparison.

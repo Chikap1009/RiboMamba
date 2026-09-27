@@ -3,9 +3,10 @@
 ## User decision
 The user approved the research pivot and, on 2026-09-27, standing approval to
 make and document decisions overnight. Research quality over teaching gates.
-Limits still apply: validation/development targets only, no final-test scoring,
-no new large training, pilot cap 8 elapsed CPU-hours (<= 4 workers) and
-2 GPU-hours, one GPU job at a time, no push, no paid services.
+Limits: validation/development targets only until a new protocol is frozen,
+no final-test scoring before that, no push, no paid services. The user LIFTED
+the pilot compute caps (2026-09-27 ~11:20 IST): local CPU/GPU use is not capped.
+WSL restarted ~07:30 IST and killed two runs; both were resumed at 11:17 IST.
 
 ## Where things stand (measured, not planned)
 Stage A is BUILT and RUN. Stage B probe is IN PROGRESS (see log for status).
@@ -69,7 +70,7 @@ Use `python -u` for long runs (stdout is block-buffered under nohup).
 Waiting on a run: never `pgrep -f`/`pkill -f` a pattern that also matches the
 waiting shell's own command line.
 
-## Compute ledger (pilot cap: 8 elapsed CPU-h at <= 4 workers, 2 GPU-h)
+## Compute ledger (caps LIFTED by the user on 2026-09-27 ~11:20 IST; keep disclosing usage)
 Counted as elapsed hours x (workers / 4). Through 07:20 IST: CPU ~1.4 h
 (diagnostics 0.1, manifests 0.06, smokes 0.03, dev1024 0.34, mfe_repair 0.02,
 RNAinverse 0.12, Stage B neural 0.62, pool 0.01, build of SamplingDesign ~0).
