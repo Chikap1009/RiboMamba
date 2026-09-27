@@ -118,3 +118,13 @@ def test_desirna_adapter_replays_its_trajectory_with_method_times():
     times = [r["elapsed_s"] for r in ev.rows]
     assert times == sorted(times) and 0 <= times[0] and times[-1] <= 3.0
     assert len({r["sequence"] for r in ev.rows}) == len(ev.rows)
+
+
+@pytest.mark.skipif(not (baselines.SAMPLINGDESIGN_DIR / "bin" / "main").exists(), reason="SamplingDesign not built")
+def test_samplingdesign_adapter_replays_steps_with_cumulative_times():
+    target = Target("toy", "((((((....))))))..((((((....))))))")
+    ev = Evaluator(target, budget=5000)
+    baselines.samplingdesign(target, 0, ev, {"time_limit_s": 6, "sample_size": 200})
+    assert ev.rows and ev.internal_available is False
+    times = [r["elapsed_s"] for r in ev.rows]
+    assert times == sorted(times) and times[-1] <= 6.5

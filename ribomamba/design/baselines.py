@@ -343,9 +343,76 @@ def desirna(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=
         shutil.rmtree(work, ignore_errors=True)
 
 
+SAMPLINGDESIGN_URL = "https://github.com/weiyutang1010/SamplingDesign.git"
+SAMPLINGDESIGN_COMMIT = "f0283c495c1031c52d4d7ecd06975a2894f5865b"
+SAMPLINGDESIGN_DIR = EXTERNAL_DIR / "SamplingDesign"
+# The upstream wrapper's defaults (external/SamplingDesign/main), passed positionally to bin/main.
+SAMPLINGDESIGN_DEFAULTS = {"mode": "ncrna_design", "objective": "prob", "init": "targeted", "eps": 0.75,
+                           "softmax": 1, "adam": 1, "nesterov": 0, "beta_1": 0.9, "beta_2": 0.999, "lr": 0.01,
+                           "lr_decay": 0, "lr_decay_rate": 0.5, "adaptive_lr": 0, "k_ma_lr": 20, "lr_decay_step": 50,
+                           "num_steps": 2000, "early_stop": 1, "k_ma": 50, "beamsize": 250, "sharpturn": 0,
+                           "is_lazy": 0, "sample_size": 2500, "best_k": 1, "importance": 0, "mismatch": 1,
+                           "trimismatch": 1, "verbose": 0, "num_threads": 1, "boxplot": 0}
+SAMPLINGDESIGN_SETTINGS = {"commit": SAMPLINGDESIGN_COMMIT, "time_limit_s": 64, **SAMPLINGDESIGN_DEFAULTS}
+
+
+def samplingdesign(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=None) -> None:
+    """SamplingDesign (Apache-2.0; pinned f0283c49; built with the separate rmtools g++) under a wall limit.
+
+    bin/main is called directly with the upstream wrapper's defaults (so a timeout kill cannot
+    orphan it), num_threads = 1, seed = seed + 1, and killed after time_limit_s if still running
+    (upstream stops earlier on its own convergence rule). Every step prints its elapsed time,
+    the distribution's most probable sequence and the step's best sample; both are replayed as
+    candidates stamped with the CUMULATIVE reported step time (upstream prints per-step durations). Its objective uses LinearPartition
+    (beam 250, Turner 2004) internally; the harness re-scores every candidate with ViennaRNA 2.7.2.
+    Internal calls (sample_size LinearPartition runs per step) are not counted individually.
+    """
+    import re
+    s = {**SAMPLINGDESIGN_SETTINGS, **settings}
+    evaluate.internal_available = False
+    order = ["mode", "objective", "init", "eps", "softmax", "adam", "nesterov", "beta_1", "beta_2", "lr", "lr_decay",
+             "lr_decay_rate", "adaptive_lr", "k_ma_lr", "lr_decay_step", "num_steps", "early_stop", "k_ma", "beamsize",
+             "sharpturn", "is_lazy", "sample_size", "best_k", "importance", "mismatch", "trimismatch"]
+    cmd = [str(SAMPLINGDESIGN_DIR / "bin" / "main")] + [str(s[k]) for k in order] + \
+        [str(seed + 1), str(s["verbose"]), str(s["num_threads"]), str(s["boxplot"])]
+    env = {**__import__("os").environ, "OMP_NUM_THREADS": str(s["num_threads"])}
+    try:
+        proc = subprocess.run(cmd, input=target.structure + "\n", capture_output=True, text=True,
+                              timeout=s["time_limit_s"], env=env)
+        out, status = proc.stdout, f"exit {proc.returncode}"
+    except subprocess.TimeoutExpired as e:
+        out = e.stdout.decode() if isinstance(e.stdout, bytes) else (e.stdout or "")
+        status = "killed at the time limit"
+    if log is not None:
+        log.write(f"cmd: {' '.join(cmd)}\n{status}\n")
+    step_time, best_next, elapsed = None, False, 0.0
+    for line in out.splitlines():
+        m = re.match(r"step: (\d+), .*time: ([0-9.eE+-]+)", line)
+        if m:
+            elapsed += float(m.group(2))          # upstream prints each step's own duration
+            step_time = elapsed
+            continue
+        if step_time is None:
+            continue
+        m = re.match(r"max-probability solution: ([ACGU]+) ", line)
+        if m and m.group(1) not in evaluate.cache:
+            evaluate(m.group(1), method_time_s=step_time)
+            continue
+        if line.startswith("best samples"):
+            best_next = True
+            continue
+        if best_next:
+            best_next = False
+            seq = line.split()[0] if line.split() else ""
+            if re.fullmatch(r"[ACGU]+", seq) and seq not in evaluate.cache:
+                evaluate(seq, method_time_s=step_time)
+
+
 BASELINES = {"samfeo": samfeo, "rnainverse": rnainverse, "samfeo_efilter": samfeo_efilter, "desirna": desirna,
+             "samplingdesign": samplingdesign,
              "samfeo_cfilter": samfeo_cfilter}
 BASELINE_SETTINGS = {"samfeo": SAMFEO_SETTINGS, "rnainverse": RNAINVERSE_SETTINGS, "desirna": DESIRNA_SETTINGS,
+                     "samplingdesign": SAMPLINGDESIGN_SETTINGS,
                      "samfeo_efilter": SAMFEO_EFILTER_SETTINGS, "samfeo_cfilter": SAMFEO_CFILTER_SETTINGS}
 # Competition-residual filters (docs/experiments/2026-09-27-competition-residual.md), frozen models only.
 RESIDUAL_VARIANTS = {"samfeo_rfilter_linear": "checkpoints/residual_v1/linear_rivals.json",
