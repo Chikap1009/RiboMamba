@@ -17,6 +17,12 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# User-approved research pivot; retain the historical queue for reproducibility.
+if [[ -f docs/PHASE4_PAUSED.md ]]; then
+    echo "Phase 4 is intentionally paused. Read docs/HANDOFF.md." >&2
+    exit 2
+fi
+
 BIMAMBA=(--arch bimamba --n-layers 14)
 AR_MAMBA=(--arch ar_mamba --n-layers 14)
 

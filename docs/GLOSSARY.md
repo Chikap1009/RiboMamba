@@ -1330,3 +1330,14 @@ Sections: Biology · Machine learning · Maths · Software.
 - **Analogy:** Pressing the smoke alarm's test button: silence means the alarm is broken, not that there is no fire.
 - **Where it appears:** Session 05: a whole-row flip and a swapped gate/normalisation order were each caught by `tests/test_bimamba.py`.
 - **First explained:** session 05 (positive controls: session 03).
+
+## Research pivot terms — 2026-09-27
+- **Repair trajectory:** a recorded sequence of attempted changes to a candidate,
+  including failures and scores; like a repair log for a circuit. Planned for
+  the new pilot, not yet implemented.
+- **Negative design:** changing a sequence to discourage unwanted competing folds,
+  rather than only stabilizing the desired one. Like suppressing unwanted modes
+  in a system. Proposed use: failure-feedback-guided repair.
+- **Oracle budget:** counted calls to the folding software used to score designs.
+  Like counting instrument measurements; MFE and partition-function calls have
+  different costs and must be logged separately in the planned harness.

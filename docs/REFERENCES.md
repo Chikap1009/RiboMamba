@@ -1,3 +1,5 @@
+> Current direction (2026-09-27): the user approved the repair-research pivot in RESEARCH_PLAN.md. Earlier phase gates and mandatory sweep completion are superseded; the material below remains historical reference. See HANDOFF.md for the next action.
+
 # References — RiboMamba
 
 Every work this project cites, what we use it for, and how the citation was
@@ -121,3 +123,34 @@ fixed by a dated protocol amendment after the Phase 5 concept block.
 | Reward-Guided Discrete Diffusion via Clean-Sample Markov Chain for Molecule and Biological Sequence Design (2026). arXiv:2602.09424 | Metropolis–Hastings over clean samples; masked diffusion; needs only rewards of complete sequences | 2026-09-25, search result → arXiv; authors to add |
 | Self-Rewarding Sequential Monte Carlo for Masked Diffusion Language Models (2026). arXiv:2602.01849 | particle filtering (SMC) for masked diffusion | 2026-09-25, search result → arXiv; authors to add |
 | Commitment Before Realization: When Classifier-Free Guidance Becomes Unnecessary in Masked Diffusion Language Models (2026). arXiv:2608.08082 | a caution about classifier-free guidance in masked diffusion, to read before choosing it | 2026-09-25, title from a search result only; to read |
+
+## Pivot literature review — 2026-09-27
+These are leads and verified content notes, not a completed novelty exclusion.
+The older backbone-combination claim above is no longer the project's main claim.
+
+- Designing RNAs with Language Models (Gautam et al., arXiv:2602.12470v1):
+  primary full text inspected at https://arxiv.org/html/2602.12470v1 .
+  Structure conditioning, constrained generation, supervised training and RL
+  already coexist. Check its evaluation budgets and settings before comparison.
+- SamplingDesign: official implementation inspected at
+  https://github.com/weiyutang1010/SamplingDesign .
+  Dependency-aware distribution optimization is existing work; source/build
+  available. Full default benchmarks can be expensive. Pin a commit and read
+  the paper before reproducing or quoting exact performance.
+- The Montparnasse Algorithm for RNA Design, arXiv:2606.07562v1:
+  primary full text inspected at https://arxiv.org/html/2606.07562v1 .
+  Reports 100/100 Eterna100 V1 solutions with parallel search. This is an author
+  report, not independently reproduced here. Match versions/budgets before claims.
+- Conditional Generation And Inpainting Of Non-coding RNA Sequences With Masked
+  Discrete Diffusion, bioRxiv 10.64898/2026.09.17.752279:
+  https://www.biorxiv.org/content/10.64898/2026.09.17.752279v1 .
+  Indexed abstract only; full-text access failed. Detailed architectural overlap
+  and novelty remain unresolved.
+- Additional required prior-art checks: RNA negative design, dependency-component
+  resampling, learned local search, repair/search distillation and targeted
+  diffusion remasking. Do not call paired moves or iterative repairs novel alone.
+
+Assistant choice reference (not RNA science):
+https://developers.openai.com/api/docs/guides/model-selection opened 2026-09-27.
+Sol Medium is suggested for everyday coding/research and Luna for lighter work.
+This does not establish exact Codex subscription-limit savings or Claude pricing.

@@ -926,3 +926,26 @@ shared too; each direction still convolves x, B and C with its own weights.
   hypothesis we cannot rule out; the two-full-mixers design would test it.
 - Correctness rests on a test that compares the fused kernels with a
   step-by-step loop of the textbook recurrence, each sequence processed alone.
+
+## Research pivot — 2026-09-27 (user approved)
+**Decision:** replace the mandatory three-backbone/teaching-gated roadmap with
+the bounded RNA-repair investigation in RESEARCH_PLAN.md. Preserve the prior
+constitution in docs/archive; current CLAUDE.md and HANDOFF.md govern continuation.
+Use the existing Transformer first. Pause the incomplete Phase 4 queue and keep
+its checkpoints rather than spend further compute on remaining seeds/AR sweeps.
+
+**Reason:** near-identical unconditional validation bounds have not demonstrated
+a compelling RNA-design capability. A compact model improving repair quality
+per computational cost is a more useful hypothesis, though neither gain nor
+novelty is established. The user explicitly prioritised this over concept gates.
+
+**Alternatives:** merely lowering 1.9, adding generic conditioning/RL as a novelty
+claim, completing the full sweep first, and starting a large pretrained model
+were rejected as weak or premature uses of this hardware. A non-neural method
+remains a valid outcome if the learned component adds no value.
+
+**Consequences:** Phase 4 is incomplete, not a completed negative result. Existing
+pre-registration remains historical and unchanged; the new task needs a separate
+final protocol. No SOTA guarantee. Small validation experiments decide whether
+specialized training is justified. Documentation and implementation can proceed
+in Claude Code or Sol Medium; stronger-model review is reserved for milestones.

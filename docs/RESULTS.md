@@ -1025,3 +1025,26 @@ Interpretation: logbook/2026-09-22-session-02.md, entry 22:30.
 
 | Date | Experiment | Metric | Value | Command | Commit | Seed |
 |---|---|---|---|---|---|---|
+
+## Status amendment — 2026-09-27: research pivot, old study interrupted
+This is a scope/status amendment, not a mechanical change to the frozen protocol.
+The user approved stopping the exhaustive architecture comparison and investigating
+folding-guided coordinated repair. The original protocol above is preserved;
+its full comparison has NOT been completed, and planned endpoints must not be
+silently dropped from a purported complete report.
+
+Operational record: verified Phase 4 process group 38913 was sent SIGTERM after
+seed-2 last.pt was saved at step 27,500. Saved files remain in
+checkpoints/bimamba_M_do0.1_seed2. This is an interrupted run, not a 30k-step seed.
+No new repair experiment or final test evaluation was run for the pivot.
+
+Interpretation corrections: matching parameters and nominal training steps/tokens
+does not establish matched wall time or FLOPs. The observed ~1.9 bound is not a
+proved irreducible floor. A lower structure-conditioned loss would measure a
+different task. The historical blanket test-lock statement is too broad: older
+audit/baseline readers could read test data outside newer protocol guards.
+Distinguish construction/auditing from final model testing.
+
+The new development plan is RESEARCH_PLAN.md. It will need a separately dated
+freeze before final tests. Do not mix its repair/design numbers with the old
+unconditional likelihood study. No repair performance numbers exist yet.

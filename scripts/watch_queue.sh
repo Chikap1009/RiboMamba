@@ -16,6 +16,7 @@
 #   find the group id with:  ps -eo pid,pgid,args | grep '[p]hase4_queue'
 PGID=$1
 cd "$(dirname "$0")/.." || exit 1
+if [ -f docs/PHASE4_PAUSED.md ]; then echo "QUEUE INTENTIONALLY PAUSED"; exit 0; fi
 LOG=checkpoints/phase4_queue.log
 DONE_LINE="PHASE 4 QUEUE COMPLETE"
 count_done() { local n; n=$(grep -c "^done:" "$LOG" 2>/dev/null); echo "${n:-0}"; }   # grep -c prints 0 AND fails on no match
@@ -26,6 +27,7 @@ seen_div=$(list 'checkpoints/*mamba*/DIVERGED')
 slow=0
 while true; do
   sleep 300
+  if [ -f docs/PHASE4_PAUSED.md ]; then echo "QUEUE INTENTIONALLY PAUSED"; exit 0; fi
   if grep -q "$DONE_LINE" "$LOG"; then echo "QUEUE COMPLETE $(date '+%F %T')"; tail -5 "$LOG"; exit 0; fi
   if ! ps -eo pgid= | grep -qw "$PGID"; then
     sleep 5

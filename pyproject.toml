@@ -10,7 +10,7 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ribomamba"
 version = "0.1.0"
-description = "Masked discrete diffusion with a bidirectional Mamba backbone for RNA sequence design"
+description = "RNA sequence generation and research into efficient folding-guided design"
 requires-python = ">=3.12"
 
 [tool.setuptools.packages.find]

@@ -1,3 +1,5 @@
+> Current direction (2026-09-27): the user approved the repair-research pivot in RESEARCH_PLAN.md. Earlier phase gates and mandatory sweep completion are superseded; the material below remains historical reference. See HANDOFF.md for the next action.
+
 # RiboMamba — Study Guide
 
 > **Read this the night before the interview.** It is written for a version of
