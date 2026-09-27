@@ -37,17 +37,17 @@ Easy tier (rfam_val smoke): at ceiling; the shared start alone solves most.
 Trace finding: late in search only ~2 % of proposals improve; feedback edits waste
 ~33 % of late proposals on repeats. Defect-weighted site choice = random sites.
 
-## Exact next task (session 09, updated ~19:20 IST)
-Framing (D-026): current method result = NON-NEURAL energy pre-screen for SAMFEO (prior art
-INFO-RNA; ~+10 pp uMFE, replicated, confirmed once). Neural results so far are negative or null
-(unconditional diffusion proposals D-020; learned critics / competition residual D-022, D-024).
-Do NOT present the critic or energy filter as a diffusion contribution.
-Next model question: target-conditioned masked-diffusion denoiser
-(docs/experiments/2026-09-28-target-conditioned-denoiser.md) on development targets, BEFORE
-freezing docs/PROTOCOL_design_v2.md.
-In flight: ew_dev_frontier_v1 (long budgets; resume the same command afterwards to rerun the 6
-units invalidated by a laptop suspend). Final manifests are built (manifests/final_*.json) and
-runs on them are refused until the protocol is frozen.
+## Exact next task (session 09, updated ~21:00 IST)
+Framing (D-026): method result so far = NON-NEURAL energy screen for SAMFEO (prior art INFO-RNA).
+Neural: unconditional diffusion proposals negative (D-020); learned critics / competition residual
+negative online (D-022, D-024); TARGET-CONDITIONED DENOISER (TCD, checkpoints/tcd_v1/tcd.pt)
+works as a design prior (42.7 % vs 15.6 % random, 3.1 % unconditional; D-027) but not yet as a
+method. Records: docs/experiments/2026-09-28-target-conditioned-denoiser.md, RESULTS.md,
+DECISIONS D-022..D-027, docs/logbook/2026-09-27-session-09.md.
+In flight: ew_dev_tcdprop_v1 (TCD as SAMFEO's proposal model, alone and energy-screened).
+Then: decide the frozen method list from ew_dev_frontier_v1 + ew_dev_tcdprop_v1; write and FREEZE
+docs/PROTOCOL_design_v2.md (final manifests exist; runs are refused until frozen); run the final
+benchmark with --unit-time-limit; EternaFold robustness check; report.
 
 ## Execution environment
 WSL Ubuntu-24.04:
