@@ -56,3 +56,20 @@ Endpoints and statistics as in the online batch (paired per target, bootstrap ov
 ## Costs reported
 Structure folding for natural pairs (CPU), leakage audit (CPU), fine-tuning GPU time and peak
 memory, sampling throughput (designs/s on this GPU), and break-even queries versus search.
+
+## Results 1 (measured 2026-09-27): data and fine-tuning
+Data (`python scripts/tcd_data.py --workers 6`, 574 s): 150,000 Rfam train sequences folded;
+149,934 with >= 4 pairs; 4,769 (3.2 %) EXCLUDED as within normalized edit distance 0.2 of a
+development/confirmation/final structure (210 exclusion structures); natural train 142,533,
+natural val 2,632 (~2 % of families). Design pairs: 16,820 capped uMFE designs; train 14,567
+(272 pool puzzles), val 2,253 (40 held-out pool puzzles); none excluded (pool pre-audited).
+Fine-tuning (`python scripts/tcd_train.py --steps 8000`, 1,351 GPU-s, peak 2.85 GB; 15.36 M
+parameters of which 1.19 M adapter): masked-diffusion NELBO on held-out DESIGN puzzles
+0.801 bits/nt at step 1,000 (selected) vs 1.923 for the unconditional base on the same data;
+natural held-out 1.407 vs 1.837. Design-val NELBO rose afterwards (0.84, 0.97, 0.99, 1.01, 1.02 at
+steps 2k-6k) while natural-val kept improving (to 1.36): over-fitting to the 272 training
+puzzles' designs; the step-1,000 checkpoint is used. A lower NELBO is not yet better designs.
+Sanity (one smoke dev target, 111 nt, 64 samples each): best NED 0.031 conditioned vs 0.285
+unconditional; mean GC 0.62 vs 0.44; no uMFE sample from either.
+Development batch ew_dev_tcd_v1 launched (tcd_sample, uncond_sample, random_pairs,
+samfeo_efilter_tcdinit, samfeo_efilter; 1,024 candidates; 32 dev targets x 3 seeds).
