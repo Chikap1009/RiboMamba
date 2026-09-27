@@ -174,3 +174,33 @@ best-of-8 regret by ~70 % relative to target-energy screening. Next: the online 
 of whether that ranking gain survives inference cost and search dynamics (single
 development batch, all methods under the same load), with the rival variant kept as
 the online causal ablation.
+
+## Results 3 (measured 2026-09-27): ONLINE development test, single batch
+Run ew_dev1024_online_v1 (commit d2e1187-era code; 960/960 units valid, 0 errors; 768 complete,
+192 early stops by design: RNAinverse capped at 64 restarts, DesiRNA 64 s wall; 4,977 s on 10
+workers + GPU; load average ~30, so absolute times are inflated but all methods shared the load).
+uMFE @1024 evals: SAMFEO 47.9 %, energy filter 58.3 % (reproduces the earlier 58.3 %), critic_v1
+52.1 %, sibling generic / norival / rival 53.1 / 53.1 / 55.2 %, linear residual 54.2 %,
+energy + epsilon 53.1 %, DesiRNA 65.6 %, RNAinverse 59.4 %. Model time per unit (1024 evals):
+critic_v1 14 s, sibling critics 17-24 s, linear 8 s.
+Paired (a - b, 32 targets): critic_v1 - energy uMFE -0.062 [-0.146, 0.000] (0/3/29), at 4 s wall
+-0.062 [-0.115, -0.010]; NED/log P equal. rival - energy -0.031 [-0.115, +0.031]. rival - norival
+uMFE +0.021 [-0.021, +0.062], NED -0.002 [-0.005, -0.000] (23/9). linear - energy -0.042
+[-0.083, -0.010]. epsilon - energy -0.052 [-0.125, +0.010]. energy - SAMFEO +0.104 [0.031, 0.188].
+DesiRNA - energy +0.073 [0.000, 0.167] at 64 s, but -0.188 at 4 s and -0.125 at 16 s.
+
+## Verdict and diagnosis
+By the pre-registered online criterion (>= 5 pp uMFE or >= 0.3 log10 P over the energy filter at
+matched wall time) every learned variant FAILS; the rival channels give at most a marginal NED
+gain. Better one-step ranking did not become better search. Checked explanations:
+- Objective mismatch (critics rank by Delta ln P, success is uMFE): REFUTED offline — on held-out
+  siblings the critics' best-of-8 pick is uMFE more often than energy's (0.19 vs 0.16; ceiling 0.20).
+- Inference cost alone: insufficient — critics also trail at equal evaluation counts.
+- Search dynamics (supported, small n): critic-filtered searches produce MORE uMFE candidates per
+  evaluation (0.48-0.50 vs 0.44 after eval 512), smaller gaps to the MFE and more distinct
+  solutions, but solve FEWER distinct targets; energy-filtered designs are far more stabilised
+  (E_target/nt -0.33 vs -0.28). Consistent with hard targets needing accumulated target
+  stabilisation that one-step probability-greedy selection does not supply. Only 3 targets differ,
+  so this is an interpretation, not a demonstrated mechanism.
+Next experiment (D-024): is energy pre-screening a host-agnostic accelerator? Apply it to
+DesiRNA (the strongest uMFE host here) under matched wall time.

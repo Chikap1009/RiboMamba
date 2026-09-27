@@ -1127,3 +1127,23 @@ with approximate method times. SamplingDesign (f0283c49) is built with the separ
 `rmtools` toolchain. Montparnasse has no public code found: published numbers only,
 reported separately with their different settings (V1, Turner 1999, 50 threads).
 The project env `ribomamba` is unchanged.
+
+## D-024 — Learned filters fail online; test energy pre-screening as a host-agnostic accelerator
+**Date:** 2026-09-27   **Status:** accepted   **Logbook:** logbook/2026-09-27-session-09.md
+
+**Context.** Online (ew_dev1024_online_v1) no learned filter (critic_v1, sibling critics with or
+without rivals, linear residual) beat the energy filter at matched wall time; critic_v1 was
+-6 pp uMFE (at 4 s significantly). The energy filter replicated its +10 pp over SAMFEO a third
+time. DesiRNA led uMFE at 64 s but trailed at 4-16 s.
+
+**Decision.** Stop the learned-critic line for now (negative result recorded, no architecture
+sweep). Next test whether target-energy pre-screening of proposals also accelerates a very
+different search host, DesiRNA (replica-exchange MC), wrapping its mutation step without
+editing its source; compare DesiRNA vs DesiRNA + filter on the 32 development targets at
+matched wall time, 3 seeds. A long-horizon value critic (predicting future solvability rather
+than one-step Delta ln P) is the principled neural follow-up, deferred until the filter's
+generality is known.
+
+**Consequences.** The candidate contribution is an empirical one — a cheap, general proposal
+screen with measured quality/time gains — not a new learned model; novelty is modest and must
+be checked against best-of-K / multiple-try proposal schemes.

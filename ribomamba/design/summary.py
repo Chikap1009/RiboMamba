@@ -254,3 +254,33 @@ def wall_table(run_dir: Path, walls=WALL_BUDGETS_S) -> pl.DataFrame:
         pl.col("success_umfe").mean().alias("success_umfe"), pl.col("best_ned").mean().alias("best_ned"),
         pl.col("truncated").mean().alias("truncated_share"), pl.col("evals").mean().alias("mean_evals"),
         pl.len().alias("targets")).sort(["wall_s", "method"])
+
+
+def wall_unit_table(run_dir: Path, walls=WALL_BUDGETS_S) -> pl.DataFrame:
+    """Per unit and wall budget: success and best NED by that method time (no aggregation)."""
+    _, statuses, traces = load_run(run_dir)
+    rows = []
+    for status in statuses:
+        if status["status"] not in TERMINAL:
+            continue
+        unit = traces.filter((pl.col("method") == status["method"]) & (pl.col("target_id") == status["target_id"])
+                             & (pl.col("seed") == status["seed"]))
+        rows.extend(wall_checkpoints(unit, status, walls))
+    return pl.DataFrame(rows)
+
+
+def paired_wall(units: pl.DataFrame, a: str, b: str, wall_s: float, metric: str = "success_umfe",
+                seed: int = 0) -> dict | None:
+    """Per-target difference a - b at one method-time budget (seeds averaged within target)."""
+    def per_target(m):
+        return (units.filter((pl.col("method") == m) & (pl.col("wall_s") == wall_s))
+                .group_by("target_id").agg(pl.col(metric).cast(pl.Float64).mean()))
+    j = per_target(a).join(per_target(b), on="target_id", suffix="_b").drop_nans()
+    if j.height == 0:
+        return None
+    diff = (j[metric] - j[f"{metric}_b"]).to_numpy()
+    est, low, high = bootstrap_ci(diff, seed=seed)
+    lower = metric in LOWER_IS_BETTER
+    return {"a": a, "b": b, "metric": metric, "wall_s": wall_s, "mean_diff": est, "low": low, "high": high,
+            "a_better": int(((diff < 0) if lower else (diff > 0)).sum()),
+            "b_better": int(((diff > 0) if lower else (diff < 0)).sum()), "ties": int((diff == 0).sum())}
