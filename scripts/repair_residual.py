@@ -104,7 +104,7 @@ def cmd_collect(args) -> None:
 
 def load_all() -> pl.DataFrame:
     from ribomamba.design.residual_models import add_features
-    files = sorted(OUT.glob("*.parquet"))
+    files = sorted(OUT.glob("eternaweb_*.parquet"))           # sibling files only (not score tables)
     df = pl.concat([pl.read_parquet(f) for f in files], how="vertical")
     return add_features(df)
 
