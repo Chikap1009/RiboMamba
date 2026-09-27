@@ -1,6 +1,6 @@
 # Final design-benchmark protocol v2 (repair project)
 
-**Status: DRAFT — not frozen.**
+**Status: FROZEN on 2026-09-27**
 The old Phase 3/4 protocol in RESULTS.md is a different study and is not modified. Once frozen
 (a `**Status: FROZEN on YYYY-MM-DD**` line replaces the one above), `scripts/repair_pilot.py run`
 accepts the final manifests; before that it refuses them (ribomamba/design/final_manifest.py).
@@ -34,7 +34,7 @@ from all of these (hard_manifest.py, training_pool.py, scripts/tcd_data.py).
 1. samfeo — SAMFEO e78b4b5 defaults (baseline).
 2. samfeo_efilter — SAMFEO + target-energy pre-screen, K = 8 (Q1 method).
 3. samfeo_tcdprop_efilter — SAMFEO sites, TCD letters, energy screen K = 8 (Q2).
-4. <samfeo_tcdprop_only — included only if ew_dev_tcdprop_v2 shows it is not dominated> (Q2).
+   (samfeo_tcdprop_only was evaluated on development and is dominated by method 3: D-028.)
 5. tcd_sample — TCD sampling, 32 steps, batch 32 (Q2).
 6. random_pairs — targeted random designs (Q2 control).
 7. desirna — DesiRNA bdb4908, Turner 2004, 10 replicas pinned to one core.
@@ -62,3 +62,13 @@ Only what these numbers show under this oracle and budget. Published numbers of 
 (SamplingDesign 79/78, DesiRNA 97/100 V2 in 24 h, Montparnasse 100/100 V1 with Turner 1999)
 are quoted separately with their settings, never mixed with ours. No SOTA, wet-lab,
 generalisation or speed claim beyond the measured frontier.
+
+## Freeze record
+Frozen 2026-09-27 (~21:45 IST) after the development runs ew_dev_frontier_v1, ew_dev_tcd_v1,
+ew_dev_tcdprop_v1 and ew_dev_tcdprop_v2 (decision D-028). Final manifests and SHA-256 (content):
+final_eterna100_v2 33c65b95..., final_eterna100_v1only 2ef59009..., final_rfam_taneda27 a8016910...
+Commands (one runner invocation per manifest, all methods in the same batch):
+  python scripts/repair_pilot.py run --run final_v2_<set> --manifest <final manifest> --subset all
+    --budget 5010 --seeds 0 1 2 --unit-time-limit 128 --workers 10 --gpu
+    --methods samfeo samfeo_efilter samfeo_tcdprop_efilter tcd_sample random_pairs desirna
+              rnainverse samplingdesign

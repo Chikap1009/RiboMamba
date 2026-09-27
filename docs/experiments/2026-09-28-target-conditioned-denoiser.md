@@ -115,3 +115,14 @@ Paired @1024: TCD+energy - SAMFEO+energy uMFE -0.042 [-0.094, 0.000] (0/3/29), N
 Reading: conditioned-model proposals give the best ensemble quality measured so far (NED,
 P) but do not beat the energy screen on uMFE or at matched wall time. The clean "TCD
 proposals alone vs SAMFEO" contrast is rerun as ew_dev_tcdprop_v2 (samfeo_tcdprop_only).
+
+## Results 4 (measured 2026-09-27): clean "TCD proposals alone" — run ew_dev_tcdprop_v2
+192/192 units valid; effective settings logged per unit (no filter). Same batch as SAMFEO.
+@1024 evaluations: uMFE 47.9 vs 47.9 % (paired 0.000 [-0.104, +0.104], 3/3/26); best NED
+0.0523 vs 0.0685 (-0.016 [-0.026, -0.008], 29/3); best log10 P -0.86 vs -1.20 (+0.337 [0.105,
+0.604], 23/9). Cost: 82.5 s model time per unit (one TCD forward pass per SAMFEO step), wall
+117 s vs 40 s; at 16 s wall uMFE -0.073 [-0.135, -0.010].
+Reading: with identical mutation SITES, the conditioned denoiser's LETTERS causally improve
+ensemble quality per evaluation (NED, P) but not uMFE success, at ~3x wall time. Dominated by
+TCD + energy screen (NED 0.0495, log10 P -0.78, uMFE 54 %, 38 s model time), which is kept for the
+final benchmark; "proposals alone" is not (D-028).

@@ -1203,3 +1203,15 @@ chooses the letters), with and without the energy screen, at matched wall time.
 
 **Alternatives rejected.** Tuning sampling temperature/steps (no diagnosis points there);
 presenting TCD sampling as competitive (it is not).
+
+## D-028 — Freeze protocol v2 with the method list the development evidence supports
+**Date:** 2026-09-27   **Status:** accepted
+
+Development results (32 hard targets x 3 seeds): SAMFEO + energy screen is the best non-neural
+variant; TCD sampling passes the conditioning criterion; TCD proposals improve ensemble quality
+per evaluation causally but not uMFE, and cost ~3x wall time alone (~2x with the screen).
+Final list: samfeo, samfeo_efilter, samfeo_tcdprop_efilter, tcd_sample, random_pairs, desirna,
+rnainverse, samplingdesign. Excluded: learned critics and the residual variants (negative online),
+samfeo_tcdprop_only (dominated by the screened variant), uncond_sample (3 % on development, no
+question left for it), DesiRNA + energy (worse uMFE at longer budgets). Budget: 128 s of method
+time on one core per unit, <= 5,010 candidates, seeds 0-2 (docs/PROTOCOL_design_v2.md).
