@@ -10,8 +10,11 @@ seeds and the mean over seeds — per set; uMFE at 1/4/16/64/128 s; best NED; be
 evaluations to first solution; paired per-puzzle comparisons (method vs samfeo, method vs
 samfeo_efilter, tcd_sample vs random_pairs) with bootstrap 95 % intervals over puzzles.
 V1 = V2 results on the 81 identical structures + final_eterna100_v1only (19 puzzles).
-Every error / time-limit / early-stop outcome is counted. Writes data/repair_pilot/final_v2_report.json
-and prints a markdown summary.
+Every error / time-limit / early-stop outcome is counted. Zero-candidate time_limit units (the method's first
+design came after 128 s) are legitimate unsolved outcomes and are listed per method; units that ended in
+`error` are implementation failures until diagnosed, so FINAL refuses while any remain unless
+--accept-errors is given (they then count as unsolved and are listed). Writes
+data/repair_pilot/final_v2_report.json and prints a markdown summary.
 """
 
 import argparse
@@ -42,7 +45,7 @@ def run_dir(s: str):
 def audit(s: str) -> dict:
     d = run_dir(s)
     cfg = json.loads((d / "run_config.json").read_text())
-    reasons, statuses = {}, {}
+    reasons, statuses, zero, errors = {}, {}, {}, []
     for m in cfg["methods"]:
         for t in cfg["target_ids"]:
             for seed in cfg["seeds"]:
@@ -51,9 +54,16 @@ def audit(s: str) -> dict:
                 reasons[why] = reasons.get(why, 0) + 1
                 p = runner.unit_paths(d, key)[1]
                 if p.exists():
-                    st = json.loads(p.read_text())["status"]
+                    j = json.loads(p.read_text())
+                    st = j["status"]
                     statuses[f"{m}:{st}"] = statuses.get(f"{m}:{st}", 0) + 1
+                    if st == "error":
+                        last = [x for x in str(j.get("reason", "")).splitlines() if x.strip()]
+                        errors.append({"unit": key, "reason": last[-1][:200] if last else ""})
+                    elif j.get("n_rows") == 0:
+                        zero[f"{m}:{st}"] = zero.get(f"{m}:{st}", 0) + 1
     return {"config_hash": cfg["config_hash"], "validation": reasons, "statuses": statuses,
+            "zero_candidate_units": zero, "error_units": errors,
             "methods": sorted(cfg["methods"]), "n_targets": len(cfg["target_ids"])}
 
 
@@ -121,6 +131,8 @@ def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--eternafold", action="store_true")
     p.add_argument("--interim", action="store_true", help="allow an incomplete benchmark; output labelled INTERIM")
+    p.add_argument("--accept-errors", action="store_true",
+                   help="after diagnosis, count remaining error units as unsolved (they are listed in the report)")
     args = p.parse_args()
     report, frames = {"audit": {}, "sets": {}, "status": "INTERIM (incomplete benchmark)" if args.interim else "FINAL"}, {}
     problems = []
@@ -132,6 +144,13 @@ def main() -> None:
         bad = {k: v for k, v in report["audit"][s]["validation"].items() if k != "valid"}
         if bad:
             problems.append(f"{s}: units not valid {bad}")
+        errs = report["audit"][s]["error_units"]
+        if errs and not args.accept_errors:
+            problems.append(f"{s}: {len(errs)} units ended in error (diagnose; rerun implementation failures, or "
+                            f"--accept-errors to count them as unsolved), e.g. {errs[0]}")
+        zero_bad = [k for k in report["audit"][s]["zero_candidate_units"] if not k.endswith(":time_limit")]
+        if zero_bad:
+            problems.append(f"{s}: zero-candidate units that did not reach the time limit: {zero_bad}")
     if not RETRY_DONE.exists():
         problems.append("the corrective retry pass (data/repair_pilot/run_final_v2_retry.sh) has not completed")
     report["coverage_problems"] = problems
