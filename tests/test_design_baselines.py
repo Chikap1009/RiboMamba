@@ -128,3 +128,22 @@ def test_samplingdesign_adapter_replays_steps_with_cumulative_times():
     assert ev.rows and ev.internal_available is False
     times = [r["elapsed_s"] for r in ev.rows]
     assert times == sorted(times) and times[-1] <= 6.5
+
+
+def test_effective_samfeo_settings_match_the_registered_intent():
+    """Guards against a wrapper's defaults silently changing a variant (the samfeo_tcdprop slip)."""
+    effective = {}
+
+    def capture(target, seed, evaluate, settings, log=None):
+        effective[settings.get("_name")] = {**baselines.SAMFEO_SETTINGS, **settings}
+    orig = baselines.samfeo
+    baselines.samfeo = capture
+    try:
+        for name in ("samfeo_tcdprop_only", "samfeo_efilter", "samfeo_tcdprop_efilter"):
+            fn, st = baselines.BASELINES[name], dict(baselines.BASELINE_SETTINGS[name], _name=name)
+            (capture if fn is orig else fn)(None, 0, None, st)
+    finally:
+        baselines.samfeo = orig
+    assert "filter" not in effective["samfeo_tcdprop_only"] and effective["samfeo_tcdprop_only"]["proposal_model"]
+    assert effective["samfeo_efilter"]["filter"] == "energy"
+    assert effective["samfeo_tcdprop_efilter"]["filter"] == "energy" and effective["samfeo_tcdprop_efilter"]["proposal_model"]

@@ -158,6 +158,8 @@ def samfeo(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=N
     """Run SAMFEO until the Evaluator's budget is spent (BudgetExhausted) or it stops itself."""
     module, proxy = load_samfeo()
     s = {**SAMFEO_SETTINGS, **settings}
+    if log is not None:                               # the settings that actually run, not only the registered ones
+        log.write("effective settings: " + repr(sorted(s.items())) + "\n")
     if s["commit"] != SAMFEO_COMMIT:
         raise ValueError(f"settings name SAMFEO commit {s['commit']}, loaded {SAMFEO_COMMIT}")
     proxy.counters = evaluate.internal
@@ -477,7 +479,11 @@ BASELINES["rnainverse_r64"] = rnainverse
 BASELINE_SETTINGS["rnainverse_r64"] = {**RNAINVERSE_SETTINGS, "max_restarts": 64}
 BASELINES["samfeo_efilter_tcdinit"] = samfeo_efilter
 BASELINE_SETTINGS["samfeo_efilter_tcdinit"] = {**SAMFEO_EFILTER_SETTINGS, "init_model": "checkpoints/tcd_v1/tcd.pt"}
-BASELINES["samfeo_tcdprop"] = samfeo_efilter
+# Registered through samfeo (NOT samfeo_efilter, whose defaults would silently add the energy screen:
+# the bug that made ew_dev_tcdprop_v1's "samfeo_tcdprop" arm identical to its energy-screened arm).
+BASELINES["samfeo_tcdprop_only"] = samfeo
+BASELINE_SETTINGS["samfeo_tcdprop_only"] = {**SAMFEO_SETTINGS, "proposal_model": "checkpoints/tcd_v1/tcd.pt"}
+BASELINES["samfeo_tcdprop"] = samfeo_efilter             # kept as run (it WAS energy-screened); see above
 BASELINE_SETTINGS["samfeo_tcdprop"] = {**SAMFEO_SETTINGS, "proposal_model": "checkpoints/tcd_v1/tcd.pt"}
 BASELINES["samfeo_tcdprop_efilter"] = samfeo_efilter
 BASELINE_SETTINGS["samfeo_tcdprop_efilter"] = {**SAMFEO_EFILTER_SETTINGS, "proposal_model": "checkpoints/tcd_v1/tcd.pt"}
