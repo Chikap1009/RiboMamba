@@ -1,4 +1,4 @@
-# Current handoff — 2026-09-27 (session 07, overnight)
+# Current handoff — 2026-09-27 (sessions 07-09)
 
 ## User decision
 The user approved the research pivot and, on 2026-09-27, standing approval to
@@ -37,18 +37,23 @@ Easy tier (rfam_val smoke): at ceiling; the shared start alone solves most.
 Trace finding: late in search only ~2 % of proposals improve; feedback edits waste
 ~33 % of late proposals on repeats. Defect-weighted site choice = random sites.
 
-## Exact next task
-Done since the last update: the energy filter's CONFIRMATION look replicated
-(+9.4 pp uMFE [1.0, 19.8], better NED on 29/32, RESULTS.md). Critic training
-data built (273,000 transitions). Critic training launched ~12:07 IST:
-`python scripts/repair_critic.py train --data trainpool_samfeo_v1 --out
-checkpoints/critic_v1` (log data/repair_pilot/critic_v1_train.log).
-Next: evaluate the frozen critic on dev with `python scripts/repair_pilot.py run
---run ew_dev1024_cfilter_v1 --manifest eternaweb_dev_v1 --subset development
---budget 1024 --seeds 0 1 2 --methods samfeo_cfilter --workers 4 --gpu`, then
-compare with ew_dev1024_efilter_v1 (decision rule in the Stage C record).
-After that: scale-up and a newly frozen final protocol (Eterna100 V1/V2,
-Rfam-Taneda, RNAsolo) with all baselines re-run under matched settings.
+## Exact next task (session 09, updated ~12:55 IST)
+Single implementing agent: Claude Code. Active experiment:
+docs/experiments/2026-09-27-competition-residual.md (spec + Amendment 1 + Results 1).
+Session log: docs/logbook/2026-09-27-session-09.md.
+Done and verified: confirmation look (energy filter K=8 only) and training-pool runs are
+complete (all units valid); critic_v1 trained; 5,600 sibling groups collected
+(data/repair_pilot/residual_siblings_v1/); diagnosis + scalar-model offline comparison.
+In flight:
+1. Sibling critics, sequential GPU jobs: `for v in generic norival rival; do python
+   scripts/repair_residual.py train-critic --variant $v --epochs 10; done`
+   (log data/repair_pilot/sibling_critics_v1.log; checkpoints/residual_v1/).
+2. ew_dev1024_kablation_v1 (energy filter K = 4/16/32/64, dev; resumable).
+Next: `python scripts/repair_residual.py compare --pairs sib_rival:sib_norival
+sib_norival:sib_generic sib_rival:critic_v1 sib_rival:energy`; then choose frozen
+variants by the spec's selection rule and run them ONLINE on development targets
+(repair_pilot.py run ... --methods samfeo_efilter samfeo_cfilter <frozen variants>
+--gpu), with all costs counted. Do not use confirmation results to tune.
 
 ## Execution environment
 WSL Ubuntu-24.04:
