@@ -198,7 +198,7 @@ def log_confirmation_look(run_name: str, subset: str, label: str, config: dict, 
                             "git_commit": git_commit()}) + "\n")
 
 
-def run(run_dir: Path, config: dict, targets: list[dict], workers: int = 4, max_hours: float = 8.0,
+def run(run_dir: Path, config: dict, targets: list[dict], workers: int = 4, max_hours: float | None = None,
         retry_errors: bool = False, progress=print) -> dict:
     """Run every unfinished unit of the configuration. Returns counts by final status."""
     run_dir = Path(run_dir)
@@ -216,7 +216,7 @@ def run(run_dir: Path, config: dict, targets: list[dict], workers: int = 4, max_
         raise ValueError("targets do not match the configuration's target_ids")
     jobs, skipped = [], 0
     start = time.time()
-    deadline = start + max_hours * 3600
+    deadline = float("inf") if max_hours is None else start + max_hours * 3600
     commit = git_commit()
     for method in config["methods"]:
         for target_id in config["target_ids"]:

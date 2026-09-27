@@ -69,12 +69,12 @@ Resource settings for the first pilot:
 - Count MFE and partition-function calls separately, including proposal/selection
   feedback and internal baseline calls. A candidate evaluation is NOT inherently
   equal compute across methods. Report CPU/GPU wall time and hardware too.
-- Start with the 8-target, 64-evaluation smoke run. Estimate full runtime before
-  expansion. Initial development cap: 2 GPU-hours and 8 elapsed CPU-hours on this
-  laptop, at most 4 CPU workers, one GPU job; stop cleanly with partial artifacts
-  at the cap. No new neural training within this stage.
-- If integration or measurement cannot meet the cap, document the blocker and
-  choose a smaller diagnostic run; do not silently drop the strong baseline.
+- Start with a smoke run and estimate runtime before expansion. Local CPU/GPU
+  use has no user-imposed hour or worker cap (reaffirmed 2026-09-27).
+  Choose concurrency to fit available memory; retain one GPU job at a time.
+  Candidate budgets are experimental comparison settings, not total compute limits.
+  Explicit per-run timeouts remain optional operational settings; disclose them.
+  No new neural training within Stage B; specialized training belongs in Stage C.
 
 ## Decision after the pilot
 Compare per-target paired outcomes and show the distribution, not just one mean.

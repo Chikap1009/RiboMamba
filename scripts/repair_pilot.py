@@ -30,7 +30,7 @@ from ribomamba.design.baselines import samfeo_checkout_problem    # noqa: E402
 from ribomamba.design import hard_manifest as hm                  # noqa: E402
 from ribomamba.paths import MANIFESTS_DIR, PILOT_DIR              # noqa: E402
 
-MAX_WORKERS = 4
+DEFAULT_WORKERS = 4
 DEFAULT_METHODS = ["random_pairs", "random_pair_edits", "feedback_pair_edits", "samfeo"]
 
 
@@ -41,7 +41,7 @@ def manifest_path(name: str):
 def cmd_manifest(args) -> None:
     if args.which == "eternaweb":
         hm.check_source()
-        manifest = hm.build(workers=min(args.workers, MAX_WORKERS))
+        manifest = hm.build(workers=args.workers)
         outcome = mf.write_manifest(manifest, hm.PATH)
         print(json.dumps({"manifest": str(hm.PATH), "outcome": outcome, "content_sha256": manifest["content_sha256"],
                           "funnel": manifest["funnel"]}, indent=1))
@@ -59,8 +59,8 @@ def cmd_manifest(args) -> None:
 
 
 def cmd_run(args) -> None:
-    if args.workers > MAX_WORKERS:
-        raise SystemExit(f"at most {MAX_WORKERS} CPU workers (RESEARCH_PLAN.md pilot limit)")
+    if args.workers < 1:
+        raise SystemExit("--workers must be positive")
     if "samfeo" in args.methods and (problem := samfeo_checkout_problem()):
         raise SystemExit(problem)
     manifest = mf.load_manifest(manifest_path(args.manifest))
@@ -93,7 +93,7 @@ def cmd_summarize(args) -> None:
     per_eval = summary.per_eval_seconds(traces, statuses)
     lengths_all = [t["length"] for t in manifest["targets"]]
     estimates = {f"{len(lengths_all)} targets x {len(config['seeds'])} seeds x {b} evals": summary.runtime_estimate(
-        per_eval, lengths_all, len(config["seeds"]), b, MAX_WORKERS) for b in summary.BUDGETS}
+        per_eval, lengths_all, len(config["seeds"]), b, DEFAULT_WORKERS) for b in summary.BUDGETS}
     status_counts = {}
     for s in statuses:
         status_counts[f"{s['method']}:{s['status']}"] = status_counts.get(f"{s['method']}:{s['status']}", 0) + 1
@@ -132,7 +132,7 @@ def main() -> None:
     sub = p.add_subparsers(dest="command", required=True)
     m = sub.add_parser("manifest")
     m.add_argument("--which", choices=["rfam", "eternaweb"], default="rfam")
-    m.add_argument("--workers", type=int, default=MAX_WORKERS)
+    m.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
     r = sub.add_parser("run")
     r.add_argument("--run", required=True, help="run directory name under data/repair_pilot/")
     r.add_argument("--manifest", default=hm.NAME, choices=[mf.MANIFEST_NAME, hm.NAME, "eternaweb_trainpool_v1"])
@@ -140,8 +140,9 @@ def main() -> None:
     r.add_argument("--budget", type=int, default=64)
     r.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
     r.add_argument("--methods", nargs="+", default=DEFAULT_METHODS)
-    r.add_argument("--workers", type=int, default=MAX_WORKERS)
-    r.add_argument("--max-hours", type=float, default=8.0)
+    r.add_argument("--workers", type=int, default=DEFAULT_WORKERS)
+    r.add_argument("--max-hours", type=float, default=None,
+                   help="optional run wall-time limit; omitted means no time cap")
     r.add_argument("--retry-errors", action="store_true")
     r.add_argument("--gpu", action="store_true", help="let neural proposal methods use the GPU")
     r.add_argument("--confirmation-look", default="", help="declared candidate revision (required for confirmation)")

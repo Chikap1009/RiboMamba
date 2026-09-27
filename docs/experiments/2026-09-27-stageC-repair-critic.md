@@ -38,9 +38,11 @@ search and (ii) a non-neural filter (best of K by target-structure energy).
 - Selection: held-out puzzles only (Spearman within parent groups and
   top-1-of-K improvement precision versus the energy filter). Development
   targets are used only to evaluate the frozen critic online.
-- Budget: data generation <= 1 CPU-hour elapsed (4 workers); training <= 30 GPU
-  minutes; online evaluation on 32 dev targets x 3 seeds x 1024 evals
-  <= 1 CPU-hour. Memory: < 1 GB GPU at batch 256.
+- Resources: no fixed CPU/GPU-hour cap; the user lifted the original pilot
+  limits. Report actual data-generation, training and evaluation costs. Online
+  evaluation remains 32 dev targets x 3 seeds x 1024 evals for comparability.
+  Measure peak GPU memory before choosing batch size; the earlier <1 GB at
+  batch 256 statement was an estimate, not a verified memory benchmark.
 - Ablations: K = 8 random pick (= SAMFEO), energy filter, critic without the
   defect input, critic without Delta E input.
 - Decision rule (RESEARCH_PLAN continuation criterion): critic must beat BOTH
