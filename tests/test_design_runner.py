@@ -122,3 +122,17 @@ def test_evaluator_rows_match_the_trace_schema():
     extra = set(ev.rows[0]) - set(runner.SCHEMA)
     missing = set(runner.SCHEMA) - set(ev.rows[0]) - {"method", "target_id", "seed"}
     assert not extra and not missing
+
+
+def test_wall_limited_units_that_slept_through_are_rerun(tmp_path):
+    cfg = config(budget=12, methods=["random_pairs"], seeds=[0])
+    runner.run(tmp_path, cfg, TARGETS, workers=1, progress=quiet)
+    key = runner.unit_key("random_pairs", "toy:a", 0)
+    path = runner.unit_paths(tmp_path, key)[1]
+    status = json.loads(path.read_text())
+    status["finished_utc"] = "2099-01-01T00:00:00+00:00"            # a huge clock gap
+    path.write_text(json.dumps(status))
+    assert runner.validate_unit(tmp_path, key, cfg["config_hash"], 12) is None     # evaluation-limited: fine
+    status["method"] = "desirna_t256"
+    path.write_text(json.dumps(status))
+    assert "clock gap" in runner.validate_unit(tmp_path, key, cfg["config_hash"], 12)

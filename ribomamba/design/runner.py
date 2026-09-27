@@ -41,6 +41,12 @@ TRACE_SCHEMA_VERSION = 2          # 2: model-call columns (Stage B)
 METHODS = {**CONTROLS, **BASELINES, **NEURAL, **MFE_METHODS}
 METHOD_SETTINGS = {**CONTROL_SETTINGS, **BASELINE_SETTINGS, **NEURAL_METHOD_SETTINGS, "mfe_repair": MFE_REPAIR_SETTINGS}
 TERMINAL = ("complete", "early_stop", "error")
+CLOCK_GAP_S = 30.0
+
+
+def wall_limited(method: str) -> bool:
+    """External methods whose own time limit or step times use the wall clock."""
+    return method.startswith("desirna") or method.startswith("samplingdesign")
 ORACLE = {"package": "ViennaRNA", "version": "2.7.2", "parameters": "Turner 2004", "temperature_c": TEMPERATURE_C,
           "dangles": DANGLES, "lonely_pairs": True}
 BUDGET_UNIT = ("one candidate evaluation = one proposal scored, including the initial candidate and cache hits; "
@@ -131,6 +137,16 @@ def validate_unit(run_dir: Path, key: str, config_hash: str, budget: int, retry_
         return f"status {status.get('status')}"
     if status["status"] == "error" and retry_errors:
         return "retrying error"
+    if wall_limited(status.get("method", "")):
+        # DesiRNA (time.time) and SamplingDesign (gettimeofday) budget by WALL CLOCK; if the machine
+        # slept during the unit, their budget was spent asleep and their step times jumped.
+        try:
+            clock = (dt.datetime.fromisoformat(status["finished_utc"])
+                     - dt.datetime.fromisoformat(status["started_utc"])).total_seconds()
+        except (KeyError, ValueError):
+            clock = 0.0
+        if clock - status.get("wall_s", clock) > CLOCK_GAP_S:
+            return "clock gap during a wall-limited unit (machine suspended?)"
     if not trace_path.exists() or hashlib.sha256(trace_path.read_bytes()).hexdigest() != status.get("sha256"):
         return "trace missing or hash differs"
     trace = pl.read_parquet(trace_path)
