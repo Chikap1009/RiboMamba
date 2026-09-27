@@ -183,6 +183,9 @@ def samfeo(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=N
             return child
         return wrapped
 
+    eps = float(s.get("epsilon", 0.0))
+    eps_rng = rng_for("filter_epsilon", target.id, seed)
+
     def filtered_mutation(mutate, scorer, k):
         """Draw k children with SAMFEO's own mutation; keep the one the scorer ranks best (lowest).
 
@@ -198,6 +201,10 @@ def samfeo(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=N
             if not children:
                 parents[child] = sequence
                 return child
+            if eps > 0 and eps_rng.random() < eps:            # exploration: a random sibling, unscored
+                best = children[int(eps_rng.integers(len(children)))]
+                parents[best] = sequence
+                return best
             scores = scorer(target, sequence, children, defect_list, evaluate)
             best = children[int(np.argmin(scores))]
             parents[best] = sequence
@@ -236,7 +243,14 @@ _CRITICS: dict = {}
 
 
 def make_filter(settings: dict):
-    """The scorer named by settings["filter"]; a learned critic is loaded once per process."""
+    """The scorer named by settings["filter"]; learned models are loaded once per process."""
+    if settings["filter"] == "residual":
+        from ribomamba.design.residual_filter import ResidualScorer
+        from ribomamba.paths import REPO_ROOT
+        path = str(REPO_ROOT / settings["residual_model"])
+        if path not in _CRITICS:
+            _CRITICS[path] = ResidualScorer(path)
+        return _CRITICS[path]
     if settings["filter"] == "critic":
         from ribomamba.design.critic import CriticScorer
         from ribomamba.paths import REPO_ROOT
@@ -274,6 +288,18 @@ BASELINES = {"samfeo": samfeo, "rnainverse": rnainverse, "samfeo_efilter": samfe
              "samfeo_cfilter": samfeo_cfilter}
 BASELINE_SETTINGS = {"samfeo": SAMFEO_SETTINGS, "rnainverse": RNAINVERSE_SETTINGS,
                      "samfeo_efilter": SAMFEO_EFILTER_SETTINGS, "samfeo_cfilter": SAMFEO_CFILTER_SETTINGS}
+# Competition-residual filters (docs/experiments/2026-09-27-competition-residual.md), frozen models only.
+RESIDUAL_VARIANTS = {"samfeo_rfilter_linear": "checkpoints/residual_v1/linear_rivals.json",
+                     "samfeo_rfilter_linear_norival": "checkpoints/residual_v1/linear_no_rivals.json",
+                     "samfeo_rfilter_mlp": "checkpoints/residual_v1/mlp_rivals.pt",
+                     "samfeo_rfilter_mlp_norival": "checkpoints/residual_v1/mlp_no_rivals.pt",
+                     "samfeo_rfilter_bank": "physics:bank"}
+for _name, _path in RESIDUAL_VARIANTS.items():
+    BASELINES[_name] = samfeo_efilter
+    BASELINE_SETTINGS[_name] = {**SAMFEO_SETTINGS, "filter": "residual", "filter_k": 8, "residual_model": _path}
+BASELINES["samfeo_efilter_eps"] = samfeo_efilter
+BASELINE_SETTINGS["samfeo_efilter_eps"] = {**SAMFEO_EFILTER_SETTINGS, "epsilon": 0.125}
+
 # Development ablation of the filter width K (energy filter), registered as separate method names so
 # runs can be compared side by side. Changing K is a new candidate revision (needs its own look).
 for _k in (4, 16, 32, 64):

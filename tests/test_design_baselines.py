@@ -71,3 +71,39 @@ def test_energy_filtered_samfeo_picks_the_most_stable_child_and_counts_it():
         baselines.samfeo(target, 0, unfiltered, {})
     e = lambda rows: np.mean([r["target_energy"] for r in rows[10:]])
     assert e(ev.rows) < e(unfiltered.rows)
+
+
+@needs_samfeo
+def test_residual_filter_counts_bank_and_rival_work(tmp_path):
+    import json
+
+    from ribomamba.design import baselines as b
+    from ribomamba.design.residual_models import FEATURES
+    model = {"kind": "ridge", "features": FEATURES, "w": [0.0] * (len(FEATURES) + 1),
+             "mu": [0.0] * len(FEATURES), "sd": [1.0] * len(FEATURES)}
+    (tmp_path / "zero.json").write_text(json.dumps(model))
+    target = Target("toy:two", "((((((....))))))..((((((....))))))")
+    ev = Evaluator(target, budget=30)
+    with pytest.raises(BudgetExhausted):
+        b.samfeo(target, 0, ev, {**b.SAMFEO_SETTINGS, "filter": "residual", "filter_k": 8,
+                                 "residual_model": str(tmp_path / "zero.json")})
+    assert len(ev.rows) == 30 and ev.model_calls > 0
+    assert ev.internal.pf > 30                       # SAMFEO's 30 + at least one rival-bank partition function
+    assert ev.internal.eval > 30 + 8 * ev.model_calls
+
+
+@needs_samfeo
+def test_zero_residual_model_ranks_like_the_energy_filter():
+    # A residual model that predicts c_hat = 0 must pick the same children as the energy filter.
+    from ribomamba.design import baselines as b
+    from ribomamba.design.residual_filter import ResidualScorer
+    target = Target("toy:two", "((((((....))))))..((((((....))))))")
+    scorer = ResidualScorer.__new__(ResidualScorer)
+    scorer.kind, scorer.features, scorer.banks = "ridge", ["a"], __import__("collections").OrderedDict()
+    scorer.w, scorer.mu, scorer.sd = np.array([0.0, 0.0]), np.array([0.0]), np.array([1.0])
+    ev = Evaluator(target, budget=5)
+    parent = "GGGGGGAAAACCCCCCAAGGGGGGAAAACCCCCC"
+    kids = ["GGGCGGAAAACCGCCCAAGGGGGGAAAACCCCCC", "GGGGGGAAAACCCCCCAAGGAGGGAAAACCUCCC", "AGGGGGAAAACCCCCUAAGGGGGGAAAACCCCCC"]
+    energy = b.energy_scores(target, parent, kids, [0.1] * len(parent), ev)
+    residual = scorer(target, parent, kids, [0.1] * len(parent), ev)
+    assert list(np.argsort(energy)) == list(np.argsort(residual))

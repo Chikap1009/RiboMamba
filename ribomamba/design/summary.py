@@ -32,8 +32,12 @@ WALL_BUDGETS_S = (1, 2, 4, 8, 16, 32, 64, 128, 256)
 # Methods whose feedback comes from their OWN (counted) oracle calls: the harness's re-scoring
 # of their candidates is measurement overhead and is subtracted from their wall time. For
 # every other method the harness scoring IS the method's feedback, so it counts.
-EXTERNAL = {"samfeo", "rnainverse", "mfe_repair", "samfeo_efilter", "samfeo_cfilter",
-            *(f"samfeo_efilter_k{k}" for k in (4, 16, 32, 64))}
+EXTERNAL = {"rnainverse", "mfe_repair"}
+
+
+def self_scored(method: str) -> bool:
+    """SAMFEO and every SAMFEO-hosted variant score candidates themselves (their own counted calls)."""
+    return method in EXTERNAL or method.startswith("samfeo")
 
 
 def load_run(run_dir: Path) -> tuple[dict, list[dict], pl.DataFrame]:
@@ -97,7 +101,7 @@ def unit_checkpoints(trace: pl.DataFrame, status: dict, budgets=BUDGETS) -> list
 def method_wall(trace: pl.DataFrame, method: str) -> pl.Series:
     """Cumulative wall seconds attributable to the method (see EXTERNAL)."""
     wall = trace["elapsed_s"]
-    return wall - trace["score_wall_s"] if method in EXTERNAL else wall
+    return wall - trace["score_wall_s"] if self_scored(method) else wall
 
 
 def wall_checkpoints(trace: pl.DataFrame, status: dict, walls=WALL_BUDGETS_S) -> list[dict]:
