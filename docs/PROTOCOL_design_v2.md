@@ -72,3 +72,12 @@ Commands (one runner invocation per manifest, all methods in the same batch):
     --budget 5010 --seeds 0 1 2 --unit-time-limit 128 --workers 10 --gpu
     --methods samfeo samfeo_efilter samfeo_tcdprop_efilter tcd_sample random_pairs desirna
               rnainverse samplingdesign
+
+## Amendment 1 (2026-09-27 ~22:30 IST) — operational only
+After 43 final units, host memory neared exhaustion (10 workers x ~1 GB: each worker kept a CUDA
+context once it had run a TCD unit). The chain was stopped by process group (completed units are
+atomic and kept; in-flight units rerun) and resumed with `--recycle-workers --workers 8` (a fresh
+process per unit). Methods, settings, budgets (128 s method time, <= 5,010 candidates), seeds,
+manifests and endpoints are unchanged; each unit is independent and seeded by name, so results do
+not depend on the worker count. Side effect disclosed: every unit now pays its own imports and, for
+TCD units, a model load (~2-3 s) inside its method time.

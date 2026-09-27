@@ -78,7 +78,8 @@ def cmd_run(args) -> None:
         runner.log_confirmation_look(args.run, args.subset, args.confirmation_look, config)
     design_targets = [{"id": t["id"], "structure": t["structure"]} for t in targets]    # no native sequences
     counts = runner.run(PILOT_DIR / args.run, config, design_targets, workers=args.workers,
-                        max_hours=args.max_hours, retry_errors=args.retry_errors)
+                        max_hours=args.max_hours, retry_errors=args.retry_errors,
+                        recycle_workers=args.recycle_workers)
     print(json.dumps(counts))
 
 
@@ -155,6 +156,8 @@ def main() -> None:
     r.add_argument("--max-hours", type=float, default=None,
                    help="optional run wall-time limit; omitted means no time cap")
     r.add_argument("--retry-errors", action="store_true")
+    r.add_argument("--recycle-workers", action="store_true",
+                   help="one fresh worker process per unit (releases GPU/CUDA host memory between units)")
     r.add_argument("--gpu", action="store_true", help="let neural proposal methods use the GPU")
     r.add_argument("--confirmation-look", default="", help="declared candidate revision (required for confirmation)")
     s = sub.add_parser("summarize")

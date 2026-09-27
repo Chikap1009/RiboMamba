@@ -233,7 +233,7 @@ def log_confirmation_look(run_name: str, subset: str, label: str, config: dict, 
 
 
 def run(run_dir: Path, config: dict, targets: list[dict], workers: int = 4, max_hours: float | None = None,
-        retry_errors: bool = False, progress=print) -> dict:
+        retry_errors: bool = False, progress=print, recycle_workers: bool = False) -> dict:
     """Run every unfinished unit of the configuration. Returns counts by final status."""
     run_dir = Path(run_dir)
     config_path = run_dir / "run_config.json"
@@ -277,7 +277,9 @@ def run(run_dir: Path, config: dict, targets: list[dict], workers: int = 4, max_
             pool = None
         else:
             import multiprocessing as mp
-            pool = mp.get_context("spawn").Pool(workers)
+            # recycle_workers: a fresh process per unit, so a GPU model's CUDA context (~1 GB of host
+            # memory) is released when its unit ends (operational only; results do not depend on it).
+            pool = mp.get_context("spawn").Pool(workers, maxtasksperchild=1 if recycle_workers else None)
             results = pool.imap_unordered(run_unit, jobs)
         try:
             for done, result in enumerate(results, 1):
