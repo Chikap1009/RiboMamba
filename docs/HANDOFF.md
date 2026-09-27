@@ -37,20 +37,17 @@ Easy tier (rfam_val smoke): at ceiling; the shared start alone solves most.
 Trace finding: late in search only ~2 % of proposals improve; feedback edits waste
 ~33 % of late proposals on repeats. Defect-weighted site choice = random sites.
 
-## Exact next task (session 09, updated ~14:40 IST)
-Active record: docs/experiments/2026-09-27-competition-residual.md (Results 1-3, verdict).
-Decisions D-022..D-024. Log: docs/logbook/2026-09-27-session-09.md.
-Measured so far: energy pre-screening of SAMFEO's mutations (K = 8) is the best filter
-online (58 % uMFE vs SAMFEO 48 %, replicated 3x, confirmed once on sealed targets);
-learned critics (generic or competition-residual, with/without rivals) cut offline ranking
-regret ~70 % but do NOT beat the energy filter online. DesiRNA leads uMFE at 64 s only.
-In flight: ew_dev_desirna_filter_v1 (DesiRNA vs DesiRNA + energy pre-screen).
-Next: compare with `python scripts/repair_compare.py --runs ew_dev_desirna_filter_v1
---name dev_desirna_filter --pairs desirna_efilter:desirna` plus wall-time pairs
-(summary.paired_wall). If the filter helps DesiRNA too, declare "host-agnostic energy
-pre-screen" as a revision, take one logged confirmation look, then write and FREEZE
-docs/PROTOCOL_design_v2.md and run the final benchmark. The K ablation run
-(ew_dev1024_kablation_v1) is paused at 77/384 units (resumable).
+## Exact next task (session 09, updated ~15:00 IST)
+Records: docs/experiments/2026-09-27-competition-residual.md; D-022..D-025; RESULTS.md;
+docs/logbook/2026-09-27-session-09.md.
+Measured: SAMFEO + energy pre-screen (K = 8) is the best SAMFEO filter (58 vs 48 % uMFE,
+replicated 3x, confirmed once); learned critics do not beat it online; the screen improves
+DesiRNA's NED/P but lowers its uMFE at 64 s (D-025). DesiRNA leads uMFE at 64 s (66-70 %).
+In flight: ew_dev_frontier_v1 (long budgets, dev only). Then: summarise the quality-time
+frontier (repair_compare.py + summary.paired_wall), decide the frozen method list and
+endpoints, FREEZE docs/PROTOCOL_design_v2.md (add "**Status: FROZEN on <date>**" and a code
+guard for final manifests), build the Eterna100 V1/V2 + Rfam-Taneda + RNAsolo manifests, and
+run the final benchmark. The K ablation (ew_dev1024_kablation_v1) remains paused.
 
 ## Execution environment
 WSL Ubuntu-24.04:
