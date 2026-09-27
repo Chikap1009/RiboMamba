@@ -116,3 +116,7 @@ method, setting, budget or endpoint changes; nothing tuned on final outcomes):
 (e) scripts/final_report.py refuses FINAL output unless all expected units of all three sets are valid
     and the retry pass is done; best-P designs, first successes and EternaFold inputs are selected
     only among candidates within 128 s of method time (same rule as the success curves).
+Amendment 4b (2026-09-27T19:45:05+00:00 UTC): the DesiRNA wrapper also logs the states ENTERING each round, so its
+initial population (present from start-up, step 0 of its own trajectory) is counted even when the
+first round outlasts 128 s (e.g. 337-400 nt with 10 replicas on one core). The fix time for
+superseding DesiRNA/SamplingDesign units moves to this commit (bda4884).
