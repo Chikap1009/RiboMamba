@@ -113,18 +113,27 @@ def paired(u: pl.DataFrame, a: str, b: str, wall: int, metric: str) -> dict | No
 
 
 def eternafold_check(frames: dict) -> dict:
-    """Best-P design per (method, target, seed) on V2: does EternaFold's MFE equal the target?"""
+    """Best-P design (within 128 s) per (method, target, seed) on V2: does EternaFold's MFE equal the target?
+    Units without any design within 128 s count as non-matches (rate over ALL units) and are reported."""
     from ribomamba.eval.eternafold import eternafold_many
-    v2 = frames["eterna100_v2"].filter(pl.col("wall_s") == 128).drop_nulls("sequence")
+    allu = frames["eterna100_v2"].filter(pl.col("wall_s") == 128)
+    v2 = allu.drop_nulls("sequence")
     structures = {t["id"]: t["structure"] for t in load_manifest(MANIFESTS_DIR / "final_eterna100_v2.json")["targets"]}
     seqs = v2["sequence"].to_list()
     targets = [structures[t] for t in v2["target_id"].to_list()]
     res = eternafold_many(seqs, compare=[[t] for t in targets], processes=4)
     v2 = v2.with_columns(pl.Series("ef_match", [bool(r["ef_match_0"]) for r in res]),
                          pl.Series("ef_ned", [r["ef_ned_0"] for r in res]))
-    return {r["method"]: {"ef_mfe_match_rate": r["ef_match_rate"], "ef_ned_mean": r["ef_ned_mean"]}
-            for r in v2.group_by("method").agg(pl.col("ef_match").cast(pl.Float64).mean().alias("ef_match_rate"),
-                                               pl.col("ef_ned").mean().alias("ef_ned_mean")).iter_rows(named=True)}
+    n_units = dict(allu.group_by("method").len().iter_rows())
+    agg = {r["method"]: r for r in v2.group_by("method").agg(
+        pl.col("ef_match").sum().alias("matches"), pl.len().alias("designs"),
+        pl.col("ef_ned").mean().alias("ef_ned_mean")).iter_rows(named=True)}
+    out = {}
+    for m, n in sorted(n_units.items()):          # a method with no design at all still appears (rate 0)
+        r = agg.get(m, {"matches": 0, "designs": 0, "ef_ned_mean": None})
+        out[m] = {"ef_mfe_match_rate_all_units": r["matches"] / n, "ef_ned_mean_over_designs": r["ef_ned_mean"],
+                  "units": n, "units_without_design": n - r["designs"]}
+    return out
 
 
 def main() -> None:
