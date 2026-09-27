@@ -27,7 +27,7 @@ from ribomamba.eval.folding import CANONICAL_PAIRS
 from ribomamba.models.conditioned import ConditionedDenoiser, structure_inputs
 from ribomamba.paths import REPO_ROOT
 
-TCD_CHECKPOINT = "checkpoints/tcd_v1/tcd.pt"
+from ribomamba.design.lazy_methods import TCD_CHECKPOINT, TCD_SETTINGS  # noqa: E402  (single source of truth)
 BASE_CHECKPOINT = REPO_ROOT / "checkpoints" / "tf_M_do0" / "best.pt"
 CANON16 = torch.tensor([[1.0 if a + b in CANONICAL_PAIRS else 0.0 for b in NUCLEOTIDES] for a in NUCLEOTIDES]).flatten()
 _MODELS: dict = {}
@@ -132,8 +132,6 @@ def tcd_initial_designs(target: Target, seed: int, k: int, evaluate: Evaluator, 
     return out[:k]
 
 
-TCD_SETTINGS = {"checkpoint": TCD_CHECKPOINT, "steps": 32, "batch": 32, "temperature": 1.0,
-                "pair_rule": "product of conditional marginals restricted to canonical pairs"}
 TCD_METHODS = {"tcd_sample": tcd_sample, "uncond_sample": uncond_sample}
 TCD_METHOD_SETTINGS = {"tcd_sample": TCD_SETTINGS, "uncond_sample": {**TCD_SETTINGS, "checkpoint": "base"}}
 

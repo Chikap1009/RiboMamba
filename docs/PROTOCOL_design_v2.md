@@ -81,3 +81,7 @@ process per unit). Methods, settings, budgets (128 s method time, <= 5,010 candi
 manifests and endpoints are unchanged; each unit is independent and seeded by name, so results do
 not depend on the worker count. Side effect disclosed: every unit now pays its own imports and, for
 TCD units, a model load (~2-3 s) inside its method time.
+Amendment 1b (same evening): recycling alone left ~1.2 GB per worker because every worker imported
+torch's CUDA build via the method registry; model methods are now registered lazily
+(ribomamba/design/lazy_methods.py), so CPU-method workers never import torch. Method settings and
+the run's config hash are unchanged (verified); the chain was stopped and resumed again.

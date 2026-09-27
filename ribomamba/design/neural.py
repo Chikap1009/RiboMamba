@@ -42,8 +42,7 @@ from ribomamba.eval.folding import CANONICAL_PAIRS
 from ribomamba.paths import REPO_ROOT
 
 CHECKPOINT = REPO_ROOT / "checkpoints" / "tf_M_do0" / "best.pt"
-NEURAL_SETTINGS = {"checkpoint": "checkpoints/tf_M_do0/best.pt", "weights": "ema", "temperature": 1.0,
-                   "decoding": "sequential chain rule, one position per forward pass, legal-move restricted"}
+from ribomamba.design.lazy_methods import NEURAL_SETTINGS  # noqa: E402  (single source of truth)
 _MODEL = {}
 
 
