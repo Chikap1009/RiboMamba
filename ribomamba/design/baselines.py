@@ -232,6 +232,8 @@ def samfeo(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=N
         tcd_model, tcd_device = _tcd.load(s["proposal_model"])
         tcd_rng = rng_for("tcd_proposal", target.id, seed)
         k_prop = int(s.get("filter_k", 1)) if s.get("filter") else 1
+        # "cuda_graph": the same forward replayed from a CUDA graph (bitwise-identical logits; speed only)
+        infill = {"eager": _tcd.infill, "cuda_graph": _tcd.infill_graphed}[s.get("tcd_forward", "eager")]
         scorer = make_filter(s) if s.get("filter") else None
 
         def tcd_mutation(sequence, pairs, defect_list, *args, **kwargs):
@@ -239,7 +241,7 @@ def samfeo(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=N
             drafts = [originals["mutate_structured"](sequence, pairs, defect_list, *args, **kwargs) for _ in range(k_prop)]
             masks = [[i for i, (x, y) in enumerate(zip(sequence, d)) if x != y] or [int(tcd_rng.integers(len(sequence)))]
                      for d in drafts]
-            children = _tcd.infill(tcd_model, tcd_device, target.structure, target.pt, sequence, masks, tcd_rng)
+            children = infill(tcd_model, tcd_device, target.structure, target.pt, sequence, masks, tcd_rng)
             evaluate.model_calls += 1
             evaluate.model_wall_s += time.perf_counter() - start
             fresh = [c for c in dict.fromkeys(children) if c not in evaluate.first_index]
@@ -538,6 +540,11 @@ BASELINES["samfeo_tcdprop"] = samfeo_efilter             # kept as run (it WAS e
 BASELINE_SETTINGS["samfeo_tcdprop"] = {**SAMFEO_SETTINGS, "proposal_model": "checkpoints/tcd_v1/tcd.pt"}
 BASELINES["samfeo_tcdprop_efilter"] = samfeo_efilter
 BASELINE_SETTINGS["samfeo_tcdprop_efilter"] = {**SAMFEO_EFILTER_SETTINGS, "proposal_model": "checkpoints/tcd_v1/tcd.pt"}
+# Speed-only variant (docs/experiments/2026-09-28-tcd-inference-efficiency.md): same search, forward replayed
+# from a CUDA graph with static input buffers.
+BASELINES["samfeo_tcdprop_efilter_graph"] = samfeo_efilter
+BASELINE_SETTINGS["samfeo_tcdprop_efilter_graph"] = {**BASELINE_SETTINGS["samfeo_tcdprop_efilter"],
+                                                    "tcd_forward": "cuda_graph"}
 BASELINES["samfeo_efilter_eps"] = samfeo_efilter
 BASELINE_SETTINGS["samfeo_efilter_eps"] = {**SAMFEO_EFILTER_SETTINGS, "epsilon": 0.125}
 

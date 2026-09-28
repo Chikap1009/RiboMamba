@@ -146,11 +146,7 @@ def infill(model: ConditionedDenoiser, device: str, structure: str, pt: list[int
     from their marginal. Everything outside the mask is clamped to the parent.
     """
     L, W = len(structure), len(structure) + 2
-    full = []
-    for m in masks:
-        s = set(m)
-        s |= {pt[p] for p in m if pt[p] >= 0}
-        full.append(sorted(s))
+    full = _expand_masks(masks, pt)
     base = torch.tensor([BOS_ID, *[FIRST_NUCLEOTIDE_ID + NUCLEOTIDES.index(c) for c in parent], EOS_ID],
                         device=device)
     ids = base.repeat(len(masks), 1)
@@ -161,6 +157,22 @@ def infill(model: ConditionedDenoiser, device: str, structure: str, pt: list[int
     with torch.autocast("cuda", dtype=torch.bfloat16, enabled=device == "cuda"):
         logits = model(ids, attn, bracket, partner)
     probs = torch.softmax(logits[..., FIRST_NUCLEOTIDE_ID:].double(), dim=-1).cpu().numpy()   # (B, W, 4)
+    return _draw_children(probs, full, parent, pt, rng)
+
+
+def _expand_masks(masks: list[list[int]], pt: list[int]) -> list[list[int]]:
+    """Each mask plus the target partners of its positions, sorted (a pair is refilled as a unit)."""
+    full = []
+    for m in masks:
+        s = set(m)
+        s |= {pt[p] for p in m if pt[p] >= 0}
+        full.append(sorted(s))
+    return full
+
+
+def _draw_children(probs: np.ndarray, full: list[list[int]], parent: str, pt: list[int],
+                   rng: np.random.Generator) -> list[str]:
+    """Sample each row's masked units from its (B, W, 4) probabilities, in mask order, with `rng`."""
     canon = CANON16.numpy().reshape(4, 4)
     out = []
     for b, m in enumerate(full):
@@ -181,3 +193,65 @@ def infill(model: ConditionedDenoiser, device: str, structure: str, pt: list[int
                 done.add(p)
         out.append("".join(seq))
     return out
+
+
+class GraphedForward:
+    """The TCD forward for ONE target and batch shape, captured once in a CUDA graph and replayed.
+
+    Static buffers hold the token batch and the (per-target, constant) structure inputs; each call
+    copies a host-built token batch into the buffer (one H2D copy) and replays the captured kernels.
+    Same model, same inputs, same kernels as the eager call: logits are expected to be bitwise
+    identical (tested), so everything downstream (softmax, sampling, search) is unchanged.
+    """
+
+    def __init__(self, model: ConditionedDenoiser, structure: str, batch: int):
+        W = len(structure) + 2
+        self.key = (id(model), structure, batch)
+        self.model = model
+        self.ids = torch.full((batch, W), MASK_ID, dtype=torch.long, device="cuda")
+        self.ids[:, 0], self.ids[:, -1] = BOS_ID, EOS_ID
+        self.attn = torch.ones((batch, W), dtype=torch.bool, device="cuda")
+        self.bracket, self.partner = structure_inputs([structure] * batch, W, "cuda")
+        side = torch.cuda.Stream()
+        side.wait_stream(torch.cuda.current_stream())
+        with torch.cuda.stream(side):                      # warm-up before capture (required by CUDA graphs)
+            for _ in range(3):
+                self._forward()
+        torch.cuda.current_stream().wait_stream(side)
+        self.graph = torch.cuda.CUDAGraph()
+        with torch.cuda.graph(self.graph):
+            self.logits = self._forward()
+
+    @torch.no_grad()
+    def _forward(self) -> torch.Tensor:
+        with torch.autocast("cuda", dtype=torch.bfloat16, cache_enabled=False):
+            return self.model(self.ids, self.attn, self.bracket, self.partner)
+
+    def __call__(self, host_ids: torch.Tensor) -> torch.Tensor:
+        self.ids.copy_(host_ids)
+        self.graph.replay()
+        return self.logits
+
+
+_GRAPHED: dict = {}                                        # at most ONE captured graph per process (bounded)
+
+
+@torch.no_grad()
+def infill_graphed(model: ConditionedDenoiser, device: str, structure: str, pt: list[int], parent: str,
+                   masks: list[list[int]], rng: np.random.Generator) -> list[str]:
+    """infill with the forward replayed from a CUDA graph (same inputs, logits, draws); eager off the GPU."""
+    if device != "cuda":
+        return infill(model, device, structure, pt, parent, masks, rng)
+    key = (id(model), structure, len(masks))
+    graphed = _GRAPHED.get("current")
+    if graphed is None or graphed.key != key:
+        _GRAPHED.clear()                                   # release the previous target's graph first
+        graphed = _GRAPHED["current"] = GraphedForward(model, structure, len(masks))
+    full = _expand_masks(masks, pt)
+    host = torch.tensor([BOS_ID, *[FIRST_NUCLEOTIDE_ID + NUCLEOTIDES.index(c) for c in parent], EOS_ID])
+    host_ids = host.repeat(len(masks), 1)
+    for b, m in enumerate(full):
+        host_ids[b, [p + 1 for p in m]] = MASK_ID
+    logits = graphed(host_ids)
+    probs = torch.softmax(logits[..., FIRST_NUCLEOTIDE_ID:].double(), dim=-1).cpu().numpy()   # (B, W, 4)
+    return _draw_children(probs, full, parent, pt, rng)
