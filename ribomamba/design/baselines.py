@@ -180,12 +180,23 @@ def samfeo(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=N
         evaluate(sequence, parent=parent, objective=float(objective))
         return out
 
+    def timed(hook):
+        """Count every call of a mutation hook and its wall time (proposal overhead; no semantic change)."""
+        def wrapped(*args, **kwargs):
+            start = time.perf_counter()
+            try:
+                return hook(*args, **kwargs)
+            finally:
+                evaluate.proposal_calls += 1
+                evaluate.proposal_wall_s += time.perf_counter() - start
+        return wrapped
+
     def logging_mutation(mutate):
         def wrapped(sequence, *args, **kwargs):
             child = mutate(sequence, *args, **kwargs)
             parents[child] = sequence                        # the last child made is the one evaluated
             return child
-        return wrapped
+        return timed(wrapped)
 
     eps = float(s.get("epsilon", 0.0))
     eps_rng = rng_for("filter_epsilon", target.id, seed)
@@ -213,7 +224,7 @@ def samfeo(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=N
             best = children[int(np.argmin(scores))]
             parents[best] = sequence
             return best
-        return wrapped
+        return timed(wrapped)
 
     module.position_ed_pd_mfe = evaluated
     if s.get("proposal_model"):                      # SAMFEO picks the sites, the TCD picks the letters
@@ -238,7 +249,7 @@ def samfeo(target: Target, seed: int, evaluate: Evaluator, settings: dict, log=N
                 child = fresh[0] if fresh else children[0]
             parents[child] = sequence
             return child
-        module.mutate_structured = tcd_mutation
+        module.mutate_structured = timed(tcd_mutation)
     elif s.get("init_model"):                          # SAMFEO's k initial designs drawn from a model instead
         from ribomamba.design.tcd import tcd_initial_designs
         module.init_k = lambda target_ss, pos_pairs, k: tcd_initial_designs(

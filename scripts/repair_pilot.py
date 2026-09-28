@@ -72,6 +72,11 @@ def cmd_run(args) -> None:
         print(f"protocol frozen on {require_protocol_frozen()}; final manifest {args.manifest}", flush=True)
     manifest = mf.load_manifest(manifest_path(args.manifest))
     targets = mf.select(manifest, args.subset)
+    if args.target_ids:
+        unknown = set(args.target_ids) - {t["id"] for t in targets}
+        if unknown:
+            raise SystemExit(f"--target-ids not in subset {args.subset}: {sorted(unknown)}")
+        targets = [t for t in targets if t["id"] in set(args.target_ids)]
     config = runner.make_config(manifest, args.subset, targets, args.methods, args.seeds, args.budget,
                                 unit_time_limit_s=args.unit_time_limit)
     if any(t["subset"] == "confirmation" for t in targets):
@@ -149,6 +154,8 @@ def main() -> None:
     r.add_argument("--unit-time-limit", type=float, default=None,
                    help="per-unit method-time limit in seconds (final protocol); omitted = none")
     r.add_argument("--subset", required=True, choices=mf.SUBSETS)
+    r.add_argument("--target-ids", nargs="+", default=None,
+                   help="restrict the subset to these target ids (recorded in the run config)")
     r.add_argument("--budget", type=int, default=64)
     r.add_argument("--seeds", type=int, nargs="+", default=[0, 1, 2])
     r.add_argument("--methods", nargs="+", default=DEFAULT_METHODS)

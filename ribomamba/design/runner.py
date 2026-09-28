@@ -22,6 +22,7 @@ import hashlib
 import json
 import os
 import platform
+import sys
 import time
 import traceback
 from pathlib import Path
@@ -173,6 +174,16 @@ def validate_unit(run_dir: Path, key: str, config_hash: str, budget: int, retry_
     return None
 
 
+def peak_memory() -> dict:
+    """Peak host RSS of this worker process and, if this process used CUDA, peak GPU memory allocated."""
+    import resource
+    out = {"peak_rss_mb": resource.getrusage(resource.RUSAGE_SELF).ru_maxrss / 1024}
+    torch = sys.modules.get("torch")                      # never import torch here (CPU workers stay torch-free)
+    if torch is not None and torch.cuda.is_available() and torch.cuda.is_initialized():
+        out["peak_gpu_mb"] = torch.cuda.max_memory_allocated() / 2**20
+    return out
+
+
 def run_unit(job: dict) -> dict:
     """Run one unit to its end and write it. Executed in a worker process."""
     run_dir, key = Path(job["run_dir"]), job["key"]
@@ -212,6 +223,8 @@ def run_unit(job: dict) -> dict:
               "wall_s": time.perf_counter() - evaluate.t0, "cpu_s": time.process_time() - evaluate.c0,
               "score_wall_s": evaluate.score_wall_s, "cache_misses": evaluate.cache_misses,
               "model_calls": evaluate.model_calls, "model_wall_s": evaluate.model_wall_s,
+              "proposal_calls": evaluate.proposal_calls, "proposal_wall_s": evaluate.proposal_wall_s,
+              **peak_memory(),
               "oracle_calls": evaluate.oracle.as_dict(),
               "internal_calls": evaluate.internal.as_dict() if evaluate.internal_available else None,
               "started_utc": started, "finished_utc": utc_now(), "git_commit": job["git_commit"],

@@ -115,6 +115,8 @@ class Evaluator:
         self.score_wall_s = 0.0
         self.model_calls = 0              # neural proposal forward passes (Stage B)
         self.model_wall_s = 0.0
+        self.proposal_calls = 0           # calls of a host method's mutation hook (every method, incl. re-calls)
+        self.proposal_wall_s = 0.0        # wall time inside those hooks (drafts, model, screen, dedup)
         self.t0, self.c0 = time.perf_counter(), time.process_time()
 
     @property
