@@ -69,7 +69,7 @@ EXTERNAL = [("external/SAMFEO", "https://github.com/shanry/SAMFEO.git", "no lice
             ("external/DesiRNA", "https://github.com/fryzjergda/DesiRNA.git", "Apache-2.0"),
             ("external/SamplingDesign", "https://github.com/weiyutang1010/SamplingDesign.git",
              "Apache-2.0; build: conda activate rmtools && make CC=x86_64-conda-linux-gnu-g++")]
-DOCS = ["README.md", "docs/REPORT_repair_v2.md", "docs/REPRODUCE.md", "docs/HANDOFF.md", "docs/RESULTS.md",
+DOCS = ["README.md", "CLAUDE.md", "AGENTS.md", "docs/PROJECT_HISTORY.md", "docs/REPORT_repair_v2.md", "docs/REPRODUCE.md", "docs/HANDOFF.md", "docs/RESULTS.md",
         "docs/DECISIONS.md", "docs/PROTOCOL_design_v2.md", "docs/REFERENCES.md", "docs/MODEL_CARD_tcd_v1.md",
         "docs/DATA_CARD_design.md", "docs/INTERVIEW_PREP.md", "docs/RESEARCH_PLAN.md", "docs/figures", "docs/experiments",
         "docs/logbook/2026-09-27-session-09.md", "docs/logbook/2026-09-28-session-10.md",
