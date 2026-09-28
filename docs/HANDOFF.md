@@ -1,4 +1,4 @@
-# Current handoff — 2026-09-28 (sessions 07-10)
+# Current handoff — 2026-09-28 (sessions 07-11)
 
 ## User decision
 The user approved the research pivot (efficient RNA inverse folding through coordinated repair;
@@ -8,7 +8,8 @@ or external messages, one GPU training job at a time, preserve all data/checkpoi
 subagents, no SOTA/biological claims, record negative results.
 
 ## Where things stand (measured, 2026-09-28 ~16:30 IST)
-The protocol v2 FINAL BENCHMARK IS COMPLETE and reported. Nothing is running.
+The protocol v2 FINAL BENCHMARK IS COMPLETE and reported. Session 11 (evening) ran a bounded TCD
+inference-efficiency study (development only; see Exact next task).
 - Protocol: docs/PROTOCOL_design_v2.md, frozen 2026-09-27; amendments 1-4f are operational,
   measurement or report-side fixes (no method, budget or endpoint changes; nothing tuned on
   final outcomes).
@@ -46,22 +47,19 @@ near ceiling (24/27 for the top five). EternaFold folds 25-39 % of best designs 
 - Training pool (eternaweb_trainpool_v1, 700 puzzles): trainpool_samfeo_v1 COMPLETE, 700/700 units.
 - Any new claim needs a NEW, unused evaluation set and a new frozen protocol (D-029).
 
-## Exact next task
-The core pilot question is answered (D-029). Remaining work is optional; pick with the user:
-1. Paper-quality write-up of docs/REPORT_repair_v2.md. Done: figures (docs/figures/, drawn from the
-   FINAL report by scripts/final_figures.py, rendered with the desirna env's matplotlib), model card
-   docs/MODEL_CARD_tcd_v1.md, data card docs/DATA_CARD_design.md, prior-art list refreshed 2026-09-28
-   (report section 6; REFERENCES session 10). Left: a longer methods section and, if publishing, a
-   systematic literature review. Keep the framing: null uMFE, modest NED
-   gain, TCD = model-adaptation result, careful negative results, harness/timing lessons.
-2. Next model-adaptation question (docs/experiments/2026-09-28-target-conditioned-denoiser.md, "Next
-   model-adaptation question", Q1-Q3; proposed, not frozen): Q1 amortised TCD proposals (cost), Q2 more
-   training-side design data (over-fitting / transfer to Eterna100), Q3 search-aware fine-tuning.
-   Needs a new unused evaluation set (e.g. leakage-audited Eterna web puzzles not in dev/confirmation/
-   trainpool) and success criteria written before the first run.
-3. Optional: finish the paused K ablation (ew_dev1024_kablation_v1, 77/384 units, resumable) as a
-   labelled development sensitivity analysis only.
-Do NOT rerun or re-analyse the final sets to look for a significant uMFE gain.
+## Exact next task (updated 2026-09-28 ~22:30 IST)
+The bounded TCD inference-efficiency study (session 11; docs/experiments/2026-09-28-tcd-inference-
+efficiency.md; D-030) is DONE for its decision: the CUDA-graph forward cut proposal overhead 2.48x and
+gave 1.9x more evaluations by 64 s with identical search semantics, but TCD + screen still trails
+SAMFEO + screen on uMFE (-6.3 / -5.2 pp at 16 / 64 s) on development puzzles, so the scientific gate
+failed and the direction STOPS (no new evaluation set or protocol).
+1. When data/repair_pilot/prof_tcd_iso.done exists: summarise the secondary isolated speed profile
+   (runs prof_tcd_iso_cold_v1 / prof_tcd_iso_warm_v1, 6 targets x 3 seeds, reference vs graph, 1 worker)
+   in the experiment record and RESULTS (speed only; no quality inference); commit.
+2. Then finish the report and close: add a short "inference efficiency" note to docs/REPORT_repair_v2.md
+   (speed-only result; did not change the scientific conclusion). Optional only if publishing: a
+   systematic literature review and a longer methods section.
+Do NOT rerun or re-analyse the consumed final sets; do not start new training or tuning.
 
 ## Execution environment
 WSL Ubuntu-24.04:

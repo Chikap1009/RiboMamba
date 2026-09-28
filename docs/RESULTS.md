@@ -1291,3 +1291,25 @@ puzzles, and the TCD's design data come from the same Eterna web source as the d
    separately (SamplingDesign 79/78 on Eterna100 with Turner 2004; DesiRNA V2 85 < 1 min, 95 < 1 h,
    97 in 24 h), never mixed with ours.
 No SOTA, generalisation, wet-lab or speed claim follows from these numbers.
+
+## TCD proposal overhead (development, session 11) — run ew_dev_tcdgraph_v1
+Record: docs/experiments/2026-09-28-tcd-inference-efficiency.md (question, profile, chosen optimisation
+and gates committed before the run). 32 eternaweb_dev_v1 development targets x seeds 0-2; 64 s method
+time, <= 5,010 candidates; 4 concurrent units, fresh process per unit (setup charged); 384/384 valid.
+Profile: the eager forward is launch-bound (~11-12 ms per call at batch 1-32) and is 75-89 % of TCD
+proposal time; each unit also pays ~3.2 s of setup (torch import, CUDA init, checkpoint load, first
+call); long puzzles add a GPU wake-up latency after idle periods. Optimisation: the same forward
+replayed from a CUDA graph with static input buffers (bitwise-identical logits; identical search at a
+fixed budget).
+- Speed: proposal time per evaluated candidate 24.7 -> 10.2 ms (median); per-target ratio median 2.48
+  (1.34-3.50; 1.74 above 130 nt); evaluations by 64 s x1.90, by 16 s x2.05.
+- Quality vs the eager implementation (graph - eager): uMFE +3.1 pp [0.0, +6.3] @16 s, 0.0 @64 s;
+  best NED -0.0031 [-0.0051, -0.0015] @16 s (28/0 targets), -0.0019 [-0.0043, -0.0003] @64 s.
+- Versus SAMFEO + energy screen (graph - screen): uMFE -6.3 pp [-14.6, -1.0] @16 s, -5.2 pp [-10.4,
+  -1.0] @64 s; best NED -0.0024 [-0.0054, +0.0008] @16 s, -0.0033 [-0.0057, -0.0011] @64 s.
+- Seed-mean uMFE @16 / 64 s: SAMFEO 47.9 / 56.2 %, screen 56.2 / 61.5 %, TCD + screen eager 46.9 /
+  56.2 %, graph 50.0 / 56.2 %.
+Gates: engineering (>= 2x overhead, >= 1.5x / 1.2x evaluations) MET; no quality regression; scientific
+continuation (beat SAMFEO + screen on uMFE, or on NED at both checkpoints without a uMFE loss) NOT MET.
+Faster proposals help TCD + screen against its own eager version but do not close its success-rate gap
+to the non-neural screen on these development puzzles. Development evidence only; GPU used by TCD arms.

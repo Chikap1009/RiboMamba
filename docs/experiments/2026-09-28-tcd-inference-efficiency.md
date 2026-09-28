@@ -149,3 +149,55 @@ Decision: continue to a new unused-set protocol (Phase 4) only if E1, E2 and not
 S-quality holds; otherwise record the result and stop this direction. Secondary, descriptive only:
 an isolated (1 worker) cold and warm end-to-end profile of reference vs graph on the 6 profiling
 targets x seeds 0-2 (speed only; no quality inference).
+
+## Outcome — development comparison ew_dev_tcdgraph_v1 (measured 2026-09-28 20:02-22:10 IST)
+384/384 units valid (7,664 s; 4 concurrent units, fresh process per unit, setup charged; no errors;
+no unit without a design by 64 s). Analysis: `python scripts/tcd_graph_compare.py` (declared script;
+two plumbing fixes before its first successful output: polars schema inference over null peak_gpu_mb,
+and printing NA for the undefined 1 s means; no endpoint or threshold changed) -> compare.json.
+Many CPU-method units reached the 5,010-candidate cap before 64 s (samfeo 71/96, screen 66/96, graph
+15/96 'complete'); endpoints are at matched method time under that cap, as in protocol v2.
+
+Seed-mean uMFE / best NED / best log10 P (32 targets) and median evaluations:
+| method | 4 s | 16 s | 64 s | evals by 16 s / 64 s |
+|---|---|---|---|---|
+| SAMFEO | 38.5 % / 0.0701 / -1.42 | 47.9 % / 0.0590 / -0.99 | 56.2 % / 0.0526 / -0.79 | 2,568 / 5,010 |
+| SAMFEO + screen | 47.9 % / 0.0631 / -1.08 | 56.2 % / 0.0528 / -0.79 | 61.5 % / 0.0490 / -0.72 | 2,289 / 5,010 |
+| TCD + screen, eager (reference) | 26.0 % / 0.0836 / -1.72 | 46.9 % / 0.0536 / -0.93 | 56.2 % / 0.0476 / -0.72 | 504 / 1,920 |
+| TCD + screen, CUDA graph | 36.5 % / 0.0674 / -1.42 | 50.0 % / 0.0505 / -0.84 | 56.2 % / 0.0457 / -0.70 | 1,096 / 3,661 |
+At 1 s neither TCD arm has a design (cold start ~3.2 s is charged to both and unchanged).
+
+Speed (cold, 4 concurrent): proposal time per evaluated candidate 24.7 -> 10.2 ms (unit medians);
+per-target ratio reference/graph median 2.48 (1.34-3.50): 2.51 (<= 60 nt, 12 targets), 2.53
+(61-130 nt, 14), 1.74 (> 130 nt, 6; 1.34 at 251 nt, the GPU wake-latency regime). Evaluations by
+64 s graph/reference median 1.90 (1.08-2.46; 1.21 above 130 nt), by 16 s 2.05. Proposal calls per
+evaluation rose 1.07 -> 1.45 (the faster search reaches SAMFEO's history-collision phase more often).
+Model time per 64 s unit: 49.5 -> 34.7 s (median) while model calls rose 2,262 -> 5,685. Peak host RSS
+~1.2 GB for both TCD arms (0.17 GB for SAMFEO); peak GPU memory 120 -> 99 MB. GPU is used only by
+the TCD arms; CPU-only and GPU-assisted arms are not equal-compute despite equal time limits.
+
+Paired effects (seed-mean per target; bootstrap 95 % over 32 targets; a better / b better):
+- graph - reference: uMFE +3.1 pp [0.0, +6.3] @16 (3/0), 0.0 @64 (0/0); best NED -0.0031 [-0.0051,
+  -0.0015] @16 (28/0), -0.0019 [-0.0043, -0.0003] @64 (23/0); log10 P +0.090 [+0.038, +0.153] @16,
+  +0.021 [+0.006, +0.040] @64.
+- graph - SAMFEO + screen: uMFE -6.3 pp [-14.6, -1.0] @16 (0/4), -5.2 pp [-10.4, -1.0] @64 (0/4);
+  best NED -0.0024 [-0.0054, +0.0008] @16 (19/13), -0.0033 [-0.0057, -0.0011] @64 (18/14); log10 P
+  -0.049 [-0.179, +0.059] @16, +0.015 [-0.063, +0.090] @64.
+- reference - SAMFEO + screen: uMFE -9.4 pp [-17.7, -3.1] @16, -5.2 pp [-10.4, -1.0] @64.
+- graph - SAMFEO: uMFE +2.1 pp [-5.2, +10.4] @16, 0.0 [-6.3, +5.2] @64; best NED -0.0085 [-0.0149,
+  -0.0030] @16, -0.0069 [-0.0113, -0.0031] @64.
+- SAMFEO + screen - SAMFEO (context): uMFE +8.3 pp [0.0, +17.7] @16, +5.2 pp [+1.0, +9.4] @64.
+
+## Gates and decision (as fixed before the run)
+E1 MET (2.48 >= 2.0). E2 MET (1.90 >= 1.5 at 64 s; 2.05 >= 1.2 at 16 s). Q OK (no regression; the
+graph arm is better than the eager reference on NED and P at matched time, as expected from identical
+search semantics with more evaluations). S NOT MET: against SAMFEO + screen the optimised TCD arm is
+WORSE on uMFE at both checkpoints (-6.3 and -5.2 pp, intervals below 0) and its NED advantage holds
+only at 64 s (-0.0033) and not at 16 s (interval includes 0).
+DECISION: the engineering optimisation works and is kept (a transparent speed change), but the
+scientific continuation criterion fails, so no new evaluation set or protocol is prepared (Phase 4 not
+started) and this direction STOPS here, as the stopping rule requires. The removed overhead was a real
+cost, but not the reason TCD + screen trails SAMFEO + screen in success rate on these puzzles.
+Limits: 32 development targets used throughout the project's development (not confirmation); one
+laptop GPU under WSL2 (launch and wake latencies are platform-specific); bitwise identity of graph and
+eager logits is verified empirically on this GPU/driver/torch build, not guaranteed in general.

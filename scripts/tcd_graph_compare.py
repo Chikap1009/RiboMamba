@@ -51,7 +51,7 @@ def unit_table(d) -> pl.DataFrame:
                          "model_calls": st.get("model_calls", 0), "model_wall_s": st.get("model_wall_s", 0.0),
                          "unit_evals": st["n_rows"], "peak_rss_mb": st.get("peak_rss_mb"),
                          "peak_gpu_mb": st.get("peak_gpu_mb")})
-    return pl.DataFrame(rows)
+    return pl.DataFrame(rows, infer_schema_length=None)
 
 
 def per_target(u: pl.DataFrame, method: str, wall: int, col: str) -> pl.DataFrame:
@@ -121,9 +121,10 @@ def main() -> None:
     out["gates"], out["paired"] = gates, pairs
     (d / "compare.json").write_text(json.dumps(out, indent=1, default=float))
     print(json.dumps({k: out[k] for k in ("units", "status_counts", "units_without_design_64s")}, indent=1))
+    f = lambda v, spec: "NA" if v is None or (isinstance(v, float) and math.isnan(v)) else format(v, spec)
     for r in out["means"]:
-        print(f"  {r['method']:30s} {r['wall_s']:3d}s uMFE {100*r['umfe']:5.1f} % NED {r['best_ned']:.4f} "
-              f"log10P {r['best_log10_p']:.2f} evals(med) {r['median_evals']:.0f} "
+        print(f"  {r['method']:30s} {r['wall_s']:3d}s uMFE {100*r['umfe']:5.1f} % NED {f(r['best_ned'], '.4f')} "
+              f"log10P {f(r['best_log10_p'], '.2f')} evals(med) {r['median_evals']:.0f} "
               f"prop ms/eval(med) {r['median_proposal_ms_per_eval']:.1f} calls/eval {r['median_proposal_calls_per_eval']:.2f}")
     for r in pairs:
         print(f"  {r['a']:30s} - {r['b']:24s} {r['metric']:12s} @{r['wall_s']:2d}s {r['mean_diff']:+.4f} "

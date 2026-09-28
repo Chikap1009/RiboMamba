@@ -1243,3 +1243,24 @@ screen gives the lowest NED of all methods (82/14 vs SAMFEO). TCD sampling beats
 **Alternatives rejected.** Re-analysing with other budgets, subsets or success definitions to find a
 significant uMFE gain (post hoc); rerunning the final sets with modified methods; dropping the V1-only
 set because every method scored 0 (it is reported with the independent SAMFEO check).
+
+## D-030 — Keep the CUDA-graph TCD forward as a speed-only change; stop the TCD-efficiency direction
+**Date:** 2026-09-28   **Status:** accepted
+
+**Context.** The bounded efficiency study (docs/experiments/2026-09-28-tcd-inference-efficiency.md)
+verified that K-candidate batching already existed, profiled the TCD proposal path (launch-bound eager
+forward 75-89 % of proposal time; ~3.2 s per-unit setup; GPU wake latency on long puzzles), replaced
+the forward with a CUDA-graph replay (identical logits and search), and ran one declared development
+comparison (ew_dev_tcdgraph_v1). Engineering gates met (2.48x less proposal overhead, 1.90x more
+evaluations by 64 s, no quality regression); scientific gate not met (vs SAMFEO + screen: uMFE -6.3 pp
+@16 s and -5.2 pp @64 s; NED better only at 64 s).
+
+**Decision.** (1) Keep samfeo_tcdprop_efilter_graph / tcd.infill_graphed as the implementation for any
+future use of TCD proposals (same semantics, faster); the eager path stays as the reference, and the
+frozen protocol v2 methods are unchanged. (2) Do not prepare a new evaluation set or protocol for this
+direction; the stopping rule applies. (3) Record that proposal overhead was a real cost but not the
+explanation for TCD + screen's success-rate gap to the non-neural screen.
+
+**Alternatives rejected.** Adding a resident-model service or prediction caching as a second
+optimisation (outside the one-optimisation scope, and the profile shows the remaining gap is not
+dominated by what they remove); moving the endpoint to ensemble quality alone after seeing results.
