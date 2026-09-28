@@ -5,6 +5,20 @@ Written 2026-09-29 at project closeout. It covers the technical report
 inference-efficiency study. Part A only reads saved results; Part B launches experiments and is
 expensive and unnecessary for viewing or checking the report.
 
+## Public snapshot (no local research assets required)
+
+A fresh clone includes [aggregate final results](results/README.md). To render the existing figures
+with Python and matplotlib, run:
+
+```bash
+python scripts/final_figures.py --report docs/results/final_v2_summary.json --out-dir /tmp/ribomamba-figures
+```
+
+This renders saved estimates; it does not recompute statistics from traces. The sections below describe
+full local reproduction, which requires assets not distributed on GitHub. GitHub's CPU checks cover
+only tokenizer/statistics tests with lightweight dependencies; they do not use the frozen experiment
+environment or certify GPU/baseline integration.
+
 ## 1. Platform assumed
 - Linux x86-64. Measured on Windows 11 + WSL2 Ubuntu 24.04 (kernel 6.18), 20 logical CPUs, ~11 GB RAM
   allocated to WSL, NVIDIA RTX 4060 Laptop GPU (8 GB), driver 595.79.

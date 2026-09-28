@@ -109,3 +109,15 @@ TCD inference inside units shares the one GPU. Earlier elapsed-x-workers ledger 
 docs/CODEX_TO_CLAUDE_2026-09-27.md (Codex review, 2026-09-27) proposed the competition-aware residual
 experiment, since run (negative; docs/experiments/2026-09-27-competition-residual.md). Its status
 notes about confirmation and the training pool being "in progress" are superseded by the section above.
+
+## Public repository presentation — 2026-09-29
+
+The user authorized repository improvements and GitHub publication in this chat. The public README
+now leads with the completed study, all eight final success rates, a figure, and reproduction limits.
+`docs/README.md` separates reader documentation from historical/maintenance records.
+`docs/results/final_v2_summary.json` copies canonical aggregate fields and records the source SHA-256;
+it excludes candidate-level EternaFold output and raw traces. Rendering it reproduces both figures.
+`.github/workflows/checks.yml` runs 20 CPU tokenizer/statistics tests and parses the public result JSON;
+this is distinct from the 54-test local integration suite. No experiment or inference method changed.
+The original closeout preservation package remains a historical snapshot; subsequent presentation
+changes are committed in Git and are not claimed to be part of that earlier package.
