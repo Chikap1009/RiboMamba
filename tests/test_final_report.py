@@ -73,3 +73,21 @@ def test_earlier_reports_are_archived_not_overwritten(tmp_path, monkeypatch):
     os.utime(old, (0, (tmp_path / moved[0]["archived_to"]).stat().st_mtime))
     again = final_report.archive_previous([old], tmp_path / "history")
     assert again[0]["archived_to"] != moved[0]["archived_to"]                   # never clobbers the archive
+
+
+def test_out_writes_a_copy_and_never_touches_the_canonical_report(tmp_path, monkeypatch):
+    canonical = tmp_path / "final_v2_report.json"
+    canonical.write_text('{"status": "FINAL", "canonical": true}')
+    (tmp_path / "final_v2_retry.done").write_text("RETRY_DONE")
+    monkeypatch.setattr(final_report, "PILOT_DIR", tmp_path)
+    monkeypatch.setattr(final_report, "RETRY_DONE", tmp_path / "final_v2_retry.done")
+    monkeypatch.setattr(final_report, "HISTORY", tmp_path / "report_history")
+    monkeypatch.setattr(final_report, "SETS", ())                 # no runs: coverage trivially complete
+    copy = tmp_path / "elsewhere" / "regenerated.json"
+    copy.parent.mkdir()
+    monkeypatch.setattr(sys, "argv", ["final_report.py", "--out", str(copy)])
+    final_report.main()
+    out = json.loads(copy.read_text())
+    assert out["status"] == "FINAL" and "regenerated_copy" in out and "supersedes" not in out
+    assert json.loads(canonical.read_text()) == {"status": "FINAL", "canonical": True}
+    assert not (tmp_path / "report_history").exists()

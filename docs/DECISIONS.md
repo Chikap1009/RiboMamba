@@ -1264,3 +1264,29 @@ explanation for TCD + screen's success-rate gap to the non-neural screen.
 **Alternatives rejected.** Adding a resident-model service or prediction caching as a second
 optimisation (outside the one-optimisation scope, and the profile shows the remaining gap is not
 dominated by what they remove); moving the endpoint to ensemble quality alone after seeing results.
+
+**Correction (2026-09-29, closeout).** Point (3) overstated the evidence. Supported conclusion: proposal
+cost mattered, but reducing proposal overhead substantially did not eliminate TCD's success-rate
+disadvantage against the non-neural energy screen within the tested budgets. "Launch-bound" and "GPU
+wake latency" describe observations (a batch-independent per-call cost; a slowdown after idle periods)
+whose hardware/driver causes are inferred, not established.
+
+## D-031 — Close the project as a completed technical report; preserve a local reproduction package
+**Date:** 2026-09-29   **Status:** accepted
+
+**Context.** The protocol v2 final benchmark is complete (null primary endpoint; D-029) and the TCD
+efficiency direction is closed (D-030). A closeout review verified the saved evidence (all units
+valid; frozen configurations reproduce their config hashes; deterministic methods replay their saved
+prefixes; figures and point estimates regenerate) and found two reporting issues: an overstated
+conclusion about proposal cost, and bootstrap intervals that regenerate only to one discrete step.
+
+**Decision.** Finish docs/REPORT_repair_v2.md as the final technical report with the narrower
+conclusion and the limitations stated; add docs/REPRODUCE.md; preserve a dated local package
+(Git bundle, copies of reports, manifests, results, essential checkpoints and prepared data, and a
+checksummed inventory) without moving or deleting any original artifact. No further experiment,
+training or evaluation set is scheduled. The CUDA-graph TCD forward stays an opt-in method name
+(samfeo_tcdprop_efilter_graph); frozen method identifiers keep the eager path.
+
+**Alternatives rejected.** Sorting bootstrap inputs and re-issuing the intervals (would change
+canonical numbers after the fact for no change in any conclusion); re-running any benchmark to refresh
+numbers; copying third-party code (SAMFEO has no licence) into the package.

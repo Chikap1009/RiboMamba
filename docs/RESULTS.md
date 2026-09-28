@@ -1296,14 +1296,17 @@ No SOTA, generalisation, wet-lab or speed claim follows from these numbers.
 Record: docs/experiments/2026-09-28-tcd-inference-efficiency.md (question, profile, chosen optimisation
 and gates committed before the run). 32 eternaweb_dev_v1 development targets x seeds 0-2; 64 s method
 time, <= 5,010 candidates; 4 concurrent units, fresh process per unit (setup charged); 384/384 valid.
-Profile: the eager forward is launch-bound (~11-12 ms per call at batch 1-32) and is 75-89 % of TCD
-proposal time; each unit also pays ~3.2 s of setup (torch import, CUDA init, checkpoint load, first
-call); long puzzles add a GPU wake-up latency after idle periods. Optimisation: the same forward
-replayed from a CUDA graph with static input buffers (bitwise-identical logits; identical search at a
-fixed budget).
+Profile: the eager forward costs ~11-12 ms per call whether the batch holds 1, 8 or 32 rows (a fixed
+per-call cost, consistent with launch/dispatch overhead) and is 75-89 % of TCD proposal time; each
+unit also pays ~3.2 s of setup (torch import, CUDA init, checkpoint load, first call); on long puzzles
+forwards slow down after the GPU idles between calls (observed; its hardware/driver cause is inferred,
+not established). Optimisation: the same forward replayed from a CUDA graph with static input buffers
+(bitwise-identical logits and identical search at a fixed CANDIDATE budget, verified on the tested
+laptop/WSL2 configuration only; at a fixed time budget it evaluates more candidates).
 - Speed: proposal time per evaluated candidate 24.7 -> 10.2 ms (median); per-target ratio median 2.48
   (1.34-3.50; 1.74 above 130 nt); evaluations by 64 s x1.90, by 16 s x2.05.
-- Quality vs the eager implementation (graph - eager): uMFE +3.1 pp [0.0, +6.3] @16 s, 0.0 @64 s;
+- Quality vs the eager implementation (graph - eager; the comparator of the "no unacceptable quality
+  drop" criterion): uMFE +3.1 pp [0.0, +6.3] @16 s, 0.0 @64 s;
   best NED -0.0031 [-0.0051, -0.0015] @16 s (28/0 targets), -0.0019 [-0.0043, -0.0003] @64 s.
 - Versus SAMFEO + energy screen (graph - screen): uMFE -6.3 pp [-14.6, -1.0] @16 s, -5.2 pp [-10.4,
   -1.0] @64 s; best NED -0.0024 [-0.0054, +0.0008] @16 s, -0.0033 [-0.0057, -0.0011] @64 s.
@@ -1311,9 +1314,28 @@ fixed budget).
   56.2 %, graph 50.0 / 56.2 %.
 Gates: engineering (>= 2x overhead, >= 1.5x / 1.2x evaluations) MET; no quality regression; scientific
 continuation (beat SAMFEO + screen on uMFE, or on NED at both checkpoints without a uMFE loss) NOT MET.
-Faster proposals help TCD + screen against its own eager version but do not close its success-rate gap
-to the non-neural screen on these development puzzles. Development evidence only; GPU used by TCD arms.
+Proposal cost mattered (faster proposals improved TCD + screen against its own eager version), but
+reducing proposal overhead substantially did not eliminate TCD's success-rate disadvantage against the
+non-neural energy screen within the tested budgets. Development evidence only; GPU used by TCD arms.
 Isolated speed profiles (6 profiling targets x 3 seeds; speed only): proposal-overhead reduction x1.51
 cold / x1.8 warm (x2.48 in the 4-concurrent comparison); evaluations by 16 s x1.9-2.1 in every mode,
 by 64 s x1.39 cold / x1.55 warm. Setup before the first candidate ~3.1 s cold for both arms. The run
 prof_tcd_iso_cold_v1 was warm in fact (runner ignored --recycle-workers at --workers 1; fixed 82361cc).
+
+## Closeout verification (2026-09-29; no new experiment)
+Checks run at closeout (scripts/closeout_verify.py; output kept in the preservation package):
+- FINAL v2 report: status FINAL, commit 842124b, no coverage problems; all 3,504 units re-validated
+  from the saved traces (trace hashes and row counts); 117 superseded units and both superseded report
+  files preserved.
+- Frozen v2 configurations rebuilt from the current code give the recorded config hashes for all three
+  sets; the first 40 candidates of samfeo, samfeo_efilter, samfeo_tcdprop_efilter, random_pairs and
+  tcd_sample on two V2 puzzles (seed 0), re-run now, equal the saved final traces.
+- Regeneration from saved traces (to a temporary location): the FINAL report's status, coverage and
+  audit sections and both figures are byte-identical; every point estimate reproduces (to floating-point
+  rounding); bootstrap interval bounds move by up to one discrete step (at most 0.0123 for uMFE, 0.0008
+  for NED; 0.0104 in the efficiency comparison) because per-puzzle rows are not sorted before the seeded
+  bootstrap; no interval changed which side of zero it lies on and the efficiency gates are identical.
+- Execution detail found: the first 43 final V2 units (before amendment 1) ran in 10 persistent workers;
+  7 of them were TCD units that ran with the model already loaded (puzzles 22 and 53), so their ~3 s
+  setup was not charged. Puzzle 22 is solved by SAMFEO's initial designs; at most early-time points of
+  puzzle 53 (seed 0) are affected. Reported as a limitation; nothing re-analysed.

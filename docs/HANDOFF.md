@@ -1,4 +1,4 @@
-# Current handoff — 2026-09-28 (sessions 07-11)
+# Current handoff — 2026-09-29 (project closed; sessions 07-12)
 
 ## User decision
 The user approved the research pivot (efficient RNA inverse folding through coordinated repair;
@@ -7,57 +7,50 @@ use is not capped (lifted 2026-09-27 ~11:20 IST). Limits that still hold: no pai
 or external messages, one GPU training job at a time, preserve all data/checkpoints/results, no
 subagents, no SOTA/biological claims, record negative results.
 
-## Where things stand (measured, 2026-09-29 ~01:00 IST)
-The protocol v2 FINAL BENCHMARK IS COMPLETE and reported. Session 11 (evening) ran a bounded TCD
-inference-efficiency study (development only; see Exact next task).
-- Protocol: docs/PROTOCOL_design_v2.md, frozen 2026-09-27; amendments 1-4f are operational,
-  measurement or report-side fixes (no method, budget or endpoint changes; nothing tuned on
-  final outcomes).
-- Coverage: Eterna100 V2 2,400/2,400, V1-only 456/456, Rfam-Taneda-27 648/648 units valid; 0 errors;
-  117 V2 DesiRNA/SamplingDesign units that ran pre-fix code were superseded (kept in
-  data/repair_pilot/final_v2_eterna100_v2/units_superseded/) and rerun by the corrective pass.
-- Report: data/repair_pilot/final_v2_report.json, status FINAL, generated 2026-09-28 10:09:58 UTC
-  from commit 842124b (no uncommitted changes) after the corrective pass (10:01:37 UTC). It
-  SUPERSEDES two earlier files, moved to data/repair_pilot/report_history/ (README there): an
-  unlabelled smoke test of the report script (29/2,400 units, 2026-09-27 22:21 IST) and an INTERIM
-  file. Neither is a result.
-- Write-up: docs/RESULTS.md "FINAL BENCHMARK"; docs/REPORT_repair_v2.md (sections 1 and 4 filled);
-  decision D-029; logbook docs/logbook/2026-09-28-session-10.md.
+## Status (2026-09-29): PROJECT CLOSED
+The research direction is closed. No experiment, training run or evaluation is pending or scheduled,
+and nothing is running. The final technical report is complete: docs/REPORT_repair_v2.md (limitations
+in its section 9; optional publication work in section 11). Decisions: D-029 (final benchmark), D-030
+(efficiency study, with a closeout correction), D-031 (closeout).
 
-## Final results in one paragraph (Eterna100 V2, 128 s one-core method time, seeds 0-2)
-Solved by 128 s (any seed / mean): RNAinverse 75 / 71.7; SAMFEO 74 / 71.0; SAMFEO + TCD proposals +
-energy screen 73 / 71.0; SAMFEO + energy screen 73 / 70.7; DesiRNA 74 / 68.3; TCD sampling 62 / 61.3;
-targeted random 56 / 56.0; SamplingDesign (1 thread) 48 / 43.7. PRIMARY ENDPOINT NULL for every
-variant developed here (screen - SAMFEO uMFE -0.3 pp [-3.3, +2.0]). Ensemble quality improves
-modestly: best NED screen - SAMFEO -0.0026 [-0.0047, -0.0005] (72/25 puzzles); TCD + screen has the
-lowest NED of all methods (0.0400 vs SAMFEO 0.0459; -0.0059 [-0.0085, -0.0035], 82/14) but a slow start
-(40 % at 4 s vs 63 %). TCD sampling - targeted random +5.3 pp [-1.7, +12.3]; exploratory matched-sample
-view: -5.7 pp at 16 samples, +8.3 pp [0.0, +17.1] at 1,024 (72 puzzles) — the development
-conditioning gain (+27 pp) largely did not transfer. V1-only: 0/19 for every method, as in SAMFEO's
-own published V1 results (the puzzles V2 redesigned for the Vienna 2 energy model). Rfam-Taneda-27
-near ceiling (24/27 for the top five). EternaFold folds 25-39 % of best designs to target.
+## Where everything is
+- Report and reproduction: docs/REPORT_repair_v2.md, docs/REPRODUCE.md, docs/figures/ (drawn by
+  scripts/final_figures.py from the FINAL report).
+- Final benchmark (protocol v2, frozen 2026-09-27; docs/PROTOCOL_design_v2.md, amendments 1-4f):
+  data/repair_pilot/final_v2_eterna100_v2/, final_v2_eterna100_v1only/, final_v2_rfam_taneda27/ (3,504
+  valid units; 117 superseded V2 units kept in final_v2_eterna100_v2/units_superseded/); FINAL report
+  data/repair_pilot/final_v2_report.json (commit 842124b) and its superseded predecessors in
+  data/repair_pilot/report_history/ (with a README); chain scripts scripts/final_v2/.
+- Efficiency study (development only): record docs/experiments/2026-09-28-tcd-inference-efficiency.md;
+  declared comparison data/repair_pilot/ew_dev_tcdgraph_v1/ (compare.json); isolated profiles
+  prof_tcd_iso_warm_v1/ (warm), prof_tcd_iso_cold_v1/ (LABELLED cold but warm in fact: runner quirk
+  fixed in 82361cc; kept, see its LABEL.txt), prof_tcd_iso_cold_v2/ (cold); component profiles
+  data/repair_pilot/prof_tcd/.
+- Models: checkpoints/tf_M_do0/best.pt (base), checkpoints/tcd_v1/tcd.pt (TCD; model card
+  docs/MODEL_CARD_tcd_v1.md); data card docs/DATA_CARD_design.md; manifests/.
+- Records: docs/RESULTS.md (incl. "Closeout verification"), docs/DECISIONS.md, docs/logbook/ (latest
+  2026-09-29-session-12.md), docs/REFERENCES.md.
+- Local preservation package: /home/chirag/projects/RiboMamba_closeout_2026-09-29/ (built by
+  scripts/closeout_package.py): COMMIT.txt, ribomamba.bundle, restore/ (copies of data/repair_pilot,
+  essential checkpoints, prepared data, target sources), docs_snapshot/, inventory.json (A copied /
+  B referenced in place / C obtain separately), checks/, SHA256SUMS, VERIFY.txt. It is a second copy on
+  the same disk, not an independent backup; third-party code is not included (inventory gives URLs,
+  commits, licences).
 
-## Confirmation and evaluation-set status (corrected; earlier "in progress" notes are obsolete)
-- Development set (eternaweb_dev_v1, 32 hard Eterna web puzzles): used for all development runs.
-- Confirmation set (same manifest, 32 sealed puzzles): COMPLETE — one look, logged before any data
-  (manifests/confirmation_looks.jsonl; two log lines = one interrupted launch + resume with the same
-  config hash d2e1f7a7). ew_conf1024_efilter_v1: 192/192 units valid; energy screen - SAMFEO +9.4 pp
-  uMFE [1.0, 19.8] at 1,024 evaluations. It validated only the K = 8 screen and is now CONSUMED.
-- Final sets (Eterna100 V2 / V1, Rfam-Taneda-27): SCORED under protocol v2 and now CONSUMED.
-- Training pool (eternaweb_trainpool_v1, 700 puzzles): trainpool_samfeo_v1 COMPLETE, 700/700 units.
-- Any new claim needs a NEW, unused evaluation set and a new frozen protocol (D-029).
+## Final results in brief
+Eterna100 V2, solved by 128 s (any seed / mean of 3 seeds, of 100): RNAinverse 75 / 71.7; SAMFEO 74 / 71.0;
+SAMFEO + TCD proposals + screen 73 / 71.0; SAMFEO + screen 73 / 70.7; DesiRNA 74 / 68.3; TCD sampling
+62 / 61.3; targeted random 56 / 56.0; SamplingDesign (1 thread) 48 / 43.7. Primary endpoint null (no
+equivalence claim). Secondary: best NED TCD + screen 0.0400 vs SAMFEO 0.0459 (-0.0059 [-0.0085, -0.0035]).
+Efficiency study (development): CUDA-graph proposals cut overhead 2.48x (4 concurrent cold runs; 1.5-1.8x
+alone) and doubled candidates within 16 s, but TCD + screen still trailed SAMFEO + screen by 6.3 / 5.2
+uMFE points at 16 / 64 s; reducing proposal overhead did not eliminate that disadvantage.
 
-## Exact next task (updated 2026-09-29 ~01:00 IST)
-The bounded TCD inference-efficiency study (session 11; docs/experiments/2026-09-28-tcd-inference-
-efficiency.md; D-030) is COMPLETE and CLOSED: the CUDA-graph forward (samfeo_tcdprop_efilter_graph;
-identical search) cut proposal overhead 2.48x in the declared comparison (1.5x cold / 1.8x warm
-isolated) and roughly doubled evaluations by 16 s, but TCD + screen still trails SAMFEO + screen on uMFE
-(-6.3 / -5.2 pp at 16 / 64 s), so the scientific gate failed and no new protocol is prepared. Nothing is
-running. The report has a short section 4b on it.
-Remaining (optional, only if publishing): a systematic literature review and a longer methods section of
-docs/REPORT_repair_v2.md. Otherwise the project's current research question is closed; any new question
-needs a new, unused evaluation set and a newly frozen protocol. Do NOT rerun or re-analyse consumed sets,
-and do not start training or tuning without a new, recorded hypothesis.
+## Evaluation-set status
+Development (eternaweb_dev_v1, 32 puzzles): used throughout development. Confirmation (32 sealed
+puzzles): one look (+9.4 uMFE points for the screen), consumed. Final sets (Eterna100 V2/V1,
+Rfam-Taneda-27): scored under protocol v2, consumed. Any future claim would need a new, unused
+evaluation set and a newly frozen protocol; none is planned.
 
 ## Execution environment
 WSL Ubuntu-24.04:
@@ -92,7 +85,8 @@ TCD inference inside units shares the one GPU. Earlier elapsed-x-workers ledger 
 - Raw traces: data/repair_pilot/<run>/ (ignored by Git). Phase 4 remains paused (PHASE4_PAUSED.md).
 
 ## Scientific cautions
-- No SOTA, novelty, generalisation, wet-lab or speed claim exists. The primary final endpoint is null.
+- No SOTA, novelty, generalisation or wet-lab claim exists, and no speed claim beyond the measured
+  configuration (one laptop GPU under WSL2). The primary final endpoint is null.
 - The energy screen is non-neural and prior art in idea (INFO-RNA 2006); critics and the competition
   residual are negative online; the TCD is a model-adaptation result, not a benchmark-level gain.
 - Development DesiRNA wall-time numbers are optimistic (RESULTS correction); final DesiRNA/

@@ -42,6 +42,29 @@ drawn from the product of the two conditional marginals restricted to canonical 
 approximation to the joint). Cost: one GPU forward pass per sampling step or proposal; ~57 s model time
 per 1,024 samples with 8 processes sharing the GPU; a ~2-3 s model load per process.
 
+## Inference paths and how to select them (added 2026-09-29)
+- Default (reference): EAGER forward. Every frozen protocol-v2 method name uses it
+  (samfeo_tcdprop_efilter, tcd_sample, samfeo_efilter_tcdinit), and those names keep this behaviour.
+- CUDA graph (preferred on the validated configuration, opt-in): method samfeo_tcdprop_efilter_graph,
+  i.e. settings key tcd_forward = "cuda_graph" (tcd.infill_graphed). The forward for one target and
+  batch shape is captured once per process and replayed; one graph is held per process and recaptured
+  when the target changes. It applies to SAMFEO proposals (infill) only; TCD sampling (tcd_sample) and
+  TCD initial designs always run eager.
+- Fallbacks: the model runs on CUDA when a GPU is visible, otherwise on the CPU (the runner hides CUDA
+  unless --gpu is given). On the CPU, infill_graphed falls back to the eager path (tested). If CUDA is
+  visible but graph capture fails, the unit fails with an error; there is no automatic fallback. CPU runs
+  use float32 while GPU runs use bfloat16 autocast, so CPU and GPU results are not numerically identical.
+  An unknown tcd_forward value raises an error.
+- Validated configuration (only): RTX 4060 Laptop GPU, NVIDIA driver 595.79, WSL2 (kernel 6.18),
+  PyTorch 2.10.0+cu128 (CUDA 12.8, cuDNN 9.10.2). There, graph and eager logits were bitwise identical
+  and searches at a matched candidate budget were identical (tests/test_tcd_graph.py). This is not
+  guaranteed on other GPUs, drivers, PyTorch versions or operating systems; at a matched TIME budget the
+  graphed variant evaluates more candidates, so its runs differ by design.
+- Measured effect (development; docs/experiments/2026-09-28-tcd-inference-efficiency.md): proposal
+  overhead per candidate reduced 2.48x with 4 concurrent cold runs (1.51x cold, ~1.8x warm when run alone);
+  ~2x more candidates within 16 s; still 5-6 uMFE points below SAMFEO + energy screen on the development
+  puzzles. Setup before the first candidate (~3 s cold) is unchanged.
+
 ## Intended use and limits
 - Intended: research on structure-conditioned sequence generation and on neural proposals inside
   design search, evaluated with the harness in this repository.

@@ -15,6 +15,7 @@ Seeds are averaged within targets; bootstrap 95 % intervals over targets. Writes
 import argparse
 import json
 import math
+from pathlib import Path
 
 import numpy as np
 import polars as pl
@@ -79,6 +80,7 @@ def ratio_median(u, num, den, wall, col):
 def main() -> None:
     p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     p.add_argument("--run", default="ew_dev_tcdgraph_v1")
+    p.add_argument("--out", default=None, help="write the comparison JSON here (default <run>/compare.json)")
     p.add_argument("--names", nargs=4, metavar=("REF", "GRAPH", "SCREEN", "SAMFEO"), default=None,
                    help="method names (only for dry runs of this script on older runs)")
     args = p.parse_args()
@@ -119,7 +121,7 @@ def main() -> None:
              "S_success": s_success, "S_quality": s_quality}
     gates["continue_to_new_protocol"] = gates["E1_met"] and gates["E2_met"] and gates["Q_ok"] and (s_success or s_quality)
     out["gates"], out["paired"] = gates, pairs
-    (d / "compare.json").write_text(json.dumps(out, indent=1, default=float))
+    Path(args.out or d / "compare.json").write_text(json.dumps(out, indent=1, default=float))
     print(json.dumps({k: out[k] for k in ("units", "status_counts", "units_without_design_64s")}, indent=1))
     f = lambda v, spec: "NA" if v is None or (isinstance(v, float) and math.isnan(v)) else format(v, spec)
     for r in out["means"]:

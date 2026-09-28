@@ -110,13 +110,20 @@ def forest_figure(report: dict) -> None:
 
 
 def main() -> None:
-    report = json.loads(REPORT.read_text())
+    import argparse
+    global OUT
+    p = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
+    p.add_argument("--report", default=str(REPORT), help="FINAL report JSON to draw from")
+    p.add_argument("--out-dir", default=str(OUT), help="where to write the PNGs (default docs/figures)")
+    args = p.parse_args()
+    OUT = Path(args.out_dir)
+    report = json.loads(Path(args.report).read_text())
     if report.get("status") != "FINAL":
-        raise SystemExit(f"{REPORT} is not a FINAL report (status {report.get('status')!r})")
+        raise SystemExit(f"{args.report} is not a FINAL report (status {report.get('status')!r})")
     OUT.mkdir(parents=True, exist_ok=True)
     curves_figure(report)
     forest_figure(report)
-    print(f"figures from {REPORT.name} (generated {report['provenance']['generated_utc']}, "
+    print(f"figures from {Path(args.report).name} (generated {report['provenance']['generated_utc']}, "
           f"commit {report['provenance']['git_commit'][:7]}) written to {OUT}")
 
 

@@ -1,6 +1,6 @@
-> Current direction (2026-09-28): the repair-research pivot's final benchmark is complete (protocol v2). Earlier phase gates are superseded; the material below the talking points is historical reference. See HANDOFF.md.
+> Status (2026-09-29): the project is closed as a completed technical report (docs/REPORT_repair_v2.md). Earlier phase gates are superseded; the material below the talking points is historical reference. See HANDOFF.md.
 
-## Current project talking points (2026-09-28, FINAL benchmark measured)
+## Current project talking points (2026-09-29, project closed; FINAL benchmark measured)
 Honest framing: a rigorous benchmark whose PRIMARY ENDPOINT IS NULL for my variants; a modest,
 consistent ensemble-quality gain in which the conditioned diffusion model takes part; one positive
 MODEL-ADAPTATION result on development puzzles that transferred only weakly; and several careful
@@ -26,8 +26,18 @@ target-paired positions), so training starts exactly at the pretrained model. 23
 fine-tuning cut held-out design NELBO from 1.92 to 0.80 bits/nt, and sampling alone solved 43 % of
 hard development puzzles versus 16 % for targeted random designs and 3 % unconditionally. On
 Eterna100 that gain mostly did not transfer (+5 pp by time, not significant; +8 pp at 1,024
-samples on the shorter puzzles, exploratory). So: conditioning works as model adaptation, and
-the honest next questions are cost (one GPU pass per proposal) and data/transfer.
+samples on the shorter puzzles, exploratory). So: conditioning works as model adaptation, but it
+did not become a better search method.
+
+**Q: Did you check whether the model was just too slow?** Yes, in a bounded follow-up on development
+puzzles with criteria fixed in advance. Profiling showed the forward pass cost ~11-12 ms per call
+whatever the batch size, i.e. per-call overhead rather than arithmetic, and replaying it from a CUDA
+graph (same logits, same search at a fixed candidate budget) cut proposal overhead about 2.5x and
+roughly doubled the candidates evaluated in 16 s. It improved the model's variant against its own
+slower version, but it still solved 5-6 points fewer development puzzles than the plain energy screen.
+So cost mattered, but removing much of it was not enough; I stopped the direction as pre-declared
+rather than tuning further. The speed-ups are from one laptop GPU under WSL2 and are smaller when a
+single run is timed alone (1.5-1.8x).
 
 **Q: Why did the development gains not transfer?** Development used 32 hard Eterna web puzzles at a
 fixed evaluation count; the final used Eterna100 at a fixed time. Many Eterna100 puzzles are easy for

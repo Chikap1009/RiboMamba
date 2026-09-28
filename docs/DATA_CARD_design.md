@@ -48,4 +48,6 @@ optimisation target.
 - SAMFEO's repository has no license file: it is used locally only and never redistributed. The
   Rfam-Taneda-27 manifest stores structures (public Rfam-derived data), not SAMFEO code.
 - Raw traces live in data/repair_pilot/ (ignored by Git) and are preserved, including superseded units
-  and report files (data/repair_pilot/report_history/).
+  and report files (data/repair_pilot/report_history/). A checksummed local copy of the results, the
+  prepared data and these target files is in the closeout package (docs/HANDOFF.md); the large Rfam raw
+  files are referenced there by checksum, not copied.

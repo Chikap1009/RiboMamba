@@ -1,16 +1,18 @@
 # RiboMamba
 Research code for RNA sequence generation and efficient inverse folding.
 
-**Status (2026-09-28):** the repair / inverse-folding study is implemented and its
-pre-registered final benchmark (protocol v2: Eterna100 V2/V1, Rfam-Taneda-27; 128 s
-of one-core method time per run; 3 seeds) is complete. Its PRIMARY RESULT IS NULL:
-no variant developed here solves more Eterna100 V2 puzzles than SAMFEO (71.0 of 100,
-mean over seeds; energy screen 70.7; SAMFEO + target-conditioned diffusion proposals
-+ screen 71.0; RNAinverse 71.7). The conditioned-proposal variant has the lowest
-ensemble defect (a modest ensemble-quality gain, not a success-rate gain). Details:
-[technical report](docs/REPORT_repair_v2.md) and [results](docs/RESULTS.md). The
-earlier Transformer/BiMamba training study is paused; its checkpoints and results
-remain available. No SOTA, novelty or biological claim is made.
+**Status (2026-09-29): project closed.** The repair / inverse-folding study is complete and written
+up as a technical report: [docs/REPORT_repair_v2.md](docs/REPORT_repair_v2.md). Its pre-registered
+final benchmark (protocol v2: Eterna100 V2/V1, Rfam-Taneda-27; 128 s of one-core method time per run;
+3 seeds) has a NULL PRIMARY RESULT: no variant developed here solves more Eterna100 V2 puzzles than
+SAMFEO (71.0 of 100, mean over seeds; energy screen 70.7; SAMFEO + target-conditioned diffusion
+proposals + screen 71.0; RNAinverse 71.7). The conditioned-proposal variant has the lowest ensemble
+defect (a modest secondary ensemble-quality gain, not a success-rate gain). A later development study
+cut the conditioned model's proposal overhead about 2.5x with CUDA-graph replay, but reducing that
+overhead did not eliminate its success-rate disadvantage against the non-neural energy screen within
+the tested budgets; the direction is closed. No SOTA, novelty or biological claim is made. The earlier
+Transformer/BiMamba training study is paused; its checkpoints and results remain available.
+Reproduction: [docs/REPRODUCE.md](docs/REPRODUCE.md).
 
 Start with [the handoff](docs/HANDOFF.md), [research plan](docs/RESEARCH_PLAN.md),
 and [agent instructions](CLAUDE.md).
@@ -39,4 +41,5 @@ The existing environment is already installed. Large data and model artifacts
 are ignored by Git; a fresh clone does not contain them. The old Phase 4 queue
 is intentionally paused; do not use it as the default entry point.
 
-See the handoff for a verified CPU smoke-test command and the exact first task.
+See [docs/REPRODUCE.md](docs/REPRODUCE.md) for tests, regeneration of the report's tables and
+figures, and the (expensive) experiment commands.

@@ -30,6 +30,7 @@ import json
 import math
 import shutil
 import subprocess
+from pathlib import Path
 
 import numpy as np
 import polars as pl
@@ -238,6 +239,9 @@ def main() -> None:
     p.add_argument("--interim", action="store_true", help="allow an incomplete benchmark; output labelled INTERIM")
     p.add_argument("--accept-errors", action="store_true",
                    help="after diagnosis, count remaining error units as unsolved (they are listed in the report)")
+    p.add_argument("--out", default=None,
+                   help="write the report to this path instead (regeneration check): the canonical report and its "
+                        "history are neither archived nor touched")
     args = p.parse_args()
     report, frames = {"audit": {}, "sets": {}, "status": "INTERIM (incomplete benchmark)" if args.interim else "FINAL"}, {}
     problems = []
@@ -305,7 +309,10 @@ def main() -> None:
     report["provenance"] = provenance()
     out = PILOT_DIR / ("final_v2_report_INTERIM.json" if args.interim else "final_v2_report.json")
     json.dumps(report, default=float)            # fail here, before any earlier report is moved
-    if not args.interim:
+    if args.out:
+        out = Path(args.out)
+        report["regenerated_copy"] = "written with --out; the canonical report is data/repair_pilot/final_v2_report.json"
+    elif not args.interim:
         # FINAL supersedes every earlier report file: move them to report_history/ and say so in the report
         moved = archive_previous([PILOT_DIR / "final_v2_report.json", PILOT_DIR / "final_v2_report_INTERIM.json"],
                                  HISTORY)
@@ -317,7 +324,7 @@ def main() -> None:
     tmp.replace(out)
     print(f"[{report['status']}] written to {out} at {report['provenance']['generated_utc']} "
           f"(commit {report['provenance']['git_commit'][:7]})")
-    if not args.interim:
+    if "supersedes" in report:
         print(f"supersedes {len(report['supersedes']['all_superseded_files'])} earlier report file(s), kept in {HISTORY}")
     for s, e in report["sets"].items():
         print(f"## {s}")

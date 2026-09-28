@@ -105,28 +105,32 @@ energy screen are < 1 ms per evaluation. SAMFEO's history loop re-calls the prop
 per evaluated candidate on short puzzles).
 
 Why the forward is slow (probes): eager latency is ~11-12 ms whether the batch is 1, 8 or 32 rows at
-29-129 nt (launch-bound: fixed per-call overhead, not arithmetic); 23 ms only for 32 rows at 251 nt.
+29-129 nt (a fixed per-call cost that does not grow with the batch, consistent with kernel-launch/
+dispatch overhead [wording corrected at closeout]); 23 ms only for 32 rows at 251 nt.
 A CUDA-graph replay of the same B = 8 forward takes 1.8 ms (29 nt), 3.6-4.6 ms (129 nt), 5.1-6.8 ms
 (251 nt), after a one-off capture of 19-42 ms, and its nucleotide logits are BITWISE identical to
 eager (251 nt case). When the GPU idles 100-300 ms between calls (sleep or real ViennaRNA work), both
-eager and graphed forwards slow to 23-72 ms: a GPU/driver wake-up latency (laptop, WSL2) that no
-launch-level optimisation removes. This explains the 68 ms forwards at 251 nt, where SAMFEO's own
-evaluation and harness scoring leave the GPU idle ~150 ms between proposals.
+eager and graphed forwards slowed to 23-72 ms (observed; graph replay did not remove it). Attributing
+this to GPU/driver idle (power-state) behaviour on this laptop/WSL2 setup is an inference that was not
+tested further [closeout correction: earlier wording stated it as fact]. It is the likely reason for the
+68 ms forwards at 251 nt, where SAMFEO's own evaluation and harness scoring leave the GPU idle ~150 ms
+between proposals.
 
 ## Chosen optimisation (from the profile) and alternatives not chosen
 CHOSEN: graphed forward with static input buffers. Per unit (one target, fixed shape B = 8 x (L + 2)),
 build the structure tensors once, capture the model's autocast forward once in a CUDA graph, and per
 proposal copy the host-built token batch into the static buffer (one H2D copy) and replay. Mask
 expansion, softmax, D2H and the numpy sampling are unchanged, so given bitwise-identical logits the
-children, the random stream and therefore the whole search are unchanged: a transparent speed change
-(to be verified by tests and by identical trajectories at fixed budgets). The eager reference stays
+children, the random stream and therefore the whole search are unchanged at a matched CANDIDATE budget
+(to be verified by tests and by identical trajectories at fixed budgets; at a matched time budget the
+faster variant evaluates more candidates, so runs diverge [qualifier added at closeout]). The eager reference stays
 available and is the comparison arm. Projected removable proposal overhead from the profile: ~2.6-3.2x
-at 29-129 nt, only ~1.3-1.6x at 251 nt (wake latency).
+at 29-129 nt, only ~1.3-1.6x at 251 nt (post-idle slowdown).
 Not chosen: (i) a resident model across units removes the ~3.2 s cold start (20 % of a 16 s budget, 5 %
 of 64 s) but the steady-state forward costs 50-97 % of a 64 s unit, and it changes the execution model;
 (ii) caching predictions for repeated (parent, mask) rows helps short puzzles only (95/72/86 % repeats
 vs 6-28 % at >= 92 nt) and saves a forward only when all 8 rows repeat; (iii) nothing within scope
-removes the GPU wake latency at long lengths (keeping the GPU busy artificially is not a method).
+removes the post-idle slowdown at long lengths (keeping the GPU busy artificially is not a method).
 
 ## Criteria (final; fixed 2026-09-28 before any optimised-variant outcome was measured)
 Development comparison: runner, eternaweb_dev_v1 development subset (32 targets) x seeds 0-2, methods
@@ -169,7 +173,7 @@ At 1 s neither TCD arm has a design (cold start ~3.2 s is charged to both and un
 
 Speed (cold, 4 concurrent): proposal time per evaluated candidate 24.7 -> 10.2 ms (unit medians);
 per-target ratio reference/graph median 2.48 (1.34-3.50): 2.51 (<= 60 nt, 12 targets), 2.53
-(61-130 nt, 14), 1.74 (> 130 nt, 6; 1.34 at 251 nt, the GPU wake-latency regime). Evaluations by
+(61-130 nt, 14), 1.74 (> 130 nt, 6; 1.34 at 251 nt, where the post-idle slowdown dominates). Evaluations by
 64 s graph/reference median 1.90 (1.08-2.46; 1.21 above 130 nt), by 16 s 2.05. Proposal calls per
 evaluation rose 1.07 -> 1.45 (the faster search reaches SAMFEO's history-collision phase more often).
 Model time per 64 s unit: 49.5 -> 34.7 s (median) while model calls rose 2,262 -> 5,685. Peak host RSS
@@ -194,10 +198,13 @@ graph arm is better than the eager reference on NED and P at matched time, as ex
 search semantics with more evaluations). S NOT MET: against SAMFEO + screen the optimised TCD arm is
 WORSE on uMFE at both checkpoints (-6.3 and -5.2 pp, intervals below 0) and its NED advantage holds
 only at 64 s (-0.0033) and not at 16 s (interval includes 0).
-DECISION: the engineering optimisation works and is kept (a transparent speed change), but the
-scientific continuation criterion fails, so no new evaluation set or protocol is prepared (Phase 4 not
-started) and this direction STOPS here, as the stopping rule requires. The removed overhead was a real
-cost, but not the reason TCD + screen trails SAMFEO + screen in success rate on these puzzles.
+DECISION: the engineering optimisation works and is kept (a speed change that leaves the search
+unchanged at matched CANDIDATE budgets; at matched TIME budgets it evaluates more candidates, so runs
+diverge), but the scientific continuation criterion fails, so no new evaluation set or protocol is
+prepared (Phase 4 not started) and this direction STOPS here, as the stopping rule requires. Proposal
+cost mattered, but reducing proposal overhead substantially did not eliminate TCD's success-rate
+disadvantage against the non-neural energy screen within the tested budgets. [Closeout correction: the
+earlier sentence said the overhead was "not the reason" for the gap, which overstated the evidence.]
 Limits: 32 development targets used throughout the project's development (not confirmation); one
 laptop GPU under WSL2 (launch and wake latencies are platform-specific); bitwise identity of graph and
 eager logits is verified empirically on this GPU/driver/torch build, not guaranteed in general.
@@ -216,7 +223,7 @@ WARM, isolated (one process, model resident; setup paid once, excluded from late
 |---|---|---|---|---|---|
 | warm (v1 'warm') | 23.2 | 13.5 | 1.83 (1.18-2.70) | 624 -> 1,352 (x2.09) | 1,908 -> 3,182 (x1.55) |
 | warm (v1 'cold', mislabelled) | 22.6 | 13.6 | 1.76 (1.18-2.64) | 632 -> 1,353 (x2.05) | 1,956 -> 3,196 (x1.54) |
-These 6 targets include 2 of the 6 longest (> 130 nt), where the GPU wake latency limits the gain, so
+These 6 targets include 2 of the 6 longest (> 130 nt), where the post-idle slowdown limits the gain, so
 their median ratios are lower than the 32-target comparison's (2.48 overhead, 1.90 evaluations).
 COLD, isolated (prof_tcd_iso_cold_v2, 2026-09-28 23:58 - 09-29 00:47 IST; --workers 1 --recycle-workers
 after the fix; 36/36 valid, 36 distinct processes, no errors): both arms reach their first candidate
@@ -227,3 +234,23 @@ Summary across modes (speed only): the graph forward cuts proposal overhead ~1.5
 ~1.8x (warm, isolated) and ~2.5x (cold, 4 concurrent units: the declared comparison, where eager
 launches also contend for the GPU); evaluations by 16 s roughly double in every mode; gains shrink on
 the longest puzzles. None of this changes the decision above, which rests on the declared comparison.
+
+## Closeout corrections (2026-09-29; no new experiment)
+- Conclusion narrowed (see DECISION above): cost mattered, but reducing it did not eliminate the
+  success-rate disadvantage against SAMFEO + screen within the tested budgets.
+- "Launch-bound" and "wake latency" wording: the measurements show a fixed per-call cost independent
+  of batch size that CUDA-graph replay largely removes, and a slowdown after idle periods that it does
+  not; the hardware/driver causes are inferences, not established facts.
+- Equivalence scope: bitwise-identical logits and identical search were verified at matched candidate
+  budgets on one configuration (RTX 4060 Laptop GPU, driver 595.79, WSL2 kernel 6.18, PyTorch
+  2.10.0+cu128, CUDA 12.8, cuDNN 9.10.2); not guaranteed on other GPUs, drivers, PyTorch versions or
+  operating systems. At matched time budgets trajectories differ by design.
+- Criterion Q ("no unacceptable quality drop") compares the graphed variant with the EAGER TCD
+  implementation only; against SAMFEO + screen the graphed variant is worse on uMFE (criterion S).
+- Speed-up scope: 2.48x (proposal overhead) and 1.9-2.05x (candidates within the budget) are for 4
+  concurrent cold runs; isolated runs gained 1.51x (cold) and ~1.8x (warm) in overhead; the ~3 s setup
+  before the first candidate and the run length (fixed budget) are unchanged.
+- Regeneration check: re-running scripts/tcd_graph_compare.py on the saved traces reproduced every point
+  estimate and all gates; bootstrap interval bounds moved by at most one discrete step (1/96 = 0.0104
+  for uMFE) because per-target rows are not sorted before the seeded bootstrap; no interval changed
+  which side of zero it lies on.
