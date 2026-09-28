@@ -141,7 +141,9 @@ Q2 (data): over-fitting began after ~1k steps on ~270 design puzzles; does train
     improve held-out design NELBO and sampling uMFE?
 Q3 (target of learning): does fine-tuning on accepted-versus-rejected moves (search-aware) beat
     NELBO fine-tuning? Prior art: RL for design (LEARNA), distillation of SAMFEO into language
-    models (Gautam et al. 2026), conditional RNA diffusion (RNA-MDLM 2026); no novelty is claimed.
+    models (Gautam et al. 2026), RNA-type-conditioned masked diffusion with inpainting (RNA-MDLM 2026),
+    secondary-structure-conditioned RL (Struct2SeQ 2026) and latent diffusion + RL (SOLD 2026); no novelty
+    is claimed.
 Constraints before any run: development puzzles only; a NEW, unused evaluation set is needed for
 any claim, because the confirmation set has had one look and the final sets are consumed by
 protocol v2; success criteria fixed in writing before the first run; the TCD stays framed as a

@@ -103,6 +103,13 @@ no biological function is claimed.
 ## 6. Prior art and novelty
 Energy-guided proposals: INFO-RNA (2006). Rival structures/bounds: LinearDecompose (2026).
 Search baselines: SAMFEO (2023), SamplingDesign (2026), DesiRNA, Montparnasse (2025/26).
-Learned design: LEARNA, EternaBrain, language models distilled from SAMFEO (Gautam et al. 2026),
-conditional RNA diffusion (RNA-MDLM, 2026). Nothing here is claimed as SOTA or as a new idea;
-contributions are measured efficiency/quality results and careful negative results.
+Learned design: LEARNA, EternaBrain, language models distilled from SAMFEO and conditioned on the
+dot-bracket target (Gautam et al. 2026), deep Q-learning conditioned on secondary structure and SHAPE
+(Struct2SeQ, 2026), latent diffusion with reward optimisation of secondary-structure consistency and
+MFE (SOLD, 2026), diffusion conditioned on 3D backbones (RiboDiffusion, 2024), and masked discrete
+diffusion for ncRNA conditioned on RNA type with inpainting (RNA-MDLM, 2026; not target-structure
+conditioned). Structure-conditioned neural design is therefore established; adapting a pretrained
+unconditional masked-diffusion model with zero-initialised structure adapters is one variant among
+these, not claimed as new. Nothing here is claimed as SOTA or as a new idea; contributions are measured
+efficiency/quality results, a completed pre-registered benchmark with a null primary endpoint, and
+careful negative results. (Prior-art list refreshed 2026-09-28; docs/REFERENCES.md, session 10.)

@@ -139,7 +139,9 @@ tests, versioned manifests, raw traces and failure logs (local), pinned environm
 (docs/REPORT_repair_v2.md, with figures from scripts/final_figures.py), model card
 (docs/MODEL_CARD_tcd_v1.md) and data card (docs/DATA_CARD_design.md). Remaining for a complete
 artifact: a refreshed novelty/prior-art assessment against current primary sources (the report
-claims no novelty; the section 6 prior-art list dates from 2026-09-27).
+claims no novelty). Prior-art list refreshed 2026-09-28 (REFERENCES.md session 10: RNA-MDLM is
+RNA-type-conditioned, not target-structure-conditioned; Struct2SeQ, SOLD and RiboDiffusion added);
+a systematic literature review remains open if the work is prepared for publication.
 
 ## Literature tasks before any novelty claim
 - Designing RNAs with Language Models: https://arxiv.org/html/2602.12470v1
