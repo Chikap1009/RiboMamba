@@ -285,7 +285,7 @@ def run(run_dir: Path, config: dict, targets: list[dict], workers: int = 4, max_
     counts: dict[str, int] = {"skipped_complete": skipped}
     if jobs:
         os.environ.setdefault("OMP_NUM_THREADS", "1")
-        if workers <= 1:
+        if workers <= 1 and not recycle_workers:          # in-process; --recycle-workers needs a pool even at 1
             results = map(run_unit, jobs)
             pool = None
         else:

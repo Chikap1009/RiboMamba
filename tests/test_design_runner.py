@@ -171,3 +171,13 @@ def test_zero_candidate_time_limit_is_a_valid_outcome(tmp_path, monkeypatch):
 def test_wall_limited_tools_inherit_the_unit_time_limit():
     cfg = runner.make_config(MANIFEST, "toy", TARGETS, ["desirna", "samfeo"], [0], 100, unit_time_limit_s=90)
     assert cfg["methods"]["desirna"]["time_limit_s"] == 90 and "time_limit_s" not in cfg["methods"]["samfeo"]
+
+
+def test_recycle_workers_gives_every_unit_a_fresh_process_even_with_one_worker(tmp_path):
+    import os
+    cfg = config(methods=["random_pairs"], seeds=(0,))
+    runner.run(tmp_path, cfg, TARGETS, workers=1, progress=quiet, recycle_workers=True)
+    pids = [json.loads(runner.unit_paths(tmp_path, runner.unit_key("random_pairs", t["id"], 0))[1].read_text())["pid"]
+            for t in TARGETS]
+    assert len(set(pids)) == len(TARGETS) and os.getpid() not in pids
+
