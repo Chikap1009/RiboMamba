@@ -1,0 +1,27 @@
+# FULL LOCK FILE of the `rmtools` conda environment as used for the protocol v2 final benchmark (exported 2026-09-28,
+# after the benchmark). Verified unchanged since the freeze: last conda revisions ribomamba 2026-09-24, desirna 2026-09-27 12:34, rmtools 07:09 IST; no pip package newer than the freeze. environment.lock.yml stays the Phase 3 freeze record.
+# Compiler env used to build SamplingDesign f0283c49 (external/SamplingDesign/bin/main). Rebuild: conda env create -n rmtools -f environment.design_v2.rmtools.lock.yml
+name: rmtools
+channels:
+  - conda-forge
+dependencies:
+  - _openmp_mutex=4.5=20_gnu
+  - binutils_impl_linux-64=2.46.1=default_hfdba357_102
+  - binutils_linux-64=2.46.1=default_h4852527_102
+  - gcc_impl_linux-64=16.2.0=h9891192_7
+  - gcc_linux-64=16.2.0=h0ab548f_2
+  - gxx_impl_linux-64=16.2.0=h0d273dc_7
+  - gxx_linux-64=16.2.0=h23aca61_2
+  - kernel-headers_linux-64=6.12.0=he073ed8_6
+  - ld_impl_linux-64=2.46.1=default_hbd61a6d_102
+  - libgcc=16.2.0=ha9f2e26_7
+  - libgcc-devel_linux-64=16.2.0=he3ce08f_107
+  - libgomp=16.2.0=he0feb66_7
+  - libsanitizer=16.2.0=h3048135_7
+  - libstdcxx=16.2.0=h934c35e_7
+  - libstdcxx-devel_linux-64=16.2.0=h86e191b_107
+  - libzlib=1.3.2=h25fd6f3_3
+  - make=4.4.1=hb03c661_3
+  - sysroot_linux-64=2.39=hc4b9eeb_6
+  - tzdata=2026c=h151e31d_0
+  - zstd=1.5.7=hb78ec9c_7
