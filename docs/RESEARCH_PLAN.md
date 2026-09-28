@@ -130,6 +130,15 @@ model/data documentation. An optional demo follows evidence. If the hypothesis
 fails, report that accurately; the project is not complete as a SOTA contribution
 merely because software runs.
 
+**Status 2026-09-28 (D-029):** protocol v2 frozen and the final benchmark run to completion (3,504
+units valid; FINAL report data/repair_pilot/final_v2_report.json). The hypothesis as a SUCCESS-RATE
+claim failed: no variant beats SAMFEO or RNAinverse on uMFE at 128 s; ensemble quality (NED) improves
+modestly with the energy screen and most with conditioned-denoiser proposals. Done: code and adapters,
+tests, versioned manifests, raw traces and failure logs (local), pinned environments
+(environment.design_v2.*.lock.yml), ablations with uncertainty, technical report draft
+(docs/REPORT_repair_v2.md). Remaining for a complete artifact: refreshed novelty assessment against
+current sources, model/data documentation for the TCD checkpoint and design data, and figures.
+
 ## Literature tasks before any novelty claim
 - Designing RNAs with Language Models: https://arxiv.org/html/2602.12470v1
 - SamplingDesign: https://github.com/weiyutang1010/SamplingDesign

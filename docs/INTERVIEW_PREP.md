@@ -1,50 +1,60 @@
-> Current direction (2026-09-27): the user approved the repair-research pivot in RESEARCH_PLAN.md. Earlier phase gates and mandatory sweep completion are superseded; the material below remains historical reference. See HANDOFF.md for the next action.
+> Current direction (2026-09-28): the repair-research pivot's final benchmark is complete (protocol v2). Earlier phase gates are superseded; the material below the talking points is historical reference. See HANDOFF.md.
 
-## Current project talking points (2026-09-27, measured; final benchmark pending)
-Honest framing: one NON-NEURAL efficiency result, several careful NEGATIVE neural results, and one
-positive MODEL-ADAPTATION result. None is a SOTA claim. Numbers are development results on 32
-hard, leakage-audited Eterna puzzles x 3 seeds unless marked.
+## Current project talking points (2026-09-28, FINAL benchmark measured)
+Honest framing: a rigorous benchmark whose PRIMARY ENDPOINT IS NULL for my variants; a modest,
+consistent ensemble-quality gain in which the conditioned diffusion model takes part; one positive
+MODEL-ADAPTATION result on development puzzles that transferred only weakly; and several careful
+NEGATIVE neural results. None is a SOTA claim.
 
 **Q: What did you build?** A benchmark harness for RNA inverse folding that measures design
 quality per unit of compute: per-candidate traces, per-kind oracle-call counts, monotone
 method-time clocks, resumable runs, sealed confirmation targets, locally reproduced baselines
-(SAMFEO, DesiRNA, RNAinverse, SamplingDesign) and a frozen final protocol.
+(SAMFEO, DesiRNA, RNAinverse, SamplingDesign) and a frozen final protocol, run to completion
+(3,504 units, every one validated).
+
+**Q: What did the final benchmark show?** On Eterna100 V2 with 128 s of one-core time per run, my
+variants solve as many puzzles as SAMFEO and RNAinverse (all ~71 of 100 averaged over seeds) and no
+more: the primary endpoint is null. What improves is ensemble quality: the conditioned-model
+proposals plus an energy screen give the lowest ensemble defect of all eight methods (better than
+SAMFEO on 82 of 100 puzzles), at the same success rate but a slower start. I report the null result
+as the headline, not the secondary gain.
 
 **Q: What is the diffusion / foundation-model part?** I took my 14M-parameter masked-diffusion
 Transformer, pretrained unconditionally on Rfam, and adapted it to condition on the target
 structure with zero-initialised adapters (a bracket embedding and pair message passing between
 target-paired positions), so training starts exactly at the pretrained model. 23 GPU-minutes of
-fine-tuning on training-side data cut held-out design NELBO from 1.92 to 0.80 bits/nt. Sampling
-alone solves 43 % of hard puzzles versus 16 % for targeted random designs and 3 % for the
-unconditional model (pre-registered conditioning test passed). Used as the search's proposal
-model, with the mutation sites held fixed, it improves ensemble quality per evaluation causally
-(NED -0.016, log10 P +0.34) but not solve rate, and it costs ~3x wall time — so it is a model
-result, not (yet) a better method.
+fine-tuning cut held-out design NELBO from 1.92 to 0.80 bits/nt, and sampling alone solved 43 % of
+hard development puzzles versus 16 % for targeted random designs and 3 % unconditionally. On
+Eterna100 that gain mostly did not transfer (+5 pp by time, not significant; +8 pp at 1,024
+samples on the shorter puzzles, exploratory). So: conditioning works as model adaptation, and
+the honest next questions are cost (one GPU pass per proposal) and data/transfer.
 
-**Q: What actually made search better?** A cheap physics screen: draw 8 of SAMFEO's own mutations,
-keep the one that most stabilises the target structure (an O(n) energy evaluation). +10 pp
-unique-MFE success, replicated 3x and confirmed on sealed puzzles; best ensemble quality at every
-budget. Not a new idea (INFO-RNA, 2006, orders moves by target-energy change) — the contribution is
-the measurement.
+**Q: Why did the development gains not transfer?** Development used 32 hard Eterna web puzzles at a
+fixed evaluation count; the final used Eterna100 at a fixed time. Many Eterna100 puzzles are easy for
+targeted GC/A designs (56 of 100 with no search at all), and the conditioned model was trained on
+design data from the same Eterna web source as the development set. I report that as a limitation
+and did not re-analyse the final sets to find a significant subset.
 
 **Q: What didn't work, and what did you learn?** (1) The unconditional diffusion model as a repair
 proposer: no gain, 4-5x slower — the missing ingredient was conditioning. (2) Learned critics that
 rank mutations: ~70 % lower ranking regret offline, but no online gain — better one-step ranking did
 not become better search. (3) A physics-informed "competition residual" (rival folds): real signal
-for simple models, nothing added to a per-position critic. Each was pre-registered with failure
-criteria and recorded as negative.
+for simple models, nothing added to a per-position critic. (4) The energy screen's +10 pp
+development gain (confirmed once on sealed puzzles) did not carry over to Eterna100 at 128 s.
 
 **Q: Rigor stories?** ViennaRNA returns a non-zero probability for structures a sequence cannot form
 (scored explicitly as 0). Natural validation targets were at ceiling, so I built a hard set with a
-method-free hardness probe and a leakage audit (it caught 95 near-test puzzles the source had left
-in). A laptop suspend corrupted wall-clock-limited baseline runs; the harness now detects and reruns
-them. I caught my own configuration bug (a variant silently inheriting a filter) and added a test
-for effective settings.
+method-free hardness probe and a leakage audit. An independent review found a baseline (DesiRNA)
+being credited for work done after its deadline and another (SamplingDesign) losing output at the
+kill; I rebuilt both with real per-candidate timestamps and hard kills, reran every affected run,
+and made the report refuse to publish unless coverage was complete. Every method scored 0 on 19
+puzzles; I checked SAMFEO's own published results, which also solve none of them under this energy
+model, before accepting it.
 
 **Q: Where does it stand against SOTA?** Under ViennaRNA 2 energies, Eterna100 solve counts are near
-saturation (SamplingDesign 79/78 = all known designable). On a one-core frontier, no method dominates:
-SAMFEO + energy screen has the best ensemble quality, RNAinverse is fastest to a first solution,
-DesiRNA solves most at longer budgets. Final-benchmark numbers: [pending, frozen protocol v2].
+saturation (SamplingDesign reports 79/78 with its budget; DesiRNA 97 of V2 in 24 h). My numbers are
+at a short one-core budget and are not comparable to those; within my protocol, RNAinverse, SAMFEO
+and my variants tie on success and my conditioned variant leads on ensemble quality.
 
 # Interview Prep — RiboMamba
 

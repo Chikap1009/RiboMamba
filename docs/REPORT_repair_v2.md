@@ -1,24 +1,29 @@
 # Efficient RNA inverse folding: energy-screened search, learned critics, and a target-conditioned diffusion denoiser
 
-Technical report draft — 2026-09-27. Development results are final; FINAL-BENCHMARK results are
-pending (protocol v2 frozen 2026-09-27, docs/PROTOCOL_design_v2.md) and are marked [PENDING].
+Technical report draft — updated 2026-09-28 with the FINAL benchmark (protocol v2, frozen 2026-09-27,
+docs/PROTOCOL_design_v2.md; report data/repair_pilot/final_v2_report.json, status FINAL, commit 842124b).
 All numbers use ViennaRNA 2.7.2, Turner 2004, 37 C, dangles 2; success = unique MFE (uMFE).
 
 ## 1. Summary
-- A cheap target-energy pre-screen of SAMFEO's own mutations (best of K = 8 by E(target))
-  raises uMFE success on hard development puzzles from 48 % to 58 % at 1,024 evaluations,
-  replicated three times and confirmed once on sealed puzzles (+9.4 pp [1.0, 19.8]), and gives
-  the best ensemble quality at every time budget of a one-core frontier. It is non-neural and not
-  new as an idea (INFO-RNA orders moves by target-energy change); the contribution is measured.
-- Neural results: an unconditional masked-diffusion model (14 M parameters, Rfam) proposing repairs
-  adds nothing; learned critics that rank mutations cut offline ranking regret ~70 % yet do not
-  beat the energy screen online; a physics-informed "competition residual" adds nothing to a
-  per-position critic.
-- A target-conditioned version of the same diffusion model (zero-initialised adapters, 23 GPU-min
-  of fine-tuning on training-side data) turns sampling from 3 % to 43 % uMFE on hard development
-  puzzles without any search (targeted random: 16 %). Used as SAMFEO's proposal model it improves
-  ensemble quality per evaluation causally, but not uMFE, and costs 2-3x wall time.
-- Final benchmark (Eterna100 V2/V1, Rfam-Taneda-27): [PENDING].
+- Final benchmark (Eterna100 V2, 100 puzzles, 128 s of one-core method time, 3 seeds): no variant
+  developed here improves uMFE success. SAMFEO solves 74 puzzles (71.0 mean over seeds), SAMFEO with
+  a target-energy pre-screen 73 (70.7), the screen plus target-conditioned diffusion proposals 73
+  (71.0), RNAinverse 75 (71.7); all are within one puzzle and statistically indistinguishable.
+- Ensemble quality does improve, modestly and consistently: the screen lowers the best ensemble
+  defect (NED) on 72 of 100 puzzles, and conditioned-denoiser proposals with the screen give the
+  lowest NED of all methods (0.040 vs SAMFEO 0.046; better on 82, worse on 14) at equal uMFE by
+  128 s, but start slowly (40 % at 4 s vs 63 %).
+- On hard development puzzles the screen had raised uMFE from 48 % to 58 % at 1,024 evaluations
+  (confirmed once on sealed puzzles, +9.4 pp); that gain did not transfer to Eterna100 at 128 s. The
+  screen is non-neural and not new as an idea (INFO-RNA orders moves by target-energy change).
+- Model adaptation: a target-conditioned version of a 14 M-parameter masked-diffusion model
+  (zero-initialised adapters, 23 GPU-min of fine-tuning) raised sampling success on hard development
+  puzzles from 3 % (unconditional) and 16 % (targeted random) to 43 %. On Eterna100 its gain over
+  targeted random designs is small (+5.3 pp [-1.7, +12.3] by time; +8.3 pp at 1,024 samples, 72
+  puzzles, exploratory). It is a development model-adaptation result, not a benchmark-level gain.
+- Negative results: an unconditional diffusion model proposing repairs adds nothing; learned critics
+  cut offline ranking regret ~70 % yet lose to the energy screen online; a physics-informed
+  "competition residual" adds nothing to a per-position critic.
 
 ## 2. Setup
 Hard development set: 64 Eterna web player puzzles (32 development + 32 sealed confirmation),
@@ -52,9 +57,34 @@ mutation sites: uMFE unchanged (0.0 [-10.4, +10.4]), NED -0.016 [-0.026, -0.008]
 quality), uMFE 54 % (vs 58 % screen alone).
 
 ## 4. Final benchmark (protocol v2, frozen)
-[PENDING — filled only from final_v2_* runs by scripts/final_report.py.]
+Sets: Eterna100 V2 (primary, 100 puzzles, 19-400 nt), Eterna100 V1 (V2 results on the 81 shared
+structures + the 19 V1-only puzzles), Rfam-Taneda-27. Eight methods, seeds 0-2, 128 s method time on
+one core and <= 5,010 candidates per unit; 3,504 units, all valid, no errors. Wall-clock baselines use
+real per-candidate timestamps and hard kills (amendments 4, 4b); units that ran pre-fix code were
+superseded and rerun. Every figure is from the FINAL report (filled from it, not recomputed).
+
+Eterna100 V2, solved by 128 s (any seed / mean over seeds) and seed-mean uMFE at 1 / 16 s:
+RNAinverse 75 / 71.7 (59 / 67 %); SAMFEO 74 / 71.0 (54 / 66 %); SAMFEO + TCD proposals + screen
+73 / 71.0 (1 / 66 %); SAMFEO + screen 73 / 70.7 (58 / 69 %); DesiRNA 74 / 68.3 (17 / 52 %); TCD
+sampling 62 / 61.3 (0 / 54 %); targeted random 56 / 56.0 (49 / 55 %); SamplingDesign (1 thread)
+48 / 43.7 (7 / 21 %).
+Paired @128 s (bootstrap over puzzles): screen - SAMFEO uMFE -0.3 pp [-3.3, +2.0], NED -0.0026
+[-0.0047, -0.0005]; TCD + screen - SAMFEO uMFE 0.0 [-3.7, +3.7], NED -0.0059 [-0.0085, -0.0035];
+TCD + screen - screen NED -0.0033 [-0.0055, -0.0015]; TCD sampling - random uMFE +5.3 pp [-1.7,
++12.3]. Best NED (mean over units with a design): TCD + screen 0.0400, screen 0.0434, SAMFEO
+0.0459, RNAinverse 0.0510.
+Rfam-Taneda-27: near ceiling (24/27 for RNAinverse, SAMFEO, both screened variants and DesiRNA).
+Eterna100 V1-only: 0/19 for every method; SAMFEO's own published V1 results also solve none of these
+19 by uMFE (they are the puzzles V2 redesigned for the Vienna 2 energy model). V1 combined: RNAinverse
+72, SAMFEO 71, screened variants 69, DesiRNA 68 (any seed).
+EternaFold (independent model) folds 25-39 % of the best V2 designs to the target (TCD + screen 39 %,
+SAMFEO 38 %). Published results of other methods use other budgets and hardware and are not comparable
+with these numbers (SamplingDesign 79/78 on Eterna100 with Turner 2004; DesiRNA 97 of V2 in 24 h).
 
 ## 5. Limitations
+The final budget is short (128 s, one core) and favours fast restarts; longer budgets could order
+methods differently. 32 paired comparisons are reported without multiplicity correction. TCD units
+pay a model load (~2-3 s) and share one GPU among 8 concurrent units inside their method time.
 32-puzzle development sets; one laptop (8 GB GPU, 20 logical CPUs) with heavy contention during
 batches (all compared methods share each batch); SamplingDesign under-budgeted; DesiRNA's time
 limit is wall-clock; the TCD is trained on ~270 design puzzles and over-fits them after 1k steps;

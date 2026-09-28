@@ -1215,3 +1215,31 @@ rnainverse, samplingdesign. Excluded: learned critics and the residual variants 
 samfeo_tcdprop_only (dominated by the screened variant), uncond_sample (3 % on development, no
 question left for it), DesiRNA + energy (worse uMFE at longer budgets). Budget: 128 s of method
 time on one core per unit, <= 5,010 candidates, seeds 0-2 (docs/PROTOCOL_design_v2.md).
+
+## D-029 — Final benchmark read: no uMFE gain; modest ensemble-quality gain; final sets consumed
+**Date:** 2026-09-28   **Status:** accepted
+
+**Context.** Protocol v2 final benchmark complete (3,504 units valid, FINAL report from commit
+842124b; RESULTS.md "FINAL BENCHMARK"). On Eterna100 V2 at 128 s one-core budgets, SAMFEO (71.0 mean
+puzzles), SAMFEO + energy screen (70.7), SAMFEO + TCD proposals + screen (71.0) and RNAinverse (71.7)
+are statistically indistinguishable on uMFE. The screen lowers best NED (72/25 puzzles) and TCD +
+screen gives the lowest NED of all methods (82/14 vs SAMFEO). TCD sampling beats targeted random by
++5.3 pp [-1.7, +12.3] only. V1-only is 0/19 for all methods, matching SAMFEO's published V1 results.
+
+**Decision.**
+1. Report the primary endpoint as NULL for every variant developed here. The development uMFE gain of
+   the energy screen is recorded as not transferring to Eterna100 at this budget; no claim of a
+   success-rate improvement is made.
+2. Report the ensemble-quality gains (NED) as the measured positive result: small, consistent,
+   pre-specified secondary endpoints; the conditioned denoiser contributes to the best NED, which is
+   the project's only benchmark-level MODEL signal. It is framed as a model-adaptation result that
+   improves quality at equal success, not as SOTA or a success-rate gain.
+3. The final sets (Eterna100 V1/V2, Rfam-Taneda-27) are consumed by protocol v2, and the confirmation
+   set has had its one look. Any new question (TCD Q1-Q3 in the TCD record) needs a new, unused
+   evaluation set and a new frozen protocol; nothing is tuned on these final results.
+4. No further benchmark runs under protocol v2. The paused K ablation may be finished only as a
+   labelled development sensitivity analysis.
+
+**Alternatives rejected.** Re-analysing with other budgets, subsets or success definitions to find a
+significant uMFE gain (post hoc); rerunning the final sets with modified methods; dropping the V1-only
+set because every method scored 0 (it is reported with the independent SAMFEO check).

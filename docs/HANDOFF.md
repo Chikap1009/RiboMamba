@@ -1,63 +1,64 @@
-# Current handoff — 2026-09-28 (sessions 07-09)
+# Current handoff — 2026-09-28 (sessions 07-10)
 
 ## User decision
-The user approved the research pivot and, on 2026-09-27, standing approval to
-make and document decisions overnight. Research quality over teaching gates.
-Limits: validation/development targets only until a new protocol is frozen,
-no final-test scoring before that, no push, no paid services. The user LIFTED
-the pilot compute caps (2026-09-27 ~11:20 IST): local CPU/GPU use is not capped.
-WSL restarted ~07:30 IST and killed two runs; both were resumed at 11:17 IST.
+The user approved the research pivot (efficient RNA inverse folding through coordinated repair;
+research progress over teaching gates) and standing autonomy for routine decisions. Local CPU/GPU
+use is not capped (lifted 2026-09-27 ~11:20 IST). Limits that still hold: no paid services, no push
+or external messages, one GPU training job at a time, preserve all data/checkpoints/results, no
+subagents, no SOTA/biological claims, record negative results.
 
-## Where things stand (measured, not planned)
-Stage A is BUILT and RUN. Stage B is DONE and NEGATIVE.
-Commits (local, not pushed): ec95f5c pivot docs; 8f3c81b Stage A harness;
-19a8bee Stage B neural probe; e90fc09 MFE-repair control + comparisons.
+## Where things stand (measured, 2026-09-28 ~16:30 IST)
+The protocol v2 FINAL BENCHMARK IS COMPLETE and reported. Nothing is running.
+- Protocol: docs/PROTOCOL_design_v2.md, frozen 2026-09-27; amendments 1-4f are operational,
+  measurement or report-side fixes (no method, budget or endpoint changes; nothing tuned on
+  final outcomes).
+- Coverage: Eterna100 V2 2,400/2,400, V1-only 456/456, Rfam-Taneda-27 648/648 units valid; 0 errors;
+  117 V2 DesiRNA/SamplingDesign units that ran pre-fix code were superseded (kept in
+  data/repair_pilot/final_v2_eterna100_v2/units_superseded/) and rerun by the corrective pass.
+- Report: data/repair_pilot/final_v2_report.json, status FINAL, generated 2026-09-28 10:09:58 UTC
+  from commit 842124b (no uncommitted changes) after the corrective pass (10:01:37 UTC). It
+  SUPERSEDES two earlier files, moved to data/repair_pilot/report_history/ (README there): an
+  unlabelled smoke test of the report script (29/2,400 units, 2026-09-27 22:21 IST) and an INTERIM
+  file. Neither is a result.
+- Write-up: docs/RESULTS.md "FINAL BENCHMARK"; docs/REPORT_repair_v2.md (sections 1 and 4 filled);
+  decision D-029; logbook docs/logbook/2026-09-28-session-10.md.
 
-- Code: ribomamba/design/{scoring,manifest,hard_manifest,search,baselines,neural,
-  mfe_repair,runner,summary}.py; scripts/repair_pilot.py (manifest/run/summarize),
-  scripts/repair_compare.py. Tests: tests/test_design_*.py (53 pass, CPU).
-- Manifests (in Git): manifests/repair_pilot_val_v1.json (rfam_val, EASY tier,
-  sha 58df4ac1...) and manifests/eternaweb_dev_v1.json (HARD Eterna web puzzles,
-  sha 19f16b01...; 32 dev / 32 confirmation / 8 smoke). Confirmation evaluation has started; see manifests/confirmation_looks.jsonl.
-- External: external/SAMFEO at e78b4b5 (no license file: local use only);
-  data/raw/eternaweb_rnadesignlm/ (MIT data from arXiv:2602.12470 + audit copies).
-- Raw traces: data/repair_pilot/<run>/ (ignored by Git; summary.md per run,
-  compare_dev_stageA.md across runs).
+## Final results in one paragraph (Eterna100 V2, 128 s one-core method time, seeds 0-2)
+Solved by 128 s (any seed / mean): RNAinverse 75 / 71.7; SAMFEO 74 / 71.0; SAMFEO + TCD proposals +
+energy screen 73 / 71.0; SAMFEO + energy screen 73 / 70.7; DesiRNA 74 / 68.3; TCD sampling 62 / 61.3;
+targeted random 56 / 56.0; SamplingDesign (1 thread) 48 / 43.7. PRIMARY ENDPOINT NULL for every
+variant developed here (screen - SAMFEO uMFE -0.3 pp [-3.3, +2.0]). Ensemble quality improves
+modestly: best NED screen - SAMFEO -0.0026 [-0.0047, -0.0005] (72/25 puzzles); TCD + screen has the
+lowest NED of all methods (0.0400 vs SAMFEO 0.0459; -0.0059 [-0.0085, -0.0035], 82/14) but a slow start
+(40 % at 4 s vs 63 %). TCD sampling - targeted random +5.3 pp [-1.7, +12.3]; exploratory matched-sample
+view: -5.7 pp at 16 samples, +8.3 pp [0.0, +17.1] at 1,024 (72 puzzles) — the development
+conditioning gain (+27 pp) largely did not transfer. V1-only: 0/19 for every method, as in SAMFEO's
+own published V1 results (the puzzles V2 redesigned for the Vienna 2 energy model). Rfam-Taneda-27
+near ceiling (24/27 for the top five). EternaFold folds 25-39 % of best designs to target.
 
-Key results, 32 hard dev targets x 3 seeds (uMFE success, target means):
-| method | 64 evals | 1024 evals | by 1 s wall | by 64 s wall | best log10 P @1024 |
-|---|---|---|---|---|---|
-| random_pairs (no search) | 14% | 16% | 14% | 16% | -2.43 |
-| random_pair_edits | 14% | 42% | 30% | 42% | -2.08 |
-| feedback_pair_edits | 12% | 43% | 25% | 43% | -2.03 |
-| mfe_repair (MFE-only, stops when solved) | - | 31% | 30% | 31% | - |
-| SAMFEO (pinned, defaults) | 21% | 48% | 35% | 48% | -1.20 |
-| RNAinverse (restarts, 64 max) | - | - | 46% | 59% | - |
-Easy tier (rfam_val smoke): at ceiling; the shared start alone solves most.
-Trace finding: late in search only ~2 % of proposals improve; feedback edits waste
-~33 % of late proposals on repeats. Defect-weighted site choice = random sites.
+## Confirmation and evaluation-set status (corrected; earlier "in progress" notes are obsolete)
+- Development set (eternaweb_dev_v1, 32 hard Eterna web puzzles): used for all development runs.
+- Confirmation set (same manifest, 32 sealed puzzles): COMPLETE — one look, logged before any data
+  (manifests/confirmation_looks.jsonl; two log lines = one interrupted launch + resume with the same
+  config hash d2e1f7a7). ew_conf1024_efilter_v1: 192/192 units valid; energy screen - SAMFEO +9.4 pp
+  uMFE [1.0, 19.8] at 1,024 evaluations. It validated only the K = 8 screen and is now CONSUMED.
+- Final sets (Eterna100 V2 / V1, Rfam-Taneda-27): SCORED under protocol v2 and now CONSUMED.
+- Training pool (eternaweb_trainpool_v1, 700 puzzles): trainpool_samfeo_v1 COMPLETE, 700/700 units.
+- Any new claim needs a NEW, unused evaluation set and a new frozen protocol (D-029).
 
-## Exact next task (updated 2026-09-28 ~01:35 IST)
-PROTOCOL v2 FROZEN (docs/PROTOCOL_design_v2.md; amendments 1-4b are operational/measurement fixes).
-FINAL benchmark RUNNING: data/repair_pilot/run_final_v2.sh (V2 -> V1-only -> Rfam-Taneda-27;
-copy in scripts/final_v2/). At 01:17 IST V2 was at 440/2355 units after 10,019 s (~23 s per unit
-with 8 workers), so the chain needs roughly 15-20 more hours, plus the corrective pass.
-1. After data/repair_pilot/final_v2.done: `bash data/repair_pilot/run_final_v2_retry.sh` (wrapper for
-   scripts/final_v2/run_final_v2_retry.sh): moves desirna units started before bda4884 and
-   samplingdesign units started before 74ec5f1 (+60 s) to units_superseded/, reruns them and the 15
-   errored units; marker final_v2_retry.done.
-2. `python scripts/final_report.py --eternafold`. It REFUSES unless every unit is valid, the retry is
-   done, no error units remain (diagnose any; --accept-errors only after diagnosis), and every
-   zero-candidate unit is a time_limit. Zero-candidate time_limit units are legitimate unsolved
-   outcomes (e.g. RNAinverse's first design on 358-400 nt puzzles takes 132-676 s).
-3. Fill docs/REPORT_repair_v2.md section 4; update RESULTS/DECISIONS/logbook/INTERVIEW_PREP.
-Review fixes (2026-09-28): 74ec5f1 (real timing), bda4884 (DesiRNA initial population, verified:
-initial design ~4 s, first round ~115-121 s on puzzle 38), 047750e and 035c439 (report coverage,
-128 s prefix selection, error/zero-candidate handling). Development DesiRNA timings are optimistic
-(RESULTS correction). Framing unchanged (D-026): TCD = development model-adaptation gain, not SOTA;
-energy screen = non-neural; negative neural results recorded. The K ablation stays paused (77/384).
-While the benchmark runs: no GPU training (TCD units use the GPU) and no heavy CPU work (it would
-perturb method-time budgets); documentation and cheap checks only.
+## Exact next task
+The core pilot question is answered (D-029). Remaining work is optional; pick with the user:
+1. Paper-quality write-up of docs/REPORT_repair_v2.md (figures: V2 quality-time curves, NED paired
+   plot; prior-art table), keeping the framing: null uMFE, modest NED gain, TCD = model-adaptation
+   result, careful negative results, harness/timing lessons.
+2. Next model-adaptation question (docs/experiments/2026-09-28-target-conditioned-denoiser.md, "Next
+   model-adaptation question", Q1-Q3; proposed, not frozen): Q1 amortised TCD proposals (cost), Q2 more
+   training-side design data (over-fitting / transfer to Eterna100), Q3 search-aware fine-tuning.
+   Needs a new unused evaluation set (e.g. leakage-audited Eterna web puzzles not in dev/confirmation/
+   trainpool) and success criteria written before the first run.
+3. Optional: finish the paused K ablation (ew_dev1024_kablation_v1, 77/384 units, resumable) as a
+   labelled development sensitivity analysis only.
+Do NOT rerun or re-analyse the final sets to look for a significant uMFE gain.
 
 ## Execution environment
 WSL Ubuntu-24.04:
@@ -66,40 +67,41 @@ cd /home/chirag/projects/RiboMamba
 source /home/chirag/miniforge3/etc/profile.d/conda.sh
 conda activate ribomamba
 ```
-rg is unavailable; use find/grep. GPU RTX 4060 Laptop 8 GB. SamplingDesign was built using the separate rmtools compiler environment. Do not reinstall the environment.
-Use `python -u` for long runs (stdout is block-buffered under nohup).
-Waiting on a run: never `pgrep -f`/`pkill -f` a pattern that also matches the
-waiting shell's own command line.
+rg is unavailable; use find/grep. GPU RTX 4060 Laptop 8 GB. SamplingDesign was built with the
+separate rmtools compiler environment; DesiRNA runs in its own `desirna` env. Do not reinstall.
+Use `python -u` for long runs. Never `pgrep -f`/`pkill -f` a pattern that also matches the waiting
+shell's own command line. Final chain scripts: scripts/final_v2/ (fix times in fix_times.json).
+Pinned environments for protocol v2: environment.design_v2.{ribomamba,desirna,rmtools}.lock.yml
+(verified unchanged since the freeze); environment.lock.yml is the Phase 3 freeze record.
 
-## Compute ledger (caps LIFTED by the user on 2026-09-27 ~11:20 IST; keep disclosing usage)
-Counted as elapsed hours x (workers / 4). Through 07:20 IST: CPU ~1.4 h
-(diagnostics 0.1, manifests 0.06, smokes 0.03, dev1024 0.34, mfe_repair 0.02,
-RNAinverse 0.12, Stage B neural 0.62, pool 0.01, build of SamplingDesign ~0).
-GPU ~0.62 h (Stage B). In flight: efilter (2 workers) + training data (2 workers).
+## Compute ledger (caps lifted 2026-09-27; disclosed, not limited)
+Recorded per-unit time summed over all design runs in data/repair_pilot (units + superseded):
+217.8 h unit wall, 160.8 h unit CPU (harness process; DesiRNA/SamplingDesign subprocess CPU not
+included). Final benchmark: 139 h unit wall (V2 93.4, V1-only 18.1, Rfam 27.4) over ~17 h elapsed with
+8 concurrent units; largest development run ew_dev_frontier_v1 31.6 h unit wall. GPU training:
+Stage B probe ~0.6 h, critic_v1 13.6 min, three sibling critics ~20 min, TCD fine-tuning 1,351 s;
+TCD inference inside units shares the one GPU. Earlier elapsed-x-workers ledger (to 2026-09-27
+07:20 IST): CPU ~1.4 h, GPU ~0.62 h.
 
-## Existing assets (older)
-- data/processed/{train,val,test}.parquet; data/targets/*_val.parquet (validation).
-- checkpoints/tf_M_do0/best.pt: Transformer EMA, 14.17 M params (unconditional).
-- Phase 4 paused (PHASE4_PAUSED.md); BiMamba seed 2 interrupted at 27,500.
+## Existing assets
+- Checkpoints: checkpoints/tf_M_do0/best.pt (unconditional Transformer EMA, 14.17 M params);
+  checkpoints/tcd_v1 (target-conditioned denoiser); checkpoints/critic_v1, checkpoints/residual_v1.
+- Manifests: manifests/*.json (repair_pilot_val_v1, eternaweb_dev_v1, eternaweb_trainpool_v1,
+  final_eterna100_v2 / _v1 / _v1only, final_rfam_taneda27); confirmation_looks.jsonl.
+- External: external/SAMFEO at e78b4b5 (no license file: local use only, never redistribute);
+  DesiRNA bdb4908 (Apache-2.0); SamplingDesign f0283c49.
+- Raw traces: data/repair_pilot/<run>/ (ignored by Git). Phase 4 remains paused (PHASE4_PAUSED.md).
 
 ## Scientific cautions
-- No SOTA, novelty or generalisation claim exists. Dev results are development
-  evidence on 32 hard puzzles; confirmation is in progress; final tests remain unscored in this review.
+- No SOTA, novelty, generalisation, wet-lab or speed claim exists. The primary final endpoint is null.
+- The energy screen is non-neural and prior art in idea (INFO-RNA 2006); critics and the competition
+  residual are negative online; the TCD is a model-adaptation result, not a benchmark-level gain.
+- Development DesiRNA wall-time numbers are optimistic (RESULTS correction); final DesiRNA/
+  SamplingDesign numbers use real timing. SamplingDesign at one thread is under-budgeted.
+- Published numbers of other methods use other budgets/hardware; quote separately, never mix.
 - The ~1.9 unconditional bound is not a floor; conditional losses differ.
-- RNAinverse's candidates are whole adaptive walks (internal calls uncountable);
-  compare it on wall time only. SAMFEO's wall excludes harness re-scoring.
-- Paired edits, defect-weighted mutation (NUPACK), hierarchical decomposition
-  (RNAinverse, NUPACK), remasking, search distillation and RL are prior art.
 
-## 2026-09-27 Codex review — read before continuing
-The user reaffirmed uncapped local compute and asked for original, SOTA-directed
-research on this laptop. Read docs/CODEX_TO_CLAUDE_2026-09-27.md for the prepared
-reply, novelty map, and competition-aware residual repair proposal. This is a
-recommendation, not an achieved result or frozen new experiment.
-Correction to earlier status: confirmation HAS been launched; see the two records
-in manifests/confirmation_looks.jsonl (same configuration). At review it remained
-in progress along with trainpool_samfeo_v1. Do not call confirmation untouched.
-Runner now defaults to no wall cap; CLI no longer enforces four workers maximum.
-Live processes still retain their explicit launch timeouts; resume without those
-if needed. No live Claude message/read receipt is claimed; this is shared-file
-handoff. Do not start concurrent implementing agents.
+## History note
+docs/CODEX_TO_CLAUDE_2026-09-27.md (Codex review, 2026-09-27) proposed the competition-aware residual
+experiment, since run (negative; docs/experiments/2026-09-27-competition-residual.md). Its status
+notes about confirmation and the training pool being "in progress" are superseded by the section above.

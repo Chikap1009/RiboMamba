@@ -1206,3 +1206,88 @@ SamplingDesign development numbers used its own per-step durations but block-buf
 be lost at the kill, so they may be PESSIMISTIC. Both adapters now use real per-candidate timestamps
 and hard deadlines (commit 74ec5f1; protocol v2 amendment 4); the final benchmark reruns every
 affected unit. Development SAMFEO / energy-screen / TCD numbers are unaffected (in-process timing).
+
+## FINAL BENCHMARK — protocol v2 (frozen 2026-09-27; amendments 1-4f operational/measurement only)
+Report: data/repair_pilot/final_v2_report.json, status FINAL, generated 2026-09-28 10:09:58 UTC from
+commit 842124b (no uncommitted changes), after the corrective pass (done 10:01:37 UTC); it supersedes
+two earlier files kept in data/repair_pilot/report_history/ (an unlabelled 29-unit smoke test and an
+INTERIM file). Coverage: V2 2,400/2,400, V1-only 456/456, Rfam-Taneda-27 648/648 units valid; 0 error
+units; 0 pre-fix units in place (117 V2 DesiRNA/SamplingDesign units superseded and rerun).
+Oracle ViennaRNA 2.7.2, Turner 2004, 37 C, dangles 2; success = unique MFE. Budget per unit: 128 s
+method time on one core, <= 5,010 candidates; seeds 0-2; 8 units at a time on a 20-thread laptop;
+TCD units share one RTX 4060 (model load ~2-3 s inside method time). Wall time: V2 38,733 s,
+V1-only 8,185 s, Rfam-Taneda-27 12,441 s, corrective pass 1,915 s (~17 h x 8 workers).
+
+### Primary: Eterna100 V2 puzzles solved (uMFE) by 128 s — any seed / mean over 3 seeds (of 100)
+| method | any seed | mean | uMFE @1 / 4 / 16 / 64 s (seed-mean %) | best NED mean (median) | best log10 P mean (median) | units w/o design |
+|---|---|---|---|---|---|---|
+| RNAinverse (restarts) | **75** | **71.7** | 58.7 / 64.7 / 67.3 / 70.0 | 0.0510 (0.0190) | -1.07 (-0.25) | 21 |
+| SAMFEO (pinned) | 74 | 71.0 | 54.3 / 63.0 / 66.0 / 70.0 | 0.0459 (0.0151) | -2.01 (-0.21) | 0 |
+| SAMFEO + TCD proposals + energy screen | 73 | 71.0 | 0.7 / 40.0 / 66.0 / 69.3 | **0.0400 (0.0110)** | -1.43 (**-0.16**) | 0 |
+| SAMFEO + energy screen (K = 8) | 73 | 70.7 | 58.0 / 61.7 / 68.7 / 70.3 | 0.0434 (0.0133) | -1.56 (-0.18) | 0 |
+| DesiRNA (10 replicas, one core, real timing) | 74 | 68.3 | 17.3 / 29.0 / 52.0 / 61.7 | 0.0813 (0.0312) | -2.99 (-0.36) | 0 |
+| TCD sampling (no search) | 62 | 61.3 | 0.0 / 6.0 / 54.0 / 60.3 | 0.0648 (0.0286) | -2.75 (-0.40) | 0 |
+| targeted random designs (no search) | 56 | 56.0 | 49.3 / 53.0 / 55.0 / 56.0 | 0.0632 (0.0276) | -2.66 (-0.50) | 0 |
+| SamplingDesign (1 thread; under-budgeted) | 48 | 43.7 | 7.0 / 13.7 / 21.0 / 39.7 | 0.0796 (0.0307) | -1.14 (-0.31) | 90 |
+Quality columns are over units WITH a design within 128 s (amendment 4d); "w/o design" = zero-candidate
+time limits (RNAinverse's first design on 358-400 nt puzzles took 132-676 s; SamplingDesign on one
+thread finishes no step within 128 s on long puzzles). Log10 P means are dominated by a few very
+low values; medians are more representative.
+
+Paired per puzzle (seeds averaged; bootstrap 95 % over 100 puzzles; 32 comparisons, no multiplicity
+correction), V2 @128 s unless stated:
+- energy screen - SAMFEO: uMFE -0.3 pp [-3.3, +2.0] (5 better / 4 worse); @16 s +2.7 pp [0.0, +5.7]
+  (7/2); best NED -0.0026 [-0.0047, -0.0005] (72/25).
+- TCD proposals + screen - SAMFEO: uMFE 0.0 [-3.7, +3.7] (5/5); best NED -0.0059 [-0.0085, -0.0035]
+  (82/14). vs energy screen alone: uMFE +0.3 pp [-3.0, +3.3]; NED -0.0033 [-0.0055, -0.0015] (61/33);
+  @16 s uMFE -2.7 pp [-7.0, +1.3].
+- DesiRNA - screen: uMFE -2.3 pp [-6.7, +2.0] @128 s, -16.7 pp [-23.7, -10.0] @16 s; NED +0.038 worse.
+- RNAinverse - screen: uMFE +1.0 pp [-4.0, +6.0]; NED +0.017 [+0.012, +0.024] worse (n 91).
+- SamplingDesign - screen: uMFE -27.0 pp [-35.3, -19.0].
+- TCD sampling - targeted random: uMFE +5.3 pp [-1.7, +12.3] (9/4); @16 s -1.0 pp; NED +0.0016 (ns).
+- TCD sampling - screen: uMFE -9.3 pp [-15.3, -4.0].
+
+### Secondary sets (solved by 128 s, any seed / mean)
+Rfam-Taneda-27 (27): RNAinverse 24/24.0, SAMFEO + screen 24/24.0, TCD proposals + screen 24/24.0,
+SAMFEO 24/23.7, DesiRNA 24/23.7, TCD sampling 23/22.3, targeted random 21/21.0, SamplingDesign
+17/16.3 (21/81 units without a design). Near ceiling; best NED: TCD + screen 0.0045, screen 0.0049,
+SAMFEO 0.0056 (screen - SAMFEO NED -0.0007 [-0.0011, -0.0003], 23/4).
+Eterna100 V1-only (the 19 puzzles whose V1 structure differs from V2): 0/19 for EVERY method (all
+seeds). Independent check: SAMFEO's own published V1 results (external/SAMFEO/data/results/
+eterna_samfeo.csv, ViennaRNA 2, its full budget) also solve 0/19 of these by uMFE (1 by MFE with
+ties, #80); these are the puzzles Eterna100-V2 redesigned because they fail under the Vienna 2
+energy model. V1 combined (V2 results on the 81 shared structures + V1-only): RNAinverse 72, SAMFEO
+71, screen 69, TCD + screen 69, DesiRNA 68, TCD sampling 61, random 55, SamplingDesign 47 (any seed).
+
+### EternaFold agreement of best-P designs (V2, rate over ALL 300 units; no design = no match)
+TCD + screen 39.3 %, SAMFEO 38.3 %, screen 37.0 %, RNAinverse 36.0 %, TCD sampling 33.3 %, random
+33.3 %, DesiRNA 30.0 %, SamplingDesign 24.7 %. Designs optimised for ViennaRNA mostly do not fold to
+the target under an independent model (descriptive only; no test was pre-specified).
+
+### EXPLORATORY (not a frozen endpoint): TCD sampling vs targeted random at MATCHED SAMPLE COUNTS (V2)
+The development conditioning criterion was per sample; the frozen final comparison is per method time.
+From the final traces (puzzles where both have >= N samples in all 3 seeds): N = 16: 41.0 vs 46.7 %
+(-5.7 pp [-10.0, -1.7]; 100 puzzles); N = 64: 50.0 vs 50.7 %; N = 256: 56.8 vs 54.4 % (+2.4 [-3.4,
++8.2]; 98); N = 1,024: 68.5 vs 60.2 % (+8.3 [0.0, +17.1]; 72 puzzles, the shorter ones). The
+development gain (+27 pp at 1,024 on hard Eterna web puzzles) did NOT transfer at that size to
+Eterna100. Possible reasons (untested): targeted GC/A designs are strong on Eterna100's many easy
+puzzles, and the TCD's design data come from the same Eterna web source as the development set
+(leakage-filtered, but a distribution shift to Eterna100 is plausible).
+
+### Reading (what the final benchmark supports)
+1. No method variant developed here improves uMFE success on Eterna100 V2 at 128 s one-core budgets;
+   SAMFEO, the screen, TCD + screen and RNAinverse are within one puzzle (70.7-71.7 mean) and statistically
+   indistinguishable. The development uMFE gain of the energy screen (+9-10 pp on hard web puzzles at
+   1,024 evaluations) did not transfer to Eterna100 V2 at 128 s (small, borderline gain at 16 s only).
+2. Ensemble quality does improve, consistently if modestly: the energy screen lowers best NED
+   (72/25 puzzles), and conditioned-denoiser proposals with the screen give the lowest NED of all
+   methods (0.0400 vs SAMFEO 0.0459; better on 82 puzzles, worse on 14), at equal uMFE by 128 s but a
+   slow start (0.7 % at 1 s, 40 % at 4 s: model load and GPU contention inside method time).
+3. The TCD's standalone conditioning gain is small on Eterna100 (not significant by time or at <= 256
+   samples); it remains a development model-adaptation result, not a benchmark-level method gain.
+4. External baselines under our one-core, 128 s protocol: RNAinverse is the fastest and ties for most
+   uMFE solutions; DesiRNA with honest timing is slower to its first solutions; SamplingDesign on one
+   thread is heavily under-budgeted. Published results use other budgets and hardware and are quoted
+   separately (SamplingDesign 79/78 on Eterna100 with Turner 2004; DesiRNA V2 85 < 1 min, 95 < 1 h,
+   97 in 24 h), never mixed with ours.
+No SOTA, generalisation, wet-lab or speed claim follows from these numbers.
