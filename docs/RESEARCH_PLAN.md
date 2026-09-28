@@ -1,3 +1,7 @@
+> **SUPERSEDED — project closed 2026-09-29.** This document is kept as a historical record. The
+> pilot and every follow-up are complete; see docs/HANDOFF.md and docs/REPORT_repair_v2.md. Nothing
+> here is an instruction to start work.
+
 # Active research plan — approved direction, 2026-09-27
 
 ## Goal and claim boundary

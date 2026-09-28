@@ -163,7 +163,7 @@ Paired differences: rival - norival -0.013 [-0.052, +0.021]; norival - generic -
 [-0.040, +0.025]; rival - generic -0.019 [-0.067, +0.020]; rival - critic_v1 +0.004
 [-0.022, +0.030]; every per-position critic - energy about -0.70 (intervals exclude 0).
 
-## Decision on the hypothesis (by the pre-registered failure criteria)
+## Decision on the hypothesis (by the prespecified failure criteria)
 The competition-aware residual MECHANISM is not supported as an improvement: rival
 physics alone increases regret (+0.34), and rival features / the exact energy
 decomposition add no measurable value to a per-position learned critic (differences
@@ -190,7 +190,7 @@ uMFE +0.021 [-0.021, +0.062], NED -0.002 [-0.005, -0.000] (23/9). linear - energ
 DesiRNA - energy +0.073 [0.000, 0.167] at 64 s, but -0.188 at 4 s and -0.125 at 16 s.
 
 ## Verdict and diagnosis
-By the pre-registered online criterion (>= 5 pp uMFE or >= 0.3 log10 P over the energy filter at
+By the prespecified online criterion (>= 5 pp uMFE or >= 0.3 log10 P over the energy filter at
 matched wall time) every learned variant FAILS; the rival channels give at most a marginal NED
 gain. Better one-step ranking did not become better search. Checked explanations:
 - Objective mismatch (critics rank by Delta ln P, success is uMFE): REFUTED offline — on held-out
@@ -202,5 +202,5 @@ gain. Better one-step ranking did not become better search. Checked explanations
   (E_target/nt -0.33 vs -0.28). Consistent with hard targets needing accumulated target
   stabilisation that one-step probability-greedy selection does not supply. Only 3 targets differ,
   so this is an interpretation, not a demonstrated mechanism.
-Next experiment (D-024): is energy pre-screening a host-agnostic accelerator? Apply it to
+Next experiment (D-024; since done, see D-025; historical): is energy pre-screening a host-agnostic accelerator? Apply it to
 DesiRNA (the strongest uMFE host here) under matched wall time.

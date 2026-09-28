@@ -1,4 +1,4 @@
-> Current direction (2026-09-27): the user approved the repair-research pivot in RESEARCH_PLAN.md. Earlier phase gates and mandatory sweep completion are superseded; the material below remains historical reference. See HANDOFF.md for the next action.
+> Status (2026-09-29): the project is closed (docs/HANDOFF.md, docs/REPORT_repair_v2.md). This guide is historical teaching material; its phase gates and next steps are superseded.
 
 # RiboMamba — Study Guide
 

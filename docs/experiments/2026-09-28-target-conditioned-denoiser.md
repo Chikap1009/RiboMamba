@@ -88,7 +88,7 @@ Paired @1024 (a - b): TCD - random +0.271 [0.125, 0.427] (10/1/21); TCD - uncond
 @64: TCD - random +0.115 [0.021, 0.219]; TCD-init - SAMFEO+energy -0.104 [-0.208, -0.021].
 By wall time: TCD - SAMFEO+energy about -0.19 to -0.22 at 4-64 s.
 
-## Verdict (pre-registered criteria)
+## Verdict (prespecified criteria, fixed in this record before the run)
 - CONDITIONING CRITERION MET: TCD generation beats targeted random sampling (+27 pp) and the
   unconditional model with the same sampler (+40 pp) at matched sample counts, intervals
   excluding 0. Adapting the diffusion model to the target structure turns it from useless
@@ -128,6 +128,10 @@ TCD + energy screen (NED 0.0495, log10 P -0.78, uMFE 54 %, 38 s model time), whi
 final benchmark; "proposals alone" is not (D-028).
 
 ## Next model-adaptation question (drafted 2026-09-28 ~01:50 IST; PROPOSED, not run, not frozen)
+**SUPERSEDED (2026-09-29): the project is closed.** Q1 (cost) was examined by the bounded efficiency
+study (docs/experiments/2026-09-28-tcd-inference-efficiency.md; D-030): reducing proposal overhead did
+not eliminate the success-rate disadvantage, and the direction stopped. Q2 and Q3 were not pursued. Kept
+below as a historical record, not as an instruction.
 The adaptation result stands on its own: conditioning turned the diffusion model from a useless
 repair prior (3 % uMFE sampling) into a strong one (43 %), and its letters causally improve NED and
 P inside search. The open model question is whether that gain survives COST: every TCD proposal

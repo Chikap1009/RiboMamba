@@ -250,7 +250,7 @@ the longest puzzles. None of this changes the decision above, which rests on the
 - Speed-up scope: 2.48x (proposal overhead) and 1.9-2.05x (candidates within the budget) are for 4
   concurrent cold runs; isolated runs gained 1.51x (cold) and ~1.8x (warm) in overhead; the ~3 s setup
   before the first candidate and the run length (fixed budget) are unchanged.
-- Regeneration check: re-running scripts/tcd_graph_compare.py on the saved traces reproduced every point
-  estimate and all gates; bootstrap interval bounds moved by at most one discrete step (1/96 = 0.0104
-  for uMFE) because per-target rows are not sorted before the seeded bootstrap; no interval changed
-  which side of zero it lies on.
+- Regeneration check: re-running scripts/tcd_graph_compare.py once on the saved traces reproduced every
+  point estimate and all gates; in that rerun bootstrap interval bounds moved by up to 0.0104 (uMFE)
+  because per-target rows are not sorted before the seeded bootstrap (observed variation, not a bound);
+  no interval changed which side of zero it lies on.

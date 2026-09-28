@@ -1,6 +1,13 @@
 # RiboMamba — current project instructions
 Updated 2026-09-27 by explicit user direction.
 
+## Status (2026-09-29): PROJECT CLOSED
+The research direction is closed and the technical report is complete (docs/REPORT_repair_v2.md;
+docs/HANDOFF.md). The bounded validation pilot and all follow-ups referred to below are finished;
+instructions to proceed with the pilot or to take a "next action" from the handoff are SUPERSEDED.
+Do not start experiments, training or evaluations without a new explicit user instruction. The
+working rules below still apply to any future work.
+
 ## Priority and authority
 The user approved a pivot from exhaustive backbone comparisons to efficient RNA
 inverse folding through coordinated repair. Research progress and credible,
@@ -34,7 +41,7 @@ The ~1.9 unconditional diffusion bound is neither a proved irreducible floor nor
 a design leaderboard score. Conditional and unconditional losses are different.
 
 ## Working rules
-- Proceed autonomously on the bounded validation pilot in RESEARCH_PLAN.md.
+- [SUPERSEDED 2026-09-29: the pilot is complete; project closed] Proceed autonomously on the bounded validation pilot in RESEARCH_PLAN.md.
   Do not restart the old Phase 4 sweep. Check processes before launching compute.
 - Preserve datasets, checkpoints and historical results. No unsolicited cleanup,
   paid compute, paid APIs, or new large pretraining runs.

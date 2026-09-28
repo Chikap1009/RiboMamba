@@ -588,6 +588,10 @@ Sections: Biology · Machine learning · Maths · Software.
 - **First explained:** session 03.
 
 ### Pre-registration (frozen evaluation protocol)
+*Project usage note (2026-09-29): here the term means prespecified and frozen locally in the
+repository (committed before the data, enforced by code guards); nothing was registered with an external
+registry. Current documents say "prespecified, locally frozen".*
+
 - **Definition:** Writing down the metrics, thresholds and headline success criterion **before** running the test set, so the metric can't be chosen after seeing which model it favours.
 - **Analogy:** Fixing the sign-off criteria before tape-out, not after looking at which chip passes.
 - **Where it appears:** RESULTS.md "Frozen evaluation protocol" (Phase 3). Motivated by: an MFE-only metric and an ensemble-probability metric can crown different architectures.

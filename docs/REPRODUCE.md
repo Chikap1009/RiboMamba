@@ -70,9 +70,15 @@ python scripts/closeout_verify.py --out $OUT/verify.json --replay 40
 ```
 Expected: `final_report.py` prints `[FINAL] written to $OUT/...` and refuses (exit 1) if any unit is
 missing, invalid or in error; its status/coverage/audit sections equal the canonical
-data/repair_pilot/final_v2_report.json. Figures are byte-identical to docs/figures/*.png. Point
-estimates reproduce exactly; bootstrap interval bounds can move by one discrete step (up to 0.0123 for
-uMFE fractions, 0.0008 for NED) because per-puzzle rows are not sorted before the seeded bootstrap. Using
+data/repair_pilot/final_v2_report.json. Point estimates reproduce exactly. Bootstrap interval bounds are
+not bit-reproducible (per-puzzle rows are not sorted before the seeded bootstrap): in the one closeout
+regeneration they moved by up to 0.0123 (uMFE fraction) and 0.0008 (NED); treat that as observed
+variation, not a bound.
+Two different figure checks: (a) CANONICAL RENDERING — the command above draws from the saved canonical
+FINAL JSON (the default `--report`), and at closeout its PNGs were byte-identical to docs/figures/*.png;
+this checks the plotting code, not the analysis. (b) END-TO-END — draw from a regenerated report with
+`--report $OUT/final_v2_report.json`; this was NOT compared at closeout, and the forest plot can differ
+where the regenerated interval bounds differ. Using
 `final_report.py` without `--out` would archive the canonical report into report_history/ and replace
 it; do not do that to check a result.
 

@@ -1,3 +1,7 @@
+> **SUPERSEDED — project closed 2026-09-29.** This document is kept as a historical record. The
+> pilot and every follow-up are complete; see docs/HANDOFF.md and docs/REPORT_repair_v2.md. Nothing
+> here is an instruction to start work.
+
 # Phase 4 queue paused — 2026-09-27
 The user approved moving to the RNA repair research plan. The verified live queue
 process group 38913 was terminated after the BiMamba seed-2 checkpoint at step

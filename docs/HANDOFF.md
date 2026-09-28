@@ -37,6 +37,16 @@ in its section 9; optional publication work in section 11). Decisions: D-029 (fi
   the same disk, not an independent backup; third-party code is not included (inventory gives URLs,
   commits, licences).
 
+## Repository and backup status
+- GitHub (github.com/Chikap1009/RiboMamba, public): at the start of the final documentation pass on
+  2026-09-29, origin/main (5b33522, 2026-09-27 04:37 IST) was 89 commits behind local main (checked with
+  `git fetch`). The user authorised pushing; the push outcome is recorded in
+  docs/logbook/2026-09-29-session-12.md and below.
+- The preservation package (/home/chirag/projects/RiboMamba_closeout_2026-09-29/) is on the SAME DISK as
+  the repository: a second copy, not an independent backup. Copy it to separate storage for protection
+  against disk loss.
+- Project history index: docs/PROJECT_HISTORY.md (sessions, decisions, register of mistakes).
+
 ## Final results in brief
 Eterna100 V2, solved by 128 s (any seed / mean of 3 seeds, of 100): RNAinverse 75 / 71.7; SAMFEO 74 / 71.0;
 SAMFEO + TCD proposals + screen 73 / 71.0; SAMFEO + screen 73 / 70.7; DesiRNA 74 / 68.3; TCD sampling

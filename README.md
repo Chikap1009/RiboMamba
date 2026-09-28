@@ -2,8 +2,8 @@
 Research code for RNA sequence generation and efficient inverse folding.
 
 **Status (2026-09-29): project closed.** The repair / inverse-folding study is complete and written
-up as a technical report: [docs/REPORT_repair_v2.md](docs/REPORT_repair_v2.md). Its pre-registered
-final benchmark (protocol v2: Eterna100 V2/V1, Rfam-Taneda-27; 128 s of one-core method time per run;
+up as a technical report: [docs/REPORT_repair_v2.md](docs/REPORT_repair_v2.md). Its prespecified, locally
+frozen final benchmark (protocol v2: Eterna100 V2/V1, Rfam-Taneda-27; 128 s of one-core method time per run;
 3 seeds) has a NULL PRIMARY RESULT: no variant developed here solves more Eterna100 V2 puzzles than
 SAMFEO (71.0 of 100, mean over seeds; energy screen 70.7; SAMFEO + target-conditioned diffusion
 proposals + screen 71.0; RNAinverse 71.7). The conditioned-proposal variant has the lowest ensemble
@@ -12,7 +12,10 @@ cut the conditioned model's proposal overhead about 2.5x with CUDA-graph replay,
 overhead did not eliminate its success-rate disadvantage against the non-neural energy screen within
 the tested budgets; the direction is closed. No SOTA, novelty or biological claim is made. The earlier
 Transformer/BiMamba training study is paused; its checkpoints and results remain available.
-Reproduction: [docs/REPRODUCE.md](docs/REPRODUCE.md).
+Reproduction: [docs/REPRODUCE.md](docs/REPRODUCE.md). History of every session, decision and correction:
+[docs/PROJECT_HISTORY.md](docs/PROJECT_HISTORY.md). Large data, checkpoints and third-party code are not in
+Git; a local preservation package (on the same disk as the working copy, so not an independent backup) is
+described in [docs/HANDOFF.md](docs/HANDOFF.md).
 
 Start with [the handoff](docs/HANDOFF.md), [research plan](docs/RESEARCH_PLAN.md),
 and [agent instructions](CLAUDE.md).

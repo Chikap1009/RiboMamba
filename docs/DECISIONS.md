@@ -8,6 +8,10 @@ Entries are numbered and never deleted. If a decision is reversed, add a new
 entry that says so and points back to the old one. The history of changing your
 mind is itself valuable.
 
+**Terminology (2026-09-29).** "Pre-registered" in older entries of this file means prespecified and
+frozen locally in this repository (written and committed before the relevant data, often enforced by
+code guards). No protocol was registered with an external registry.
+
 ## Template
 
 ```
@@ -1278,7 +1282,8 @@ whose hardware/driver causes are inferred, not established.
 efficiency direction is closed (D-030). A closeout review verified the saved evidence (all units
 valid; frozen configurations reproduce their config hashes; deterministic methods replay their saved
 prefixes; figures and point estimates regenerate) and found two reporting issues: an overstated
-conclusion about proposal cost, and bootstrap intervals that regenerate only to one discrete step.
+conclusion about proposal cost, and bootstrap intervals that are not bit-reproducible (bounds moved by
+up to 0.0123 in one regeneration; observed, not bounded).
 
 **Decision.** Finish docs/REPORT_repair_v2.md as the final technical report with the narrower
 conclusion and the limitations stated; add docs/REPRODUCE.md; preserve a dated local package

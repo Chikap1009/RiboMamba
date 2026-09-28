@@ -6,7 +6,7 @@ work that remains optional is listed in section 11. Reproduction: [REPRODUCE.md]
 
 **One-paragraph summary.** We asked whether a small masked-diffusion model, adapted to condition on
 a target RNA secondary structure and used to choose the letters of repair moves inside a strong
-search method (SAMFEO), improves design success per unit of compute. In a pre-registered final
+search method (SAMFEO), improves design success per unit of compute. In a prespecified, locally frozen final
 benchmark (Eterna100 V2, 100 puzzles; 128 s of one-core method time per run; 3 seeds), no variant
 developed here solved more puzzles than SAMFEO (71.0 of 100 puzzles, mean over seeds): SAMFEO plus a
 target-energy pre-screen solved 70.7, the screen plus conditioned-model proposals 71.0, and RNAinverse
@@ -261,7 +261,7 @@ one at a time the gains were smaller: overhead 1.51x cold and about 1.8x with th
 (warm); candidates by 16 s 1.9-2.1x; by 64 s 1.39x cold and 1.55x warm (6 puzzles, two of them long).
 The graph does not shorten a run (budgets are fixed) or the ~3 s setup before the first candidate; it
 raises throughput of candidates within a run.
-Pre-registered gates. Engineering, versus the eager implementation: proposal overhead >= 2x (met,
+Prespecified gates (committed before the run). Engineering, versus the eager implementation: proposal overhead >= 2x (met,
 2.48x); candidates >= 1.5x by 64 s and >= 1.2x by 16 s (met); no unacceptable quality drop versus the
 eager implementation (met: graph - eager uMFE +3.1 points [0.0, +6.3] at 16 s and 0.0 at 64 s; best
 NED -0.0031 [-0.0051, -0.0015] at 16 s, better on 28 puzzles and worse on none). Scientific, versus
@@ -280,13 +280,19 @@ budgets.
   only on this hardware/driver/PyTorch configuration.
 - Statistics: 32 uncorrected comparisons in the final report; development results rest on 32 puzzles
   used throughout development. Bootstrap intervals are seeded, but per-puzzle rows were not sorted
-  before resampling, so regenerating them from the saved traces reproduces every point estimate
-  exactly but shifts interval bounds by up to one discrete step (at most 1.2 points for uMFE and 0.0008
-  for NED in a closeout regeneration check); no interval changed which side of zero it lies on.
+  before resampling, so the intervals are not bit-reproducible. In one closeout regeneration from the
+  saved traces every point estimate reproduced exactly, while interval bounds moved by up to 1.2 points
+  for uMFE and 0.0008 for NED and no interval changed which side of zero it lies on. That is the
+  variation observed in a single rerun, not an established bound; other reruns could differ more.
 - Execution details: the first 43 final units (amendment 1) ran in 10 persistent workers; 7 of them were
   TCD units that ran with the model already loaded (Eterna100 V2 puzzles 22 and 53), so their ~3 s setup
-  was not charged; puzzle 22 is solved by SAMFEO's initial designs, so at most early-time points of
-  puzzle 53 (seed 0) are affected. SamplingDesign at one thread is under-budgeted; DesiRNA ran 10
+  was not charged and they ran under the first launch's heavier 10-worker concurrency. Two are TCD-proposal
+  units on puzzle 22 solved by SAMFEO's first candidate (0.14-0.16 s), which the setup would not have
+  changed. For the other five, a cold start could have moved checkpoints: TCD sampling on puzzle 22 (seeds
+  0-2) first solved at 2.5-3.1 s, so its 4 s points may be affected; TCD sampling on puzzle 53 (seed 0)
+  first solved at 7.4 s; TCD proposals on puzzle 53 (seed 0) first solved at 15.9 s, so its 16 s point may
+  be affected. All five were solved well before 128 s, so the 128 s counts are unlikely to change, but no
+  unit was rerun and the size of the effect was not measured. SamplingDesign at one thread is under-budgeted; DesiRNA ran 10
   replicas on one core.
 - Data: the TCD's design data share the Eterna web source of the development puzzles; family overlap
   between Rfam training sequences and Rfam-Taneda-27 is possible; Eterna100 is public and may overlap

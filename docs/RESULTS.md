@@ -11,6 +11,10 @@ Two rules govern this file (CLAUDE.md §3.5):
 
 ---
 
+**Terminology (2026-09-29).** "Pre-registered" in older entries of this file means prespecified and
+frozen locally in this repository (written and committed before the relevant data, often enforced by
+code guards). No protocol was registered with an external registry.
+
 ## Frozen evaluation protocol
 
 **Status: FROZEN on 2026-09-24**
@@ -1330,12 +1334,20 @@ Checks run at closeout (scripts/closeout_verify.py; output kept in the preservat
 - Frozen v2 configurations rebuilt from the current code give the recorded config hashes for all three
   sets; the first 40 candidates of samfeo, samfeo_efilter, samfeo_tcdprop_efilter, random_pairs and
   tcd_sample on two V2 puzzles (seed 0), re-run now, equal the saved final traces.
-- Regeneration from saved traces (to a temporary location): the FINAL report's status, coverage and
-  audit sections and both figures are byte-identical; every point estimate reproduces (to floating-point
-  rounding); bootstrap interval bounds move by up to one discrete step (at most 0.0123 for uMFE, 0.0008
-  for NED; 0.0104 in the efficiency comparison) because per-puzzle rows are not sorted before the seeded
-  bootstrap; no interval changed which side of zero it lies on and the efficiency gates are identical.
+- End-to-end regeneration from saved traces (to a temporary location): the FINAL report's status,
+  coverage and audit sections are identical; every point estimate reproduces (to floating-point
+  rounding); in this single rerun, bootstrap interval bounds moved by up to 0.0123 for uMFE and 0.0008 for
+  NED (0.0104 in the efficiency comparison) because per-puzzle rows are not sorted before the seeded
+  bootstrap; this is observed variation, not a bound. No interval changed which side of zero it lies on,
+  and the efficiency gates were identical.
+- Canonical figure rendering (a separate, weaker check): re-drawing the figures from the saved canonical
+  FINAL JSON gave PNGs byte-identical to docs/figures; figures drawn from the regenerated report were not
+  compared.
 - Execution detail found: the first 43 final V2 units (before amendment 1) ran in 10 persistent workers;
   7 of them were TCD units that ran with the model already loaded (puzzles 22 and 53), so their ~3 s
-  setup was not charged. Puzzle 22 is solved by SAMFEO's initial designs; at most early-time points of
-  puzzle 53 (seed 0) are affected. Reported as a limitation; nothing re-analysed.
+  setup was not charged. [Qualified 2026-09-29 from the saved traces:] two TCD-proposal units on puzzle 22
+  were solved by SAMFEO's first candidate (0.14-0.16 s) and are unaffected; TCD sampling on puzzle 22
+  (seeds 0-2) first solved at 2.5-3.1 s, so its 4 s points may be affected; TCD sampling on puzzle 53
+  (seed 0) first solved at 7.4 s and TCD proposals on puzzle 53 (seed 0) at 15.9 s (its 16 s point may be
+  affected). All were solved long before 128 s, so 128 s counts are unlikely to change, but the effect
+  was not measured and no unit was rerun.
