@@ -73,9 +73,18 @@ Paired @128 s (bootstrap over puzzles): screen - SAMFEO uMFE -0.3 pp [-3.3, +2.0
 TCD + screen - screen NED -0.0033 [-0.0055, -0.0015]; TCD sampling - random uMFE +5.3 pp [-1.7,
 +12.3]. Best NED (mean over units with a design): TCD + screen 0.0400, screen 0.0434, SAMFEO
 0.0459, RNAinverse 0.0510.
+![Eight small panels, one per method, of the share of Eterna100 V2 puzzles solved against method time from 1 to 128 s. RNAinverse, SAMFEO and SAMFEO + screen start near 55-59 % at 1 s and reach 71-72 %; SAMFEO + TCD + screen starts at 1 % and catches up to 71 % by 16-128 s; DesiRNA rises from 17 % to 68 %; TCD sampling from 0 % to 61 %; targeted random stays near 49-56 %; SamplingDesign rises from 7 % to 44 %.](figures/final_v2_umfe_time.png)
+*Figure 1. Eterna100 V2 puzzles solved (uMFE, mean over 3 seeds) by method time; each panel highlights one
+method against the others in gray. Drawn from the FINAL report by scripts/final_figures.py.*
+
+![Forest plot of paired per-puzzle differences at 128 s with 95 % bootstrap intervals. Left, success: every interval for SAMFEO + screen, SAMFEO + TCD + screen and RNAinverse contains zero; TCD sampling minus targeted random is +5.3 points with an interval from -1.7 to +12.3. Right, best NED times 1000: SAMFEO + screen minus SAMFEO is -2.6, SAMFEO + TCD + screen minus SAMFEO is -5.9 and minus SAMFEO + screen is -3.3, all intervals below zero; RNAinverse is +17 (worse, n = 91); TCD sampling minus random is +1.6 with an interval containing zero.](figures/final_v2_paired_effects.png)
+*Figure 2. Paired differences on Eterna100 V2 at 128 s (seeds averaged per puzzle; bootstrap 95 % intervals
+over 100 puzzles; no multiplicity correction). Success differences all include zero; the NED gains of the
+screen and of TCD proposals with the screen exclude it.*
+
 Rfam-Taneda-27: near ceiling (24/27 for RNAinverse, SAMFEO, both screened variants and DesiRNA).
 Eterna100 V1-only: 0/19 for every method; SAMFEO's own published V1 results also solve none of these
-19 by uMFE (they are the puzzles V2 redesigned for the Vienna 2 energy model). V1 combined: RNAinverse
+19 by uMFE, and Koodli et al. (2021) report them as unsolvable in Vienna 2, which is why V2 redesigned them. V1 combined: RNAinverse
 72, SAMFEO 71, screened variants 69, DesiRNA 68 (any seed).
 EternaFold (independent model) folds 25-39 % of the best V2 designs to the target (TCD + screen 39 %,
 SAMFEO 38 %). Published results of other methods use other budgets and hardware and are not comparable

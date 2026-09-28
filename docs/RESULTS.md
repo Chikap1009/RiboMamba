@@ -1255,8 +1255,8 @@ SAMFEO 0.0056 (screen - SAMFEO NED -0.0007 [-0.0011, -0.0003], 23/4).
 Eterna100 V1-only (the 19 puzzles whose V1 structure differs from V2): 0/19 for EVERY method (all
 seeds). Independent check: SAMFEO's own published V1 results (external/SAMFEO/data/results/
 eterna_samfeo.csv, ViennaRNA 2, its full budget) also solve 0/19 of these by uMFE (1 by MFE with
-ties, #80); these are the puzzles Eterna100-V2 redesigned because they fail under the Vienna 2
-energy model. V1 combined (V2 results on the 81 shared structures + V1-only): RNAinverse 72, SAMFEO
+ties, #80); Koodli et al. (2021, bioRxiv 10.1101/2021.08.26.457839) report these 19 V1 puzzles as
+unsolvable in Vienna 2, which is why Eterna100-V2 redesigned them. V1 combined (V2 results on the 81 shared structures + V1-only): RNAinverse 72, SAMFEO
 71, screen 69, TCD + screen 69, DesiRNA 68, TCD sampling 61, random 55, SamplingDesign 47 (any seed).
 
 ### EternaFold agreement of best-P designs (V2, rate over ALL 300 units; no design = no match)

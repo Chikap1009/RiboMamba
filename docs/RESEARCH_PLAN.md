@@ -136,8 +136,10 @@ claim failed: no variant beats SAMFEO or RNAinverse on uMFE at 128 s; ensemble q
 modestly with the energy screen and most with conditioned-denoiser proposals. Done: code and adapters,
 tests, versioned manifests, raw traces and failure logs (local), pinned environments
 (environment.design_v2.*.lock.yml), ablations with uncertainty, technical report draft
-(docs/REPORT_repair_v2.md). Remaining for a complete artifact: refreshed novelty assessment against
-current sources, model/data documentation for the TCD checkpoint and design data, and figures.
+(docs/REPORT_repair_v2.md, with figures from scripts/final_figures.py), model card
+(docs/MODEL_CARD_tcd_v1.md) and data card (docs/DATA_CARD_design.md). Remaining for a complete
+artifact: a refreshed novelty/prior-art assessment against current primary sources (the report
+claims no novelty; the section 6 prior-art list dates from 2026-09-27).
 
 ## Literature tasks before any novelty claim
 - Designing RNAs with Language Models: https://arxiv.org/html/2602.12470v1

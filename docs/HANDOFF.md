@@ -48,9 +48,11 @@ near ceiling (24/27 for the top five). EternaFold folds 25-39 % of best designs 
 
 ## Exact next task
 The core pilot question is answered (D-029). Remaining work is optional; pick with the user:
-1. Paper-quality write-up of docs/REPORT_repair_v2.md (figures: V2 quality-time curves, NED paired
-   plot; prior-art table), keeping the framing: null uMFE, modest NED gain, TCD = model-adaptation
-   result, careful negative results, harness/timing lessons.
+1. Paper-quality write-up of docs/REPORT_repair_v2.md. Done: figures (docs/figures/, drawn from the
+   FINAL report by scripts/final_figures.py, rendered with the desirna env's matplotlib), model card
+   docs/MODEL_CARD_tcd_v1.md, data card docs/DATA_CARD_design.md. Left: refreshed prior-art table
+   against current primary sources, longer methods section. Keep the framing: null uMFE, modest NED
+   gain, TCD = model-adaptation result, careful negative results, harness/timing lessons.
 2. Next model-adaptation question (docs/experiments/2026-09-28-target-conditioned-denoiser.md, "Next
    model-adaptation question", Q1-Q3; proposed, not frozen): Q1 amortised TCD proposals (cost), Q2 more
    training-side design data (over-fitting / transfer to Eterna100), Q3 search-aware fine-tuning.
