@@ -40,8 +40,9 @@ in its section 9; optional publication work in section 11). Decisions: D-029 (fi
 ## Repository and backup status
 - GitHub (github.com/Chikap1009/RiboMamba, public): at the start of the final documentation pass on
   2026-09-29, origin/main (5b33522, 2026-09-27 04:37 IST) was 89 commits behind local main (checked with
-  `git fetch`). The user authorised pushing; the push outcome is recorded in
-  docs/logbook/2026-09-29-session-12.md and below.
+  `git fetch`). The user authorised pushing: on 2026-09-29 ~03:35 IST `git push origin main` fast-forwarded
+  GitHub from 5b33522 to 5c93550 (90 commits, no force); this record's own commit was pushed after it.
+  Only Git-tracked files are on GitHub (no data, checkpoints or third-party code).
 - The preservation package (/home/chirag/projects/RiboMamba_closeout_2026-09-29/) is on the SAME DISK as
   the repository: a second copy, not an independent backup. Copy it to separate storage for protection
   against disk loss.

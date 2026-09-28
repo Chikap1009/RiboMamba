@@ -63,8 +63,9 @@ Earlier phases (sessions 01-05) record their own corrections in their logbooks a
 
 ## Repository and backup status (2026-09-29)
 - GitHub (github.com/Chikap1009/RiboMamba): at the start of the final documentation pass, origin/main
-  (5b33522, 2026-09-27 04:37 IST) was 89 commits behind local main (confirmed with `git fetch`). The
-  outcome of the push authorised by the user is recorded in the session 12 log.
+  (5b33522, 2026-09-27 04:37 IST) was 89 commits behind local main (confirmed with `git fetch`). With the
+  user's authorisation, main was pushed on 2026-09-29 (~03:35 IST): 5b33522..5c93550, a fast-forward of 90
+  commits; the commit recording this was pushed after it. GitHub holds only Git-tracked files.
 - Large data, checkpoints and third-party code are not in Git. A local preservation package with a Git
   bundle, copies of the results and essential checkpoints, and a checksummed inventory is at
   /home/chirag/projects/RiboMamba_closeout_2026-09-29/. It is on the SAME DISK as the repository: a
