@@ -77,7 +77,7 @@ One optimisation, one development comparison. If the profile shows < 2x removabl
 optimisation fails the engineering gate or the end-to-end comparison, the negative result is recorded
 and the direction stops (no further tuning, no architecture or hyperparameter search, no training).
 
-## Profile (measured 2026-09-28 ~20:00-20:30 IST; machine otherwise idle; OMP_NUM_THREADS = 1)
+## Profile (measured 2026-09-28 ~19:45-20:00 IST; machine otherwise idle; OMP_NUM_THREADS = 1)
 Commands: `python scripts/profile_tcd.py cold` (3 repeats x 2 targets, fresh processes) and
 `python scripts/profile_tcd.py components` (warm, one process, 6 profiling targets, seed 0, 64 s
 method-time units, CUDA-synchronised stage timers; the stage-timed copy of infill was first checked
