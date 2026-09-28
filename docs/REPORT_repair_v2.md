@@ -90,6 +90,16 @@ EternaFold (independent model) folds 25-39 % of the best V2 designs to the targe
 SAMFEO 38 %). Published results of other methods use other budgets and hardware and are not comparable
 with these numbers (SamplingDesign 79/78 on Eterna100 with Turner 2004; DesiRNA 97 of V2 in 24 h).
 
+## 4b. Inference efficiency of the conditioned proposals (development, after the final benchmark)
+A bounded, pre-specified study (docs/experiments/2026-09-28-tcd-inference-efficiency.md, D-030) profiled
+the TCD proposal path: the eager forward pass was launch-bound (~11-12 ms per call regardless of batch)
+and took 75-89 % of proposal time; each run also paid ~3.1-3.2 s of setup. Replaying the same forward
+from a CUDA graph (bitwise-identical logits, identical search) cut proposal overhead 2.5x and gave 1.9x
+more evaluations by 64 s in the declared 32-target comparison (1.5-1.8x overhead in isolated runs). It
+improved TCD + screen against its own eager version (best NED -0.0031 at 16 s) but not against SAMFEO +
+energy screen, which it still trails on uMFE (-6.3 / -5.2 pp at 16 / 64 s). Proposal cost was real but
+does not explain the success-rate gap; the direction was stopped without a new protocol.
+
 ## 5. Limitations
 The final budget is short (128 s, one core) and favours fast restarts; longer budgets could order
 methods differently. 32 paired comparisons are reported without multiplicity correction. TCD units

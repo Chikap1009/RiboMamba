@@ -7,7 +7,7 @@ use is not capped (lifted 2026-09-27 ~11:20 IST). Limits that still hold: no pai
 or external messages, one GPU training job at a time, preserve all data/checkpoints/results, no
 subagents, no SOTA/biological claims, record negative results.
 
-## Where things stand (measured, 2026-09-28 ~16:30 IST)
+## Where things stand (measured, 2026-09-29 ~01:00 IST)
 The protocol v2 FINAL BENCHMARK IS COMPLETE and reported. Session 11 (evening) ran a bounded TCD
 inference-efficiency study (development only; see Exact next task).
 - Protocol: docs/PROTOCOL_design_v2.md, frozen 2026-09-27; amendments 1-4f are operational,
@@ -47,19 +47,17 @@ near ceiling (24/27 for the top five). EternaFold folds 25-39 % of best designs 
 - Training pool (eternaweb_trainpool_v1, 700 puzzles): trainpool_samfeo_v1 COMPLETE, 700/700 units.
 - Any new claim needs a NEW, unused evaluation set and a new frozen protocol (D-029).
 
-## Exact next task (updated 2026-09-28 ~22:30 IST)
+## Exact next task (updated 2026-09-29 ~01:00 IST)
 The bounded TCD inference-efficiency study (session 11; docs/experiments/2026-09-28-tcd-inference-
-efficiency.md; D-030) is DONE for its decision: the CUDA-graph forward cut proposal overhead 2.48x and
-gave 1.9x more evaluations by 64 s with identical search semantics, but TCD + screen still trails
-SAMFEO + screen on uMFE (-6.3 / -5.2 pp at 16 / 64 s) on development puzzles, so the scientific gate
-failed and the direction STOPS (no new evaluation set or protocol).
-1. When data/repair_pilot/prof_tcd_iso.done exists: summarise the secondary isolated speed profile
-   (runs prof_tcd_iso_cold_v1 / prof_tcd_iso_warm_v1, 6 targets x 3 seeds, reference vs graph, 1 worker)
-   in the experiment record and RESULTS (speed only; no quality inference); commit.
-2. Then finish the report and close: add a short "inference efficiency" note to docs/REPORT_repair_v2.md
-   (speed-only result; did not change the scientific conclusion). Optional only if publishing: a
-   systematic literature review and a longer methods section.
-Do NOT rerun or re-analyse the consumed final sets; do not start new training or tuning.
+efficiency.md; D-030) is COMPLETE and CLOSED: the CUDA-graph forward (samfeo_tcdprop_efilter_graph;
+identical search) cut proposal overhead 2.48x in the declared comparison (1.5x cold / 1.8x warm
+isolated) and roughly doubled evaluations by 16 s, but TCD + screen still trails SAMFEO + screen on uMFE
+(-6.3 / -5.2 pp at 16 / 64 s), so the scientific gate failed and no new protocol is prepared. Nothing is
+running. The report has a short section 4b on it.
+Remaining (optional, only if publishing): a systematic literature review and a longer methods section of
+docs/REPORT_repair_v2.md. Otherwise the project's current research question is closed; any new question
+needs a new, unused evaluation set and a newly frozen protocol. Do NOT rerun or re-analyse consumed sets,
+and do not start training or tuning without a new, recorded hypothesis.
 
 ## Execution environment
 WSL Ubuntu-24.04:

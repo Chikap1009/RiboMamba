@@ -218,3 +218,12 @@ WARM, isolated (one process, model resident; setup paid once, excluded from late
 | warm (v1 'cold', mislabelled) | 22.6 | 13.6 | 1.76 (1.18-2.64) | 632 -> 1,353 (x2.05) | 1,956 -> 3,196 (x1.54) |
 These 6 targets include 2 of the 6 longest (> 130 nt), where the GPU wake latency limits the gain, so
 their median ratios are lower than the 32-target comparison's (2.48 overhead, 1.90 evaluations).
+COLD, isolated (prof_tcd_iso_cold_v2, 2026-09-28 23:58 - 09-29 00:47 IST; --workers 1 --recycle-workers
+after the fix; 36/36 valid, 36 distinct processes, no errors): both arms reach their first candidate
+after the same setup (median 3.10 s; reference 2.96-6.00, graph 2.95-3.49 s). Proposal time per
+evaluated candidate 26.3 -> 17.0 ms (unit medians); per-target overhead ratio median 1.51 (1.09-2.40);
+evaluations graph/reference median x1.94 by 4 s, x1.90 by 16 s, x1.39 by 64 s.
+Summary across modes (speed only): the graph forward cuts proposal overhead ~1.5x (cold, isolated),
+~1.8x (warm, isolated) and ~2.5x (cold, 4 concurrent units: the declared comparison, where eager
+launches also contend for the GPU); evaluations by 16 s roughly double in every mode; gains shrink on
+the longest puzzles. None of this changes the decision above, which rests on the declared comparison.

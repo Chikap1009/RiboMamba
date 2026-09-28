@@ -1313,3 +1313,7 @@ Gates: engineering (>= 2x overhead, >= 1.5x / 1.2x evaluations) MET; no quality 
 continuation (beat SAMFEO + screen on uMFE, or on NED at both checkpoints without a uMFE loss) NOT MET.
 Faster proposals help TCD + screen against its own eager version but do not close its success-rate gap
 to the non-neural screen on these development puzzles. Development evidence only; GPU used by TCD arms.
+Isolated speed profiles (6 profiling targets x 3 seeds; speed only): proposal-overhead reduction x1.51
+cold / x1.8 warm (x2.48 in the 4-concurrent comparison); evaluations by 16 s x1.9-2.1 in every mode,
+by 64 s x1.39 cold / x1.55 warm. Setup before the first candidate ~3.1 s cold for both arms. The run
+prof_tcd_iso_cold_v1 was warm in fact (runner ignored --recycle-workers at --workers 1; fixed 82361cc).
