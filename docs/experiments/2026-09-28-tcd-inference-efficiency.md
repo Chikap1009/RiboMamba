@@ -201,3 +201,20 @@ cost, but not the reason TCD + screen trails SAMFEO + screen in success rate on 
 Limits: 32 development targets used throughout the project's development (not confirmation); one
 laptop GPU under WSL2 (launch and wake latencies are platform-specific); bitwise identity of graph and
 eager logits is verified empirically on this GPU/driver/torch build, not guaranteed in general.
+
+## Secondary isolated speed profile (descriptive; speed only, no quality inference)
+Runs prof_tcd_iso_warm_v1 and prof_tcd_iso_cold_v1 (6 profiling targets x seeds 0-2, reference vs
+graph, --workers 1, 64 s units; 36/36 valid each; 22:10-23:54 IST). CORRECTION: the runner ran
+--workers 1 in-process and ignored --recycle-workers, so prof_tcd_iso_cold_v1 was NOT cold: like the
+warm run it used one persistent process (only the first unit paid setup: first candidate 2.1-2.2 s;
+every later unit ~0.01-0.08 s). Both v1 runs are therefore WARM measurements and agree closely. The
+runner was fixed (82361cc, with a test) and the genuine cold isolated profile rerun as
+prof_tcd_iso_cold_v2; v1 is kept and labelled here. The development comparison was unaffected (4
+workers: 96/96 distinct worker pids per method; TCD first candidates at median ~2.2-2.3 s, i.e. cold).
+WARM, isolated (one process, model resident; setup paid once, excluded from later units):
+| mode | reference proposal ms / eval | graph proposal ms / eval | overhead ratio (per-target median, range) | evals by 16 s ref -> graph | evals by 64 s ref -> graph |
+|---|---|---|---|---|---|
+| warm (v1 'warm') | 23.2 | 13.5 | 1.83 (1.18-2.70) | 624 -> 1,352 (x2.09) | 1,908 -> 3,182 (x1.55) |
+| warm (v1 'cold', mislabelled) | 22.6 | 13.6 | 1.76 (1.18-2.64) | 632 -> 1,353 (x2.05) | 1,956 -> 3,196 (x1.54) |
+These 6 targets include 2 of the 6 longest (> 130 nt), where the GPU wake latency limits the gain, so
+their median ratios are lower than the 32-target comparison's (2.48 overhead, 1.90 evaluations).
