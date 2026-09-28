@@ -137,11 +137,11 @@ modestly with the energy screen and most with conditioned-denoiser proposals. Do
 tests, versioned manifests, raw traces and failure logs (local), pinned environments
 (environment.design_v2.*.lock.yml), ablations with uncertainty, technical report draft
 (docs/REPORT_repair_v2.md, with figures from scripts/final_figures.py), model card
-(docs/MODEL_CARD_tcd_v1.md) and data card (docs/DATA_CARD_design.md). Remaining for a complete
-artifact: a refreshed novelty/prior-art assessment against current primary sources (the report
-claims no novelty). Prior-art list refreshed 2026-09-28 (REFERENCES.md session 10: RNA-MDLM is
-RNA-type-conditioned, not target-structure-conditioned; Struct2SeQ, SOLD and RiboDiffusion added);
-a systematic literature review remains open if the work is prepared for publication.
+(docs/MODEL_CARD_tcd_v1.md) and data card (docs/DATA_CARD_design.md). A focused prior-art
+refresh against primary pages was done 2026-09-28 (REFERENCES.md session 10: RNA-MDLM is
+RNA-type-conditioned, not target-structure-conditioned; Struct2SeQ, SOLD and RiboDiffusion added; the
+report claims no novelty). Remaining only if the work is prepared for publication: a systematic
+literature review and a longer methods section.
 
 ## Literature tasks before any novelty claim
 - Designing RNAs with Language Models: https://arxiv.org/html/2602.12470v1
