@@ -138,3 +138,12 @@ final_report.per_unit applies the policy to every figure (success under all tie 
 best P/design, first success, paired comparisons, EternaFold): an `error` unit is unsolved with no
 design at every wall budget (apply_error_policy; tests/test_final_report.py, which fails without it).
 The default FINAL path still refuses while error units remain.
+Amendment 4f (2026-09-28 ~11:15 IST, report side only): (i) the pre-fix supersede rule has one source,
+scripts/final_v2/fix_times.json, read by the corrective pass and by final_report.py, which now REFUSES
+FINAL while any desirna/samplingdesign unit that started before its fix (+60 s) is still in place
+(117 V2 units at 11:10 IST, all queued for the corrective pass); (ii) the FINAL report carries
+provenance (generation time, commit, uncommitted-changes flag, retry-pass completion time, fix times)
+and a "supersedes" record: every earlier report file is moved to data/repair_pilot/report_history/
+(never overwritten or deleted) and described there by checksum, label and coverage. The unlabelled
+final_v2_report.json written 2026-09-27 22:21 IST as a smoke test of the report script (29/2400 V2
+units, before the review fixes; sha256 23be60d4...) was moved there at 11:05 IST; it is not a result.

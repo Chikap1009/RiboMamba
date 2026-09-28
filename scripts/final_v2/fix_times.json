@@ -1,0 +1,6 @@
+{
+ "_comment": "Protocol v2 amendments 3, 4, 4b: units of these methods that STARTED at or before time + margin_s ran pre-fix code; the corrective pass moves them to units_superseded/ and reruns them, and final_report.py refuses FINAL while any remain.",
+ "margin_s": 60,
+ "desirna": {"time": "2026-09-27T19:45:05+00:00", "commit": "bda4884", "fix": "real per-round timing + initial population logged"},
+ "samplingdesign": {"time": "2026-09-27T19:35:08+00:00", "commit": "74ec5f1", "fix": "line-buffered output with arrival-time stamps"}
+}

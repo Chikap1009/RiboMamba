@@ -14,13 +14,22 @@ Every error / time-limit / early-stop outcome is counted. Zero-candidate time_li
 design came after 128 s) are legitimate unsolved outcomes and are listed per method; units that ended in
 `error` are implementation failures until diagnosed, so FINAL refuses while any remain unless
 --accept-errors is given (they are listed, and count as unsolved with no design in EVERY figure, whatever
-their partial traces hold: see per_unit). Writes
-data/repair_pilot/final_v2_report.json and prints a markdown summary.
+their partial traces hold: see per_unit). FINAL also refuses while any desirna / samplingdesign unit that
+started before its method's fix (scripts/final_v2/fix_times.json) is still in place, i.e. until the
+corrective pass has replaced them.
+Writes data/repair_pilot/final_v2_report.json (status FINAL, with provenance: time, commit, retry-pass time)
+and prints a markdown summary. Any earlier report file (a previous final_v2_report.json or the INTERIM
+file) is moved to data/repair_pilot/report_history/ and listed under "supersedes" in the new report;
+nothing is overwritten or deleted.
 """
 
 import argparse
+import datetime as dt
+import hashlib
 import json
 import math
+import shutil
+import subprocess
 
 import numpy as np
 import polars as pl
@@ -28,12 +37,14 @@ import polars as pl
 from ribomamba.design import runner, summary
 from ribomamba.design.manifest import MANIFESTS_DIR, load_manifest
 from ribomamba.eval.stats import bootstrap_ci
-from ribomamba.paths import PILOT_DIR
+from ribomamba.paths import PILOT_DIR, REPO_ROOT
 
 SETS = ("eterna100_v2", "eterna100_v1only", "rfam_taneda27")
 WALLS = (1, 4, 16, 64, 128)
 LIMIT_S = 128.0
 RETRY_DONE = PILOT_DIR / "final_v2_retry.done"
+HISTORY = PILOT_DIR / "report_history"
+FIX_TIMES = REPO_ROOT / "scripts" / "final_v2" / "fix_times.json"
 PAIRS = [("samfeo_efilter", "samfeo"), ("samfeo_tcdprop_efilter", "samfeo"), ("samfeo_tcdprop_efilter", "samfeo_efilter"),
          ("desirna", "samfeo_efilter"), ("rnainverse", "samfeo_efilter"), ("samplingdesign", "samfeo_efilter"),
          ("tcd_sample", "random_pairs"), ("tcd_sample", "samfeo_efilter")]
@@ -66,6 +77,67 @@ def audit(s: str) -> dict:
     return {"config_hash": cfg["config_hash"], "validation": reasons, "statuses": statuses,
             "zero_candidate_units": zero, "error_units": errors,
             "methods": sorted(cfg["methods"]), "n_targets": len(cfg["target_ids"])}
+
+
+def pre_fix_units(d, fix: dict) -> list[str]:
+    """Units still in d/units that started at or before their method's fix time + margin (ran pre-fix code)."""
+    out = []
+    for method in (k for k in fix if isinstance(fix[k], dict)):
+        cutoff = dt.datetime.fromisoformat(fix[method]["time"]) + dt.timedelta(seconds=fix["margin_s"])
+        for p in sorted((d / "units" / method).glob("*.json")):
+            if dt.datetime.fromisoformat(json.loads(p.read_text())["started_utc"]) <= cutoff:
+                out.append(f"{method}/{p.stem}")
+    return out
+
+
+def utc(ts: float) -> str:
+    return dt.datetime.fromtimestamp(ts, dt.timezone.utc).isoformat(timespec="seconds")
+
+
+def describe(path) -> dict:
+    """What an earlier report file was: its label, when it was written, and what it covered."""
+    try:
+        r = json.loads(path.read_text())
+        status = r.get("status") or "UNLABELLED (written before reports carried a status)"
+        coverage = {s: a.get("validation") for s, a in r.get("audit", {}).items()}
+    except (json.JSONDecodeError, OSError):
+        status, coverage = "unreadable", {}
+    return {"file": path.name, "sha256": hashlib.sha256(path.read_bytes()).hexdigest(),
+            "written_utc": utc(path.stat().st_mtime), "status": status, "coverage": coverage}
+
+
+def archive_previous(paths, history) -> list[dict]:
+    """Move each existing earlier report into history/ (never overwrite or delete); return what was moved."""
+    moved = []
+    for path in paths:
+        if not path.exists():
+            continue
+        entry = describe(path)
+        history.mkdir(parents=True, exist_ok=True)
+        stamp = entry["written_utc"].replace(":", "").replace("+0000", "Z")
+        dest = history / f"{path.stem}.{stamp}{path.suffix}"
+        k = 1
+        while dest.exists():
+            dest, k = history / f"{path.stem}.{stamp}.{k}{path.suffix}", k + 1
+        shutil.move(str(path), dest)
+        moved.append({**entry, "archived_to": str(dest.relative_to(REPO_ROOT))})
+    if moved:
+        readme = history / "README.txt"
+        if not readme.exists():
+            readme.write_text("Superseded report outputs, kept for provenance only. They are NOT results.\n"
+                              "The current report is data/repair_pilot/final_v2_report.json (status FINAL); its\n"
+                              "'supersedes' field lists every file moved here, with checksums and coverage.\n")
+    return moved
+
+
+def provenance() -> dict:
+    head = subprocess.run(["git", "rev-parse", "HEAD"], cwd=REPO_ROOT, capture_output=True, text=True).stdout.strip()
+    dirty = subprocess.run(["git", "status", "--porcelain", "--untracked-files=no"], cwd=REPO_ROOT,
+                           capture_output=True, text=True).stdout.strip()
+    return {"generated_utc": dt.datetime.now(dt.timezone.utc).isoformat(timespec="seconds"), "git_commit": head,
+            "tracked_changes_uncommitted": bool(dirty),
+            "retry_pass_done_utc": utc(RETRY_DONE.stat().st_mtime) if RETRY_DONE.exists() else None,
+            "fix_times": json.loads(FIX_TIMES.read_text())}
 
 
 def per_unit(d) -> pl.DataFrame:
@@ -186,6 +258,13 @@ def main() -> None:
             problems.append(f"{s}: zero-candidate units that did not reach the time limit: {zero_bad}")
     if not RETRY_DONE.exists():
         problems.append("the corrective retry pass (data/repair_pilot/run_final_v2_retry.sh) has not completed")
+    fix = json.loads(FIX_TIMES.read_text())
+    for s in report["audit"]:
+        stale = pre_fix_units(run_dir(s), fix)
+        report["audit"][s]["pre_fix_units_in_place"] = len(stale)
+        if stale:
+            problems.append(f"{s}: {len(stale)} units ran pre-fix code and have not been replaced by the corrective "
+                            f"pass, e.g. {stale[0]}")
     report["coverage_problems"] = problems
     if problems and not args.interim:
         raise SystemExit("refusing to report FINAL results:\n  " + "\n  ".join(problems))
@@ -223,9 +302,23 @@ def main() -> None:
         report["sets"]["eterna100_v1_combined"] = {"solved_by_128s": v1.to_dicts(), "shared_structures": len(shared)}
     if args.eternafold and "eterna100_v2" in frames:
         report["eternafold_v2_best_designs"] = eternafold_check(frames)
+    report["provenance"] = provenance()
     out = PILOT_DIR / ("final_v2_report_INTERIM.json" if args.interim else "final_v2_report.json")
-    out.write_text(json.dumps(report, indent=1, default=float))
-    print(f"[{report['status']}] written to {out}")
+    json.dumps(report, default=float)            # fail here, before any earlier report is moved
+    if not args.interim:
+        # FINAL supersedes every earlier report file: move them to report_history/ and say so in the report
+        moved = archive_previous([PILOT_DIR / "final_v2_report.json", PILOT_DIR / "final_v2_report_INTERIM.json"],
+                                 HISTORY)
+        earlier = [{**describe(p), "archived_to": str(p.relative_to(REPO_ROOT))}
+                   for p in sorted(HISTORY.glob("*.json"))] if HISTORY.exists() else []
+        report["supersedes"] = {"moved_now": [m["archived_to"] for m in moved], "all_superseded_files": earlier}
+    tmp = out.with_suffix(".json.tmp")
+    tmp.write_text(json.dumps(report, indent=1, default=float))
+    tmp.replace(out)
+    print(f"[{report['status']}] written to {out} at {report['provenance']['generated_utc']} "
+          f"(commit {report['provenance']['git_commit'][:7]})")
+    if not args.interim:
+        print(f"supersedes {len(report['supersedes']['all_superseded_files'])} earlier report file(s), kept in {HISTORY}")
     for s, e in report["sets"].items():
         print(f"## {s}")
         for r in e["solved_by_128s"]:

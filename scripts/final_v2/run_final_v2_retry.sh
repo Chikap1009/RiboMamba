@@ -4,7 +4,7 @@
 #     (+60 s margin for in-flight units) to units_superseded/ (kept for the record, not deleted);
 #     the rule depends only on start times and commit times, never on outcomes;
 #  2. resume each set with --retry-errors: only errored, invalid or moved units run again.
-# Fix times (commit times, UTC):
+# Fix times (commit times, UTC; read from scripts/final_v2/fix_times.json):
 #   desirna         bda4884  2026-09-27T19:45:05  per-round timing + initial population logged
 #   samplingdesign  74ec5f1  2026-09-27T19:35:08  line-buffered output with arrival-time stamps
 # Run as data/repair_pilot/run_final_v2_retry.sh (a one-line wrapper) after data/repair_pilot/final_v2.done.
@@ -15,13 +15,13 @@ cd /home/chirag/projects/RiboMamba
 python - <<'PY' || exit 1
 import datetime as dt, json, shutil
 from pathlib import Path
-FIX = {"desirna": "2026-09-27T19:45:05+00:00", "samplingdesign": "2026-09-27T19:35:08+00:00"}
+FIX = json.loads(Path("scripts/final_v2/fix_times.json").read_text())   # single source, also read by final_report.py
 moved = {}
 for run in sorted(Path("data/repair_pilot").glob("final_v2_*")):
     if not run.is_dir():
         continue
-    for method, when in FIX.items():
-        cutoff = dt.datetime.fromisoformat(when) + dt.timedelta(seconds=60)
+    for method in ("desirna", "samplingdesign"):
+        cutoff = dt.datetime.fromisoformat(FIX[method]["time"]) + dt.timedelta(seconds=FIX["margin_s"])
         for status in (run / "units" / method).glob("*.json"):
             s = json.loads(status.read_text())
             if dt.datetime.fromisoformat(s["started_utc"]) <= cutoff:
